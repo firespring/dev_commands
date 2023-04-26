@@ -1,0 +1,14 @@
+---
+version: '3.8'
+services:
+  app:
+    image: firespring/dev_commands:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      HISTFILE: /root/.history/bash
+    command: bash -c 'while [ true ]; do sleep 60; done'
+    volumes:
+    - ../dotfiles/.history:/root/.history:delegated
+    - .:/usr/src/app:delegated

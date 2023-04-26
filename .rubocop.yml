@@ -1,0 +1,119 @@
+# This is the configuration used to check the rubocop source code.
+inherit_from: #{RUBOCOP_HOME}/config/default.yml
+require: rubocop-performance
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: '2.7'
+  Exclude:
+    - 'vendor/**/*'
+
+Layout/LineLength:
+  Max: 175
+
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: aligned
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Lint/AmbiguousBlockAssociation:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+
+Lint/DuplicateMethods:
+  Enabled: false
+
+Lint/RaiseException:
+  Enabled: false
+
+Lint/SafeNavigationChain:
+  Enabled: true
+  AllowedMethods:
+    - present?
+    - blank?
+    - presence
+    - try
+    - try!
+    - empty?
+    - nil?
+    - blank?
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/BlockNesting:
+  Max: 4
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Max: 15
+
+Metrics/MethodLength:
+  Max: 30
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Max: 5
+  CountKeywordArgs: false
+
+Metrics/PerceivedComplexity:
+  Max: 20
+
+Naming/MethodParameterName:
+  AllowedNames: [a, _, id]
+
+Naming/VariableNumber:
+  Enabled: false
+
+Performance/RangeInclude:
+  Enabled: false
+
+Style/AccessModifierDeclarations:
+  EnforcedStyle: inline
+
+Style/Alias:
+  EnforcedStyle: prefer_alias_method
+
+Style/Documentation:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/MixinGrouping:
+  Enabled: true
+  EnforcedStyle: grouped
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: ()
+    '%i': '()'
+    '%I': '()'
+    '%r': '{}'
+    '%w': '()'
+    '%W': '()'
+
+Style/RegexpLiteral:
+  Enabled: true
+  EnforcedStyle: mixed
+
+Style/RescueStandardError:
+  EnforcedStyle: implicit
+
+Style/SignalException:
+  EnforcedStyle: only_raise
+
+Style/TernaryParentheses:
+  EnforcedStyle: require_parentheses_when_complex

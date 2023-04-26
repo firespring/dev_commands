@@ -1,0 +1,5 @@
+-f d
+--color
+--format html
+--out rspec.html
+--profile
