@@ -169,7 +169,7 @@ module Dev
                  "\n\t(equivalent to docker ps)"
             task ps: %w(init_docker _pre_ps_hooks) do
               Dev::Docker.new.print_containers
-              Rake::Task[:_post_ph_hooks].execute
+              Rake::Task[:_post_ps_hooks].execute
             end
           end
         end

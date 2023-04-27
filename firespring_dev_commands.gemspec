@@ -35,11 +35,11 @@ Gem::Specification.new do |s|
   # Dev/Test dependencies
   s.add_development_dependency 'builder', '~> 3.2.4'
   s.add_development_dependency 'bundler-audit', '~> 0.9.0'
+  s.add_development_dependency 'launchy', '~> 2.5.2'
   s.add_development_dependency 'rake', '~> 13.0.6'
   s.add_development_dependency 'rspec', '~> 3.11.0'
   s.add_development_dependency 'rubocop', '~> 1.36.0'
   s.add_development_dependency 'rubocop-performance', '~> 1.15.0'
   s.add_development_dependency 'simplecov', '~> 0.21.0'
   s.add_development_dependency 'yard', '~> 0.9.28'
-  s.add_development_dependency 'launchy', '~> 2.5.2'
 end
