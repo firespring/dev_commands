@@ -7,6 +7,8 @@ module Dev
     class BaseInterface
       include ::Rake::DSL
 
+      attr_reader :exclude
+
       def initialize(exclude: [])
         @exclude = Array(exclude).map(&:to_sym)
         create_tasks!
@@ -31,6 +33,8 @@ module Dev
     # Base interface template customized for applications which require a name to be passed in to the constructor
     class ApplicationInterface < Dev::Template::BaseInterface
       include ::Rake::DSL
+
+      attr_reader :name
 
       def initialize(name, exclude: [])
         @name = name
