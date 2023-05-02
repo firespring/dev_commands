@@ -76,6 +76,30 @@ module Dev
           end
         end
 
+        # Create the rake task which stops all running containers
+        def create_stop_task!
+          exclude = @exclude
+
+          DEV_COMMANDS_TOP_LEVEL.instance_eval do
+            return if exclude.include?(:stop)
+
+            desc 'Stops all running containers'
+            task stop: %w(init_docker _pre_stop_hooks) do
+              LOG.debug('In base stop')
+
+              containers = ::Docker::Container.all(filters: {status: %w(restarting running)}.to_json)
+              containers.each do |container|
+                next if container&.info&.dig('Names')&.any? { |name| name.start_with?('/windows_tcp') }
+
+                LOG.info "Stopping container #{container.id[0, 12]}"
+                container.stop(timeout: 120)
+              end
+
+              Rake::Task[:_post_stop_hooks].execute
+            end
+          end
+        end
+
         # Create the rake task which runs a docker compose down followed by an up
         def create_reload_task!
           exclude = @exclude

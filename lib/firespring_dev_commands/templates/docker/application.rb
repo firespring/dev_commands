@@ -108,7 +108,7 @@ module Dev
             namespace application do
               return if exclude.include?(:down)
 
-              desc "Stops the #{application} container"
+              desc "Shut down the #{application} container and remove associated resources"
               task down: %w(init_docker _pre_down_hooks) do
                 LOG.debug "In #{application} down"
 
@@ -120,6 +120,25 @@ module Dev
                 Dev::Docker.new.prune_volumes if ENV['REMOVE_VOLUMES'].to_s.strip == 'true'
                 Dev::Docker.new.prune_images
                 Rake::Task[:_post_down_hooks].execute
+              end
+            end
+          end
+        end
+
+        # Create the rake task which runs a docker compose stop for the application name
+        def create_stop_task!
+          application = @name
+          exclude = @exclude
+
+          DEV_COMMANDS_TOP_LEVEL.instance_eval do
+            namespace application do
+              return if exclude.include?(:stop)
+
+              desc "Stops the #{application} container"
+              task stop: %w(init_docker _pre_stop_hooks) do
+                LOG.debug "In #{application} stop"
+                Dev::Docker::Compose.new(services: [application]).stop
+                Rake::Task[:_post_stop_hooks].execute
               end
             end
           end

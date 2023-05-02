@@ -118,9 +118,9 @@ DEV_COMMANDS_TOP_LEVEL.instance_eval do
 
   # Define an empty _pre_down_hooks handler which can be overridden by the user
   task :_pre_down_hooks do
-    # The user may define custom _pre_logs_hooks tasks to add any pre-logs actions the logs process
-    # Define this process in the appropriate namespace to add them only to a specific logs
-    #   In that case it is recommended that you call the base _pre_logs_hooks as a dependency of that task
+    # The user may define custom _pre_down_hooks tasks to add any pre-down actions the down process
+    # Define this process in the appropriate namespace to add them only to a specific down
+    #   In that case it is recommended that you call the base _pre_down_hooks as a dependency of that task
   end
 
   # Define an empty _post_down_hooks handler which can be overridden by the user
@@ -128,6 +128,20 @@ DEV_COMMANDS_TOP_LEVEL.instance_eval do
     # The user may define custom _post_down_hooks tasks to add any post-down actions the down process
     # Define this process in the appropriate namespace to add them only to a specific down
     #   In that case it is recommended that you call the base _post_down_hooks as a dependency of that task
+  end
+
+  # Define an empty _pre_stop_hooks handler which can be overridden by the user
+  task :_pre_stop_hooks do
+    # The user may define custom _pre_stop_hooks tasks to add any pre-stop actions the stop process
+    # Define this process in the appropriate namespace to add them only to a specific stop
+    #   In that case it is recommended that you call the base _pre_stop_hooks as a dependency of that task
+  end
+
+  # Define an empty _post_stop_hooks handler which can be overridden by the user
+  task :_post_stop_hooks do
+    # The user may define custom _post_stop_hooks tasks to add any post-stop actions the stop process
+    # Define this process in the appropriate namespace to add them only to a specific stop
+    #   In that case it is recommended that you call the base _post_stop_hooks as a dependency of that task
   end
 
   # Define an empty _pre_reload_hooks handler which can be overridden by the user
