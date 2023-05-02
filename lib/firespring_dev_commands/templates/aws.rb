@@ -31,6 +31,20 @@ module Dev
             task profile: %w(init) do
               Dev::Aws::Profile.new.info
             end
+
+            namespace :profile do
+              desc 'Return the commands to export your AWS credentials into your environment'
+              task :export do
+                # Turn off all logging except for errors
+                LOG.level = Logger::ERROR
+
+                # Run the init
+                Rake::Task[:nit].invoke
+
+                # Print the export info
+                Dev::Aws::Profile.new.export_info
+              end
+            end
           end
         end
       end
