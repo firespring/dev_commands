@@ -15,9 +15,10 @@ module Dev
               return if exclude.include?(:build)
 
               desc "Builds the #{application} container"
-              task build: %w(init_docker) do
+              task build: %w(init_docker _pre_build_hooks) do
                 LOG.debug "In #{application} build"
                 Dev::Docker::Compose.new(services: [application]).build
+                Rake::Task[:_post_build_hooks].execute
               end
             end
           end
@@ -33,9 +34,10 @@ module Dev
               return if exclude.include?(:up)
 
               desc "Starts up the #{application} container and it's dependencies"
-              task up: %w(init_docker) do
+              task up: %w(init_docker _pre_up_hooks) do
                 LOG.debug "In #{application} up"
                 Dev::Docker::Compose.new(services: [application]).up
+                Rake::Task[:_post_up_hooks].execute
               end
             end
           end
@@ -51,9 +53,10 @@ module Dev
               return if exclude.include?(:up_no_deps)
 
               desc "Starts up the #{application} container but no dependencies"
-              task up_no_deps: %w(init_docker) do
+              task up_no_deps: %w(init_docker _pre_up_hooks) do
                 LOG.debug "In #{application} up_no_deps"
                 Dev::Docker::Compose.new(services: [application], options: ['--no-deps']).up
+                Rake::Task[:_post_up_hooks].execute
               end
             end
           end
@@ -69,8 +72,9 @@ module Dev
               return if exclude.include?(:sh)
 
               desc "Open a shell into a running #{application} container"
-              task sh: %W(init_docker #{application}:up) do
+              task sh: %W(init_docker #{application}:up _pre_sh_hooks) do
                 Dev::Docker::Compose.new(services: [application]).sh
+                Rake::Task[:_post_sh_hooks].execute
               end
             end
           end
@@ -86,9 +90,10 @@ module Dev
               return if exclude.include?(:logs)
 
               desc "Shows logs for the #{application} container"
-              task logs: %w(init_docker) do
+              task logs: %w(init_docker _pre_logs_hooks) do
                 LOG.debug "In #{application} logs"
                 Dev::Docker::Compose.new(services: [application]).logs
+                Rake::Task[:_post_logs_hooks].execute
               end
             end
           end
@@ -104,7 +109,7 @@ module Dev
               return if exclude.include?(:down)
 
               desc "Stops the #{application} container"
-              task down: %w(init_docker) do
+              task down: %w(init_docker _pre_down_hooks) do
                 LOG.debug "In #{application} down"
 
                 # docker-copmose down shuts down everything (you can't only specify a single service)
@@ -114,6 +119,7 @@ module Dev
                 Dev::Docker.new.prune_networks
                 Dev::Docker.new.prune_volumes if ENV['REMOVE_VOLUMES'].to_s.strip == 'true'
                 Dev::Docker.new.prune_images
+                Rake::Task[:_post_down_hooks].execute
               end
             end
           end
@@ -129,8 +135,8 @@ module Dev
               return if exclude.include?(:reload)
 
               desc "Reloads the #{application} container"
-              task reload: %w(init_docker down up) do
-                # Run the down and then the up commands
+              task reload: %w(init_docker _pre_reload_hooks down up) do
+                Rake::Task[:_post_reload_hooks].execute
               end
             end
           end
@@ -146,9 +152,10 @@ module Dev
               return if exclude.include?(:push)
 
               desc "Push the #{application} container to the configured image repository"
-              task push: %w(init_docker) do
+              task push: %w(init_docker _pre_push_hooks) do
                 LOG.debug "In #{application} push"
                 Dev::Docker::Compose.new(services: [application]).push
+                Rake::Task[:_post_push_hooks].execute
               end
             end
           end
@@ -164,9 +171,10 @@ module Dev
               return if exclude.include?(:pull)
 
               desc "Pull the #{application} container from the configured image repository"
-              task pull: %w(init_docker) do
+              task pull: %w(init_docker _pre_pull_hooks) do
                 LOG.debug "In #{application} pull"
                 Dev::Docker::Compose.new(services: [application]).pull
+                Rake::Task[:_post_pull_hooks].execute
               end
             end
           end

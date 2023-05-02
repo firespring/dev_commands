@@ -5,6 +5,8 @@ module Dev
     class Aws
       # Class contains rake templates for managing your ci/cd resources
       class Ci < Dev::Template::BaseInterface
+        attr_reader :cloudformation
+
         # Base interface template customized for codepipelines which require a pipeline pattern which will match the pipeline name
         def initialize(cloudformation, exclude: [])
           @cloudformations = Array(cloudformation).sort_by(&:name)

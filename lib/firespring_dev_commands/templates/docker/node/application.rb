@@ -7,6 +7,8 @@ module Dev
       module Node
         # Class for default rake tasks associated with a node project
         class Application < Dev::Template::ApplicationInterface
+          attr_reader :node
+
           # Allow for custom container path for the application
           def initialize(application, container_path: nil, local_path: nil, exclude: [])
             @node = Dev::Node.new(container_path: container_path, local_path: local_path)

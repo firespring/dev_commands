@@ -7,6 +7,8 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
+          attr_reader :php
+
           # Allow for custom container path for the application
           def initialize(application, container_path: nil, local_path: nil, exclude: [])
             @php = Dev::Php.new(container_path: container_path, local_path: local_path)

@@ -7,6 +7,8 @@ module Dev
       module Ruby
         # Class for default rake tasks associated with a ruby project
         class Application < Dev::Template::ApplicationInterface
+          attr_reader :ruby
+
           # Allow for custom container path for the application
           def initialize(application, container_path: nil, local_path: nil, exclude: [])
             @ruby = Dev::Ruby.new(container_path: container_path, local_path: local_path)

@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'firespring_dev_commands'
 require 'yard'
+require 'launchy'
 
 YARD::Rake::YardocTask.new do |t|
   t.files = ['lib/**/*.rb']
@@ -35,6 +36,18 @@ Dev::EndOfLife.config do |c|
   ]
 end
 Dev::Template::Eol.new
+
+desc 'Open the project readme in a browser'
+task :docs do
+  Launchy.open("https://github.com/firespring/#{Dev::Git.new.info.first.name}/blob/#{Dev::Git.new.branch_name}/README.md")
+end
+
+namespace :docs do
+  desc 'Generate yardoc and open in a browser'
+  task yard: [:yard] do
+    Launchy.open("file://#{DEV_COMMANDS_ROOT_DIR}/doc/index.html")
+  end
+end
 
 desc 'Release new versions of the library'
 task release: %i(gem:release) do
