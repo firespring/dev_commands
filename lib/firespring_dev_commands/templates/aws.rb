@@ -39,7 +39,7 @@ module Dev
                 LOG.level = Logger::ERROR
 
                 # Run the init
-                Rake::Task[:nit].invoke
+                Rake::Task[:init].invoke
 
                 # Print the export info
                 Dev::Aws::Profile.new.export_info
