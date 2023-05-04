@@ -3,7 +3,11 @@ module Dev
     # Class containing useful methods for interacting with the Aws account
     class Account
       # Config object for setting top level Aws account config options
-      Config = Struct.new(:root, :children, :default, :registry)
+
+      # TODO: Can we add a "login_to_account_registry?
+      # TODO: And then add additional_registries?
+
+      Config = Struct.new(:root, :children, :default, :registry, :registries)
 
       # Instantiates a new top level config object if one hasn't already been created
       # Yields that config object to any given block
@@ -22,7 +26,7 @@ module Dev
       # The name of the file containing the Aws settings
       CONFIG_FILE = "#{Dev::Aws::CONFIG_DIR}/config".freeze
 
-      attr_accessor :root, :children, :default, :registry
+      attr_accessor :root, :children, :default, :registry, :registries
 
       # Instantiate an account object
       # Requires that root account and at least one child account have been configured
@@ -35,7 +39,7 @@ module Dev
         @root = self.class.config.root
         @children = self.class.config.children
         @default = self.class.config.default
-        @registry = self.class.config.registry
+        @registries = (Array(self.class.config.registries) << self.class.config.registry).compact.uniq
       end
 
       # Returns all configured account information objects

@@ -37,6 +37,29 @@ Dev::EndOfLife.config do |c|
 end
 Dev::Template::Eol.new
 
+# module Fdp
+#  class Aws
+#    ROOT_ACCOUNT = '020401666882'
+#    DAG_ACCOUNT = '454338653947'
+#    FDP_DEV_ACCOUNT = '417401252731'
+#    FDP_PRD_ACCOUNT = '435196416497'
+#    FDP_SHARD_RES_ACCOUNT = '300448126090'
+#    DEFAULT_REGION = 'us-east-1'
+#  end
+# end
+
+# Configure AWS accounts and create tasks
+Dev::Aws::Account.configure do |c|
+  c.root = Dev::Aws::Account::Info.new('FDP Root', '020401666882')
+  c.children = [
+    Dev::Aws::Account::Info.new('FDP Dev', '417401252731'),
+    Dev::Aws::Account::Info.new('FDP Prod', '435196416497')
+  ]
+  c.registry = '417401252731'
+  c.registries = '300448126090'
+end
+Dev::Template::Aws.new
+
 desc 'Open the project readme in a browser'
 task :docs do
   Launchy.open("https://github.com/firespring/#{Dev::Git.new.info.first.name}/blob/#{Dev::Git.new.branch_name}/README.md")
