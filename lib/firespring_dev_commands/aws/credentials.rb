@@ -16,6 +16,11 @@ module Dev
         ::Aws::STS::Client.new.get_caller_identity.account
       end
 
+      # The role the profile is currently logged in to
+      def logged_in_role
+        ::Aws::STS::Client.new.get_caller_identity.arn
+      end
+
       # The region associated with the current login
       def logged_in_region
         ::Aws::STS::Client.new.send(:config).region
