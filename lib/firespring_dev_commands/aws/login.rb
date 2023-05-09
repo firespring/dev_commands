@@ -40,20 +40,15 @@ module Dev
         defaultini = cfgini['default']
         profileini = cfgini["profile #{account}"]
 
+        region = profileini['region'] || defaultini['region'] || Dev::Aws::DEFAULT_REGION
 
-        # TODO: Allow for setting the region?
-        # TODO: Change DEFAULT_REGION to use the region configured in the aws config file?????
-        # TODO: Do we need any of this?region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
-        region = profileini['region'] || defaultini['region']
+        serial = profileini['mfa_serial_name'] || defaultini['mfa_serial_name']
+        serial = "arn:aws:iam::#{Dev::Aws::Account.new.roo.id}:mfa/#{serial}" if serial
+        serial ||= profileini['mfa_serial'] || defaultini['mfa_serial']
 
-
-        # TODO: Change to allow for name and user serial if not present?
-        #serial = profileini['mfa_serial'] || defaultini['mfa_serial']
-        serial = profileini['mfa_serial'] || defaultini['mfa_serial']
-
-        # TODO: Change to allow for role name and change to arn if not presetn
-        #role = profileini['role_arn'] || defaultini['role_arn']
-        role = profileini['role_arn'] || defaultini['role_arn']
+        role = profileini['role_name'] || defaultini['role_name']
+        role = "arn:aws:iam::#{account}:role/#{role}" if role
+        role ||= profileini['role_arn'] || defaultini['role_arn']
 
         session_name = profileini['role_session_name'] || defaultini['role_session_name']
         session_duration = profileini['session_duration'] || defaultini['session_duration']
