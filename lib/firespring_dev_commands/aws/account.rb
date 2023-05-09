@@ -66,6 +66,8 @@ module Dev
         puts
         puts 'Configuring default login values'
 
+        # TODO: DAAAMN. We need to allow for multiple base keys - or allow fdp keys to log in to SBF?
+
         # Write region and mfa serial to config file
         cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
         defaultini = cfgini['default']
@@ -73,7 +75,9 @@ module Dev
         region_default = defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         defaultini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        mfa_default = defaultini['mfa_serial'] || ENV['AWS_MFA_ARN'] || "arn:aws:iam::#{root}:mfa/#{ENV.fetch('USERNAME', nil)}"
+        # TODO: Parse the old config version and replace/remove?????
+        # TODO: Make this configurable?
+        mfa_default = defaultini['mfa_serial'] || ENV['AWS_MFA_ARN'] || "arn:aws:iam::#{root.id}:mfa/#{ENV.fetch('USERNAME', nil)}"
         defaultini['mfa_serial'] = Dev::Common.new.ask('Default mfa arn', mfa_default)
 
         session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', nil)}_cli"
@@ -111,6 +115,7 @@ module Dev
         region_default = profileini['region'] || defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         profileini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
+        # TODO: Make the default role name configurable
         role_default = profileini['role_arn'] || "arn:aws:iam::#{account}:role/ReadonlyAccessRole"
         profileini['role_arn'] = Dev::Common.new.ask('Default role arn', role_default)
 

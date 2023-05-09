@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    firespring_dev_commands (1.4.1)
+    firespring_dev_commands (1.5.0.pre.alpha.1)
       activesupport (~> 7.0.4.0)
       aws-sdk-cloudformation (~> 1.73.0)
       aws-sdk-codepipeline (~> 1.54.0)
@@ -33,14 +33,14 @@ GEM
     atlassian-jwt (0.2.1)
       jwt (~> 2.1)
     aws-eventstream (1.2.0)
-    aws-partitions (1.759.0)
+    aws-partitions (1.761.0)
     aws-sdk-cloudformation (1.73.0)
       aws-sdk-core (~> 3, >= 3.165.0)
       aws-sigv4 (~> 1.1)
     aws-sdk-codepipeline (1.54.0)
       aws-sdk-core (~> 3, >= 3.165.0)
       aws-sigv4 (~> 1.1)
-    aws-sdk-core (3.171.0)
+    aws-sdk-core (3.172.0)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.651.0)
       aws-sigv4 (~> 1.5)

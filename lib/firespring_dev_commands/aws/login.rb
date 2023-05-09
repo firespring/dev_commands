@@ -40,19 +40,32 @@ module Dev
         defaultini = cfgini['default']
         profileini = cfgini["profile #{account}"]
 
+
+        # TODO: Allow for setting the region?
+        # TODO: Change DEFAULT_REGION to use the region configured in the aws config file?????
+        # TODO: Do we need any of this?region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
+        region = profileini['region'] || defaultini['region']
+
+
+        # TODO: Change to allow for name and user serial if not present?
+        #serial = profileini['mfa_serial'] || defaultini['mfa_serial']
         serial = profileini['mfa_serial'] || defaultini['mfa_serial']
+
+        # TODO: Change to allow for role name and change to arn if not presetn
+        #role = profileini['role_arn'] || defaultini['role_arn']
         role = profileini['role_arn'] || defaultini['role_arn']
+
         session_name = profileini['role_session_name'] || defaultini['role_session_name']
         session_duration = profileini['session_duration'] || defaultini['session_duration']
 
         puts
-        puts "  Logging in to #{account} as #{role}".light_yellow
+        puts "  Logging in to #{account} in #{region} as #{role}".light_yellow
         puts
 
         code = ENV['AWS_TOKEN_CODE'] || Dev::Common.new.ask("Enter the MFA code for the #{ENV.fetch('USERNAME', '')} user serial #{serial}")
         raise 'MFA is required' unless code.to_s.strip
 
-        sts = ::Aws::STS::Client.new(profile: 'default')
+        sts = ::Aws::STS::Client.new(profile: 'default', region: region)
         creds = sts.assume_role(
           serial_number: serial,
           role_arn: role,
@@ -67,7 +80,8 @@ module Dev
 
       # Authroizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
       # Authroizes the docker ruby library to pull/push images from the Aws container registry
-      def registry_login!(registry_id: Dev::Aws::Account.new.registry, region: Dev::Aws::DEFAULT_REGION)
+      def registry_login!(registry_id: Dev::Aws::Account.new.registries, region: nil)
+        region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         raise 'registry_id is required' if registry_id.to_s.strip.empty?
         raise 'region is required' if region.to_s.strip.empty?
 
@@ -82,7 +96,8 @@ module Dev
       # Authroizes the docker cli to pull/push images from the Aws container registry
       # (e.g. if docker compose needs to pull an image)
       # @deprecated Please use {Dev::Aws::Login#registry_login!} instead
-      def docker_login!(registry_id: Dev::Aws::Account.new.registry, region: Dev::Aws::DEFAULT_REGION)
+      def docker_login!(registry_id: Dev::Aws::Account.new.registry, region: nil)
+        region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         warn '[DEPRECATION] `Dev::Aws::Login#docker_login!` is deprecated. Please use `Dev::Aws::Login#registry_login!` instead.'
         docker_cli_login!(registry: "#{registry_id}.dkr.ecr.#{region}.amazonaws.com", region: region)
       end
@@ -100,7 +115,8 @@ module Dev
 
       # Authroizes the docker ruby library to pull/push images from the Aws container registry
       # @deprecated Please use {Dev::Aws::Login#registry_login!} instead
-      def ecr_login!(registry_id: Dev::Aws::Account.new.registry, region: Dev::Aws::DEFAULT_REGION)
+      def ecr_login!(registry_id: Dev::Aws::Account.new.registry, region: nil)
+        region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         warn '[DEPRECATION] `Dev::Aws::Login#ecr_login!` is deprecated. Please use `Dev::Aws::Login#registry_login!` instead.'
         docker_lib_login!(registry_id: registry_id, region: region)
       end
