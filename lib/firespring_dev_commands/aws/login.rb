@@ -31,11 +31,7 @@ module Dev
       # Temporary credentials are written back to the credentials file
       def authorize!(account)
         # Make sure the account has been set up
-        cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
-        unless cfgini.has_section?("profile #{account}")
-          Dev::Aws::Account.new.write!(account)
-          cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
-        end
+        cfgini = setup_cfgini
 
         defaultini = cfgini['default']
         profileini = cfgini["profile #{account}"]
@@ -71,6 +67,17 @@ module Dev
         puts
 
         Dev::Aws::Credentials.new.write!(account, creds)
+      end
+
+      # Returns the config ini file
+      # Runs the setup for our current account if it's not already setup
+      def setup_cfgini
+        cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
+        unless cfgini.has_section?("profile #{account}")
+          Dev::Aws::Account.new.write!(account)
+          cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
+        end
+        cfgini
       end
 
       # Authroizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
