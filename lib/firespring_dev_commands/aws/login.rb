@@ -75,7 +75,7 @@ module Dev
 
       # Authroizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
       # Authroizes the docker ruby library to pull/push images from the Aws container registry
-      def registry_login!(registry_id: Dev::Aws::Account.new.registries, region: nil)
+      def registry_login!(registry_id: Dev::Aws::Account.new.registry, region: nil)
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         raise 'registry_id is required' if registry_id.to_s.strip.empty?
         raise 'region is required' if region.to_s.strip.empty?
