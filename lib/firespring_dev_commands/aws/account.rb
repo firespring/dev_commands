@@ -73,13 +73,13 @@ module Dev
         region_default = defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         defaultini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        # Note: We had an old config for "mfa_serial" which included the entire arn. We deprecated that config since
-        #       it made it much more difficult to switch between different root accounts. 
-        mfa_name_default = defaultini['mfa_serial']&.split(/mfa\//)&.last || ENV['AWS_MFA_ARN']&.split(/mfa\//)&.last|| ENV.fetch('USERNAME', nil)
+        # NOTE: We had an old config for "mfa_serial" which included the entire arn. We deprecated that config since
+        #       it made it much more difficult to switch between different root accounts.
+        mfa_name_default = defaultini['mfa_serial']&.split(%r{mfa/})&.last || ENV['AWS_MFA_ARN']&.split(%r{mfa/})&.last || ENV.fetch('USERNAME', nil)
         defaultini['mfa_serial_name'] = Dev::Common.new.ask('Default mfa name', mfa_name_default)
         # TODO: Eventually, we should delete the mfa_serial entry from the config. Leaving it for now because some projects
         #       may be using older versions of the dev_commands library
-        #defaultini.delete('mfa_serial')
+        # defaultini.delete('mfa_serial')
 
         session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', nil)}_cli"
         defaultini['role_session_name'] = Dev::Common.new.ask('Default session name', session_name_default)
@@ -116,13 +116,13 @@ module Dev
         region_default = profileini['region'] || defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         profileini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        # Note: We had an old config for "role_arn" which included the entire arn. We deprecated that config since
+        # NOTE: We had an old config for "role_arn" which included the entire arn. We deprecated that config since
         #       it made it much more difficult to switch between different accounts.
-        role_name_default = profileini['role_name'] || profileini['role_arn']&.split(/role\//)&.last || self.class.config.default_login_role_name
+        role_name_default = profileini['role_name'] || profileini['role_arn']&.split(%r{role/})&.last || self.class.config.default_login_role_name
         profileini['role_name'] = Dev::Common.new.ask('Default role name', role_name_default)
         # TODO: Eventually, we should delete the role_arn entry from the config. Leaving it for now because some projects
         #       may be using older versions of the dev_commands library
-        #profileini.delete('role_arn')
+        # profileini.delete('role_arn')
 
         cfgini.write
       end
