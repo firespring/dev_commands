@@ -3,11 +3,7 @@ module Dev
     # Class containing useful methods for interacting with the Aws account
     class Account
       # Config object for setting top level Aws account config options
-
-      # TODO: Can we add a "login_to_account_registry?
-      # TODO: And then add additional_registries?
-
-      Config = Struct.new(:root, :children, :default, :registry, :registries)
+      Config = Struct.new(:root, :children, :default, :registry, :ecr_registry_ids, :login_to_account_ecr_registry)
 
       # Instantiates a new top level config object if one hasn't already been created
       # Yields that config object to any given block
@@ -26,7 +22,7 @@ module Dev
       # The name of the file containing the Aws settings
       CONFIG_FILE = "#{Dev::Aws::CONFIG_DIR}/config".freeze
 
-      attr_accessor :root, :children, :default, :registry, :registries
+      attr_accessor :root, :children, :default, :registry, :ecr_registry_ids
 
       # Instantiate an account object
       # Requires that root account and at least one child account have been configured
@@ -39,7 +35,12 @@ module Dev
         @root = self.class.config.root
         @children = self.class.config.children
         @default = self.class.config.default
-        @registries = (Array(self.class.config.registries) << self.class.config.registry).compact.uniq
+
+        # Create the ecr registry list based off several possible configuration values
+        @ecr_registry_ids = Array(self.class.config.ecr_registry_ids)
+        @ecr_registry_ids << self.class.config.registry
+        @ecr_registry_ids << Dev::Aws::Profile.new.current if self.class.config.login_to_account_ecr_registry
+        @ecr_registry_ids = @ecr_registry_ids.flatten.compact.reject(&:empty?).uniq
       end
 
       # Returns all configured account information objects
@@ -70,6 +71,8 @@ module Dev
         puts
         puts 'Configuring default login values'
 
+        # TODO: DAAAMN. We need to allow for multiple base keys - or allow fdp keys to log in to SBF?
+
         # Write region and mfa serial to config file
         cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
         defaultini = cfgini['default']
@@ -77,7 +80,9 @@ module Dev
         region_default = defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         defaultini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        mfa_default = defaultini['mfa_serial'] || ENV['AWS_MFA_ARN'] || "arn:aws:iam::#{root}:mfa/#{ENV.fetch('USERNAME', nil)}"
+        # TODO: Parse the old config version and replace/remove?????
+        # TODO: Make this configurable?
+        mfa_default = defaultini['mfa_serial'] || ENV['AWS_MFA_ARN'] || "arn:aws:iam::#{root.id}:mfa/#{ENV.fetch('USERNAME', nil)}"
         defaultini['mfa_serial'] = Dev::Common.new.ask('Default mfa arn', mfa_default)
 
         session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', nil)}_cli"
@@ -115,6 +120,7 @@ module Dev
         region_default = profileini['region'] || defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         profileini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
+        # TODO: Make the default role name configurable
         role_default = profileini['role_arn'] || "arn:aws:iam::#{account}:role/ReadonlyAccessRole"
         profileini['role_arn'] = Dev::Common.new.ask('Default role arn', role_default)
 
