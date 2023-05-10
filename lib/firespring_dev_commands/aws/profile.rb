@@ -33,8 +33,10 @@ module Dev
       # Print the profile info for the current account
       def info
         Dev::Aws::Credentials.new.export!
+        current_role = Dev::Aws::Credentials.new.logged_in_role
+        current_account_name = Dev::Aws::Account.new.name_by_account(current)
         puts
-        puts "  Currently logged in to the #{Dev::Aws::Account.new.name_by_account(current)} (#{current})".light_yellow
+        puts "  Currently logged in as #{current_role} in the #{current_account_name} (#{current}) account".light_yellow
         puts
         puts '  To use this profile in your local aws cli, you must either pass the profile as a command line argument ' \
              'or export the corresponding aws variable:'.light_white
@@ -49,6 +51,15 @@ module Dev
         puts "    export AWS_SECRET_ACCESS_KEY=#{ENV.fetch('AWS_SECRET_ACCESS_KEY', nil)}"
         puts "    export AWS_SESSION_TOKEN=#{ENV.fetch('AWS_SESSION_TOKEN', nil)}"
         puts
+      end
+
+      # Print the export commands for the current credentials
+      def export_info
+        Dev::Aws::Credentials.new.export!
+        puts "export AWS_DEFAULT_REGION=#{ENV.fetch('AWS_DEFAULT_REGION', nil)}"
+        puts "export AWS_ACCESS_KEY_ID=#{ENV.fetch('AWS_ACCESS_KEY_ID', nil)}"
+        puts "export AWS_SECRET_ACCESS_KEY=#{ENV.fetch('AWS_SECRET_ACCESS_KEY', nil)}"
+        puts "export AWS_SESSION_TOKEN=#{ENV.fetch('AWS_SESSION_TOKEN', nil)}"
       end
     end
   end

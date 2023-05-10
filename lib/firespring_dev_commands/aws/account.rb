@@ -59,7 +59,7 @@ module Dev
 
       # Look up the account name for the given account id
       def name_by_account(account)
-        all.find { |it| it.id == account }.name
+        all.find { |it| it.id == account }&.name
       end
 
       # Setup base Aws settings
