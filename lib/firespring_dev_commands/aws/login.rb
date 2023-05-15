@@ -31,7 +31,7 @@ module Dev
       # Temporary credentials are written back to the credentials file
       def authorize!(account)
         # Make sure the account has been set up
-        cfgini = setup_cfgini
+        cfgini = setup_cfgini(account)
 
         defaultini = cfgini['default']
         profileini = cfgini["profile #{account}"]
@@ -39,7 +39,7 @@ module Dev
         region = profileini['region'] || defaultini['region'] || Dev::Aws::DEFAULT_REGION
 
         serial = profileini['mfa_serial_name'] || defaultini['mfa_serial_name']
-        serial = "arn:aws:iam::#{Dev::Aws::Account.new.roo.id}:mfa/#{serial}" if serial
+        serial = "arn:aws:iam::#{Dev::Aws::Account.new.root.id}:mfa/#{serial}" if serial
         serial ||= profileini['mfa_serial'] || defaultini['mfa_serial']
 
         role = profileini['role_name'] || defaultini['role_name']
@@ -71,7 +71,7 @@ module Dev
 
       # Returns the config ini file
       # Runs the setup for our current account if it's not already setup
-      def setup_cfgini
+      def setup_cfgini(account)
         cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
         unless cfgini.has_section?("profile #{account}")
           Dev::Aws::Account.new.write!(account)
