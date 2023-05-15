@@ -3,7 +3,8 @@ module Dev
     # Class containing useful methods for interacting with the Aws account
     class Account
       # Config object for setting top level Aws account config options
-      Config = Struct.new(:root, :children, :default, :registry)
+      # TODO: registry is deprecated and should be removed on the next major release
+      Config = Struct.new(:root, :children, :default, :registry, :ecr_registry_ids, :login_to_account_ecr_registry)
 
       # Instantiates a new top level config object if one hasn't already been created
       # Yields that config object to any given block
@@ -22,7 +23,8 @@ module Dev
       # The name of the file containing the Aws settings
       CONFIG_FILE = "#{Dev::Aws::CONFIG_DIR}/config".freeze
 
-      attr_accessor :root, :children, :default, :registry
+      # TODO: registry is deprecated and should be removed on the next major release
+      attr_accessor :root, :children, :default, :registry, :ecr_registry_ids
 
       # Instantiate an account object
       # Requires that root account and at least one child account have been configured
@@ -35,7 +37,13 @@ module Dev
         @root = self.class.config.root
         @children = self.class.config.children
         @default = self.class.config.default
-        @registry = self.class.config.registry
+
+        # Create the ecr registry list based off several possible configuration values
+        @ecr_registry_ids = [self.class.config.registry]
+        @ecr_registry_ids << Dev::Aws::Profile.new.current if self.class.config.login_to_account_ecr_registry
+        @ecr_registry_ids.concat(Array(self.class.config.ecr_registry_ids))
+        @ecr_registry_ids = @ecr_registry_ids.flatten.compact.reject(&:empty?).uniq
+        @registry = @ecr_registry_ids.first
       end
 
       # Returns all configured account information objects
@@ -73,7 +81,7 @@ module Dev
         region_default = defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         defaultini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        mfa_default = defaultini['mfa_serial'] || ENV['AWS_MFA_ARN'] || "arn:aws:iam::#{root}:mfa/#{ENV.fetch('USERNAME', nil)}"
+        mfa_default = defaultini['mfa_serial'] || ENV['AWS_MFA_ARN'] || "arn:aws:iam::#{root.id}:mfa/#{ENV.fetch('USERNAME', nil)}"
         defaultini['mfa_serial'] = Dev::Common.new.ask('Default mfa arn', mfa_default)
 
         session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', nil)}_cli"

@@ -11,7 +11,7 @@ gem 'firespring_dev_commands', '~> 0.0.1'
   * This is not common
   * It is mostly used for testing local changes before the gem is released
 ```
-gem 'firespring_dev_commands', path: '/path/to/firespring/dev-commands-ruby'
+gem 'firespring_dev_commands', path: '/path/to/dev_commands'
 ```
 
 * Add the following to your Rakefile
