@@ -70,8 +70,11 @@ module Dev
     end
 
     # Prunes/removes all unused volumes
+    # Specify ALL_VOLUMES=false in your environment to only clean anonymous volumes (docker version 23.x+)
     def prune_volumes
-      _prune('volumes')
+      opts = {}
+      opts[:filters] = {all: ['true']}.to_json if Dev::Common.new.version_greater_than('22.9999.0', self.class.version) && ENV['ALL_VOLUMES'].to_s.strip != 'false'
+      _prune('volumes', opts: opts)
     end
 
     # Prunes/removes all unused images
@@ -80,8 +83,8 @@ module Dev
     end
 
     # Private method which actually calls the prune endpoint on the docker api connection
-    private def _prune(type)
-      response = ::Docker.connection.post("/#{type.downcase}/prune", {})
+    private def _prune(type, opts: {})
+      response = ::Docker.connection.post("/#{type.downcase}/prune", opts)
       format_prune(type, response)
     rescue ::Docker::Error::ServerError => e
       # Specifically check for 'prune already running' error and retry if found
