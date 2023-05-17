@@ -93,7 +93,7 @@ module Dev
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
               namespace application do
                 namespace :ruby do
-                  desc 'Install all npm packages'
+                  desc 'Install all bundled gems'
                   task install: %w(init_docker up_no_deps) do
                     Dev::Docker::Compose.new(services: application).exec(*ruby.install_command)
                   end
