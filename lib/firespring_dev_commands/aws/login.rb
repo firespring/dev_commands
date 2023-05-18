@@ -82,7 +82,8 @@ module Dev
 
       # Authroizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
       # Authroizes the docker ruby library to pull/push images from the Aws container registry
-      def registry_logins!(registry_ids: Dev::Aws::Account.new.ecr_registry_ids, region: nil)
+      def registry_logins!(registry_ids: nil, region: nil)
+        registry_ids ||= Dev::Aws::Account.new.ecr_registry_ids
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         return if registry_ids.empty?
 
@@ -93,7 +94,8 @@ module Dev
 
       # Authroizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
       # Authroizes the docker ruby library to pull/push images from the Aws container registry
-      def registry_login!(registry_id: Dev::Aws::Account.new.ecr_registry_ids.first, region: nil)
+      def registry_login!(registry_id: nil, region: nil)
+        registry_id ||= Dev::Aws::Account.new.ecr_registry_ids.first
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         raise 'registry_id is required' if registry_id.to_s.strip.empty?
         raise 'region is required' if region.to_s.strip.empty?
@@ -109,7 +111,8 @@ module Dev
       # Authroizes the docker cli to pull/push images from the Aws container registry
       # (e.g. if docker compose needs to pull an image)
       # @deprecated Please use {Dev::Aws::Login#registry_login!} instead
-      def docker_login!(registry_id: Dev::Aws::Account.new.ecr_registry_ids.first, region: nil)
+      def docker_login!(registry_id: nil, region: nil)
+        registry_id ||= Dev::Aws::Account.new.ecr_registry_ids.first
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         warn '[DEPRECATION] `Dev::Aws::Login#docker_login!` is deprecated. Please use `Dev::Aws::Login#registry_login!` instead.'
         docker_cli_login!(registry: "#{registry_id}.dkr.ecr.#{region}.amazonaws.com", region: region)
@@ -128,7 +131,8 @@ module Dev
 
       # Authroizes the docker ruby library to pull/push images from the Aws container registry
       # @deprecated Please use {Dev::Aws::Login#registry_login!} instead
-      def ecr_login!(registry_id: Dev::Aws::Account.new.ecr_registry_ids.first, region: nil)
+      def ecr_login!(registry_id: nil, region: nil)
+        registry_id ||= Dev::Aws::Account.new.ecr_registry_ids.first
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         warn '[DEPRECATION] `Dev::Aws::Login#ecr_login!` is deprecated. Please use `Dev::Aws::Login#registry_login!` instead.'
         docker_lib_login!(registry_id: registry_id, region: region)
