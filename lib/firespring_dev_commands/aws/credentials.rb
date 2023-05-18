@@ -75,8 +75,6 @@ module Dev
         credini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/credentials", default: 'default')
         defaultini = credini['default']
 
-        # TODO: Should we allow for multiple sets of base credentials? How do I use this for both FDP and SBF?
-
         access_key_default = defaultini['aws_access_key_id']
         defaultini['aws_access_key_id'] = Dev::Common.new.ask('AWS Access Key ID', access_key_default)
 

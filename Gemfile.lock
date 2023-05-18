@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    firespring_dev_commands (1.5.0.pre.alpha.3)
+    firespring_dev_commands (1.5.0.pre.alpha.4)
       activesupport (~> 7.0.4.0)
       aws-sdk-cloudformation (~> 1.73.0)
       aws-sdk-codepipeline (~> 1.54.0)

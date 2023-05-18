@@ -85,8 +85,8 @@ module Dev
         #       it made it much more difficult to switch between different root accounts.
         mfa_name_default = defaultini['mfa_serial']&.split(%r{mfa/})&.last || ENV['AWS_MFA_ARN']&.split(%r{mfa/})&.last || ENV.fetch('USERNAME', nil)
         defaultini['mfa_serial_name'] = Dev::Common.new.ask('Default mfa name', mfa_name_default)
-        # TODO: Eventually, we should delete the mfa_serial entry from the config. Leaving it for now because some projects
-        #       may be using older versions of the dev_commands library
+        # TODO: mfa_serial is deprecated. Eventually, we should delete the mfa_serial entry from the config. Leaving it for now
+        #       because some projects may be using older versions of the dev_commands library
         # defaultini.delete('mfa_serial')
 
         session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', nil)}_cli"
@@ -128,8 +128,8 @@ module Dev
         #       it made it much more difficult to switch between different accounts.
         role_name_default = profileini['role_name'] || profileini['role_arn']&.split(%r{role/})&.last || self.class.config.default_login_role_name
         profileini['role_name'] = Dev::Common.new.ask('Default role name', role_name_default)
-        # TODO: Eventually, we should delete the role_arn entry from the config. Leaving it for now because some projects
-        #       may be using older versions of the dev_commands library
+        # TODO: role_arn is deprecated. Eventually, we should delete the role_arn entry from the config. Leaving it for now
+        #       because some projects may be using older versions of the dev_commands library
         # profileini.delete('role_arn')
 
         cfgini.write
