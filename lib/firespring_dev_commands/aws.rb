@@ -4,7 +4,10 @@ module Dev
     # The config dir for the user's AWS settings
     CONFIG_DIR = "#{Dir.home}/.aws".freeze
 
-    # The default region used if none have been configured in the AWS settings
+    # The default region used if none has been configured in the AWS settings
     DEFAULT_REGION = 'us-east-1'.freeze
+
+    # The default role name used if none has been configured when logging in
+    DEFAULT_LOGIN_ROLE_NAME = 'ReadonlyAccessRole'.freeze
   end
 end
