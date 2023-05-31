@@ -4,13 +4,13 @@ module Dev
     class Account
       # Config object for setting top level Aws account config options
       # TODO: registry is deprecated and should be removed on the next major release
-      Config = Struct.new(:root, :children, :default, :registry, :ecr_registry_ids, :login_to_account_ecr_registry)
+      Config = Struct.new(:root, :children, :default, :registry, :ecr_registry_ids, :login_to_account_ecr_registry, :default_login_role_name)
 
       # Instantiates a new top level config object if one hasn't already been created
       # Yields that config object to any given block
       # Returns the resulting config object
       def self.config
-        @config ||= Config.new
+        @config ||= Config.new(default_login_role_name: Dev::Aws::DEFAULT_LOGIN_ROLE_NAME)
         yield(@config) if block_given?
         @config
       end
@@ -81,8 +81,13 @@ module Dev
         region_default = defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         defaultini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        mfa_default = defaultini['mfa_serial'] || ENV['AWS_MFA_ARN'] || "arn:aws:iam::#{root.id}:mfa/#{ENV.fetch('USERNAME', nil)}"
-        defaultini['mfa_serial'] = Dev::Common.new.ask('Default mfa arn', mfa_default)
+        # NOTE: We had an old config for "mfa_serial" which included the entire arn. We deprecated that config since
+        #       it made it much more difficult to switch between different root accounts.
+        mfa_name_default = defaultini['mfa_serial']&.split(%r{mfa/})&.last || ENV['AWS_MFA_ARN']&.split(%r{mfa/})&.last || ENV.fetch('USERNAME', nil)
+        defaultini['mfa_serial_name'] = Dev::Common.new.ask('Default mfa name', mfa_name_default)
+        # TODO: mfa_serial is deprecated. Eventually, we should delete the mfa_serial entry from the config. Leaving it for now
+        #       because some projects may be using older versions of the dev_commands library
+        # defaultini.delete('mfa_serial')
 
         session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', nil)}_cli"
         defaultini['role_session_name'] = Dev::Common.new.ask('Default session name', session_name_default)
@@ -119,8 +124,13 @@ module Dev
         region_default = profileini['region'] || defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         profileini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        role_default = profileini['role_arn'] || "arn:aws:iam::#{account}:role/ReadonlyAccessRole"
-        profileini['role_arn'] = Dev::Common.new.ask('Default role arn', role_default)
+        # NOTE: We had an old config for "role_arn" which included the entire arn. We deprecated that config since
+        #       it made it much more difficult to switch between different accounts.
+        role_name_default = profileini['role_name'] || profileini['role_arn']&.split(%r{role/})&.last || self.class.config.default_login_role_name
+        profileini['role_name'] = Dev::Common.new.ask('Default role name', role_name_default)
+        # TODO: role_arn is deprecated. Eventually, we should delete the role_arn entry from the config. Leaving it for now
+        #       because some projects may be using older versions of the dev_commands library
+        # profileini.delete('role_arn')
 
         cfgini.write
       end
