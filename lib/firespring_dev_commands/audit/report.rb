@@ -32,9 +32,9 @@ module Dev
       # Exit with a non-zero status if any vulnerabilities were found
       def check
         puts(to_s)
-        unless filtered_items.empty?
-            at_exit { exit(1) }
-        end
+        return if filtered_items.empty?
+
+        at_exit { exit(1) }
       end
 
       # Returns a string representation of this audit report
