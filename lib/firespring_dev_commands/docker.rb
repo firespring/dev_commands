@@ -173,22 +173,23 @@ module Dev
     # Display a nicely formatted table of images and their associated information
     def print_images
       reposize   = 70
-      tagsize    = 79
+      tagsize    = 70
+      archsize   = 9
       imagesize  = 15
       createsize = 20
       sizesize   = 10
-      total = reposize + tagsize + imagesize + createsize + sizesize
+      total = reposize + tagsize + archsize + imagesize + createsize + sizesize
 
       # If there is additional width available, add it to the repo and tag columns
       additional = [((Rake.application.terminal_width - total) / 2).floor, 0].max
       reposize += additional
       tagsize += additional
 
-      format = "%-#{reposize}s%-#{tagsize}s%-#{imagesize}s%-#{createsize}s%s"
-      puts format(format, :REPOSITORY, :TAG, :'IMAGE ID', :CREATED, :SIZE)
+      format = "%-#{reposize}s%-#{tagsize}s%-#{archsize}s%-#{imagesize}s%-#{createsize}s%s"
+      puts format(format, :REPOSITORY, :TAG, :ARCH, :'IMAGE ID', :CREATED, :SIZE)
       ::Docker::Image.all.each do |image|
-        image_info(image).each do |repo, tag, id, created, size|
-          puts format(format, repo, tag, id, created, size)
+        image_info(image).each do |repo, tag, arch, id, created, size|
+          puts format(format, repo, tag, arch, id, created, size)
         end
       end
     end
@@ -200,13 +201,14 @@ module Dev
         id = image.info&.dig('id')&.split(':')&.last&.slice(0..11)
         created = timesince(Time.at(image.info&.dig('Created')))
         size = filesize(image.info&.dig('Size'))
+        arch = image.json&.dig('Architecture')
 
         repo_urls = image.info&.dig('RepoTags')
         repo_urls ||= ["#{image.info&.dig('RepoDigests')&.first&.split(':')&.first&.split('@')&.first}:<none>"]
         repo_urls.each do |repo_url|
           repo, tag = repo_url.split(':')
           tag ||= '<none>'
-          ary << [repo, tag, id, created, size]
+          ary << [repo, tag, arch, id, created, size]
         end
       end
     end
@@ -239,6 +241,13 @@ module Dev
     # rubocop:disable Metrics/CyclomaticComplexity
     # Take the given container and grab all of the parts of it which will be used to display the container info
     private def container_info(container)
+      puts
+      puts
+      puts container.inspect
+      puts container.to_json
+      puts container.info&.dig('Architecture')
+      puts
+      puts
       id = container.id&.slice(0..11)
       image = container.info&.dig('Image')
 

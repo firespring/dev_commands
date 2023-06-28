@@ -4,7 +4,8 @@ module Dev
   module Template
     # Module containing all default docker rake tasks
     module Docker
-      # Class containing default rake tasks which are application agnostic (run against all containers)
+      # Class containing default rake tasks which are application agnostic
+      # This means the commands will be run against all containers in the docker compose file (no service specified)
       class Default < Dev::Template::BaseInterface
         # Create the rake task which runs a docker compose build
         def create_build_task!
