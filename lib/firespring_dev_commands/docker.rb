@@ -170,6 +170,7 @@ module Dev
       Dev::Tar.new(tar).unpack(source_path, dest_path)
     end
 
+    # rubocop:disable Metrics/ParameterLists
     # Display a nicely formatted table of images and their associated information
     def print_images
       reposize   = 70
@@ -193,15 +194,16 @@ module Dev
         end
       end
     end
+    # rubocop:enable Metrics/ParameterLists
 
     # rubocop:disable Metrics/CyclomaticComplexity
     # Take the given image and grab all of the parts of it which will be used to display the image info
     private def image_info(image)
       [].tap do |ary|
+        arch = image.json&.dig('Architecture')
         id = image.info&.dig('id')&.split(':')&.last&.slice(0..11)
         created = timesince(Time.at(image.info&.dig('Created')))
         size = filesize(image.info&.dig('Size'))
-        arch = image.json&.dig('Architecture')
 
         repo_urls = image.info&.dig('RepoTags')
         repo_urls ||= ["#{image.info&.dig('RepoDigests')&.first&.split(':')&.first&.split('@')&.first}:<none>"]
@@ -217,41 +219,42 @@ module Dev
     # Display a nicely formatted table of containers and their associated information
     def print_containers
       idsize = 15
-      imagesize = 25
-      commandsize = 25
-      createsize = 17
-      statussize = 16
-      portsize = 25
-      namesize = 10
-      total = idsize + imagesize + commandsize + createsize + statussize + portsize + namesize
+      imagesize = 20
+      archsize = 7
+      commandsize = 20
+      createsize = 15
+      statussize = 15
+      portsize = 20
+      namesize = 16
+      total = idsize + imagesize + archsize + commandsize + createsize + statussize + portsize + namesize
 
       # If there is additional width available, add it to the repo and tag columns
-      additional = [((Rake.application.terminal_width - total) / 2).floor, 0].max
+      additional = [((Rake.application.terminal_width - total) / 3).floor, 0].max
+
+      # If there's enough extra, give some to the name as well
+      if additional > 40
+        namesize += 15
+        additional -= 5
+      end
       imagesize += additional
+      commandsize += additional
       portsize += additional
 
-      format = "%-#{idsize}s%-#{imagesize}s%-#{commandsize}s%-#{createsize}s%-#{statussize}s%-#{portsize}s%s"
-      puts format(format, :'CONTAINER ID', :IMAGE, :COMMAND, :CREATED, :STATUS, :PORTS, :NAMES)
+      format = "%-#{idsize}s%-#{imagesize}s%-#{archsize}s%-#{commandsize}s%-#{createsize}s%-#{statussize}s%-#{portsize}s%-#{namesize}s"
+      puts format(format, :'CONTAINER ID', :IMAGE, :ARCH, :COMMAND, :CREATED, :STATUS, :PORTS, :NAMES)
       ::Docker::Container.all.each do |container|
-        id, image, command, created, status, ports, names = container_info(container)
-        puts format(format, id, image, command, created, status, ports, names)
+        id, image, arch, command, created, status, ports, names = container_info(container)
+        puts format(format, id, image.truncate(imagesize - 5), arch, command.truncate(commandsize - 5), created, status, ports.truncate(portsize - 5), names)
       end
     end
 
     # rubocop:disable Metrics/CyclomaticComplexity
     # Take the given container and grab all of the parts of it which will be used to display the container info
     private def container_info(container)
-      puts
-      puts
-      puts container.inspect
-      puts container.to_json
-      puts container.info&.dig('Architecture')
-      puts
-      puts
       id = container.id&.slice(0..11)
       image = container.info&.dig('Image')
-
-      command = container.info&.dig('Command')&.truncate(20)
+      arch = ::Docker::Image.get(image).json&.dig('Architecture')
+      command = container.info&.dig('Command')
       created = timesince(Time.at(container.info&.dig('Created')))
       status = container.info&.dig('Status')
 
@@ -266,7 +269,7 @@ module Dev
       end&.join(', ')
       names = container.info&.dig('Names')&.map { |name| name.split('/').last }&.join(', ')
 
-      [id, image, command, created, status, ports, names]
+      [id, image, arch, command, created, status, ports, names]
     end
     # rubocop:enable Metrics/CyclomaticComplexity
 
