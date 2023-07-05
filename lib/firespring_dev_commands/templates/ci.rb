@@ -1,4 +1,4 @@
-require_relative './base_interface'
+require_relative 'base_interface'
 
 module Dev
   module Template
@@ -12,7 +12,7 @@ module Dev
           @cloudformations = Array(cloudformation).sort_by(&:name)
           raise 'must specify an arry of cloudformation objects' unless @cloudformations.all?(Dev::Aws::Cloudformation)
 
-          super(exclude: exclude)
+          super(exclude:)
         end
 
         # Create the rake task for creating the codepipeline

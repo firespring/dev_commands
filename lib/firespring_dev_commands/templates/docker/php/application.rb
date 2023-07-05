@@ -11,8 +11,8 @@ module Dev
 
           # Allow for custom container path for the application
           def initialize(application, container_path: nil, local_path: nil, exclude: [])
-            @php = Dev::Php.new(container_path: container_path, local_path: local_path)
-            super(application, exclude: exclude)
+            @php = Dev::Php.new(container_path:, local_path:)
+            super(application, exclude:)
           end
 
           # Create the rake task which downloads the vendor directory to your local system for the given application name
@@ -80,7 +80,7 @@ module Dev
 
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options: options).exec(*php.lint_command)
+                    Dev::Docker::Compose.new(services: application, options:).exec(*php.lint_command)
                   end
 
                   namespace :lint do
@@ -90,7 +90,7 @@ module Dev
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options: options).exec(*php.lint_fix_command)
+                      Dev::Docker::Compose.new(services: application, options:).exec(*php.lint_fix_command)
                     end
                   end
                 end
@@ -119,7 +119,7 @@ module Dev
 
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options: options).exec(*php.test_command)
+                    Dev::Docker::Compose.new(services: application, options:).exec(*php.test_command)
                   end
                 end
               end

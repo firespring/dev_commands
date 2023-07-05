@@ -9,7 +9,7 @@ describe Dev::Common do
     let(:stderr) { Object.new }
     let(:env) { Object.new }
     let(:capture) { false }
-    subject { described_class.new.run_command(command, stdin: stdin, stdout: stdout, stderr: stderr, env: env, capture: capture) }
+    subject { described_class.new.run_command(command, stdin:, stdout:, stderr:, env:, capture:) }
 
     let(:pid) { Object.new }
     let(:result) { [nil, Struct.new(:foo).new(:bar)] }

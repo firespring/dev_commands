@@ -38,7 +38,7 @@ module Dev
 
       def initialize(name, exclude: [])
         @name = name
-        super(exclude: exclude)
+        super(exclude:)
       end
     end
   end

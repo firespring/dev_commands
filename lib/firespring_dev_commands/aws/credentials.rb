@@ -45,7 +45,7 @@ module Dev
 
         # Check for expired credentials
         begin
-          ::Aws::STS::Client.new(profile: profile).get_caller_identity
+          ::Aws::STS::Client.new(profile:).get_caller_identity
         rescue
           return false
         end
@@ -53,7 +53,7 @@ module Dev
         # Check for invalid credentials
         begin
           # TODO: Is there a better check we can do here?
-          ::Aws::SSM::Client.new(profile: profile).describe_parameters(max_results: 1)
+          ::Aws::SSM::Client.new(profile:).describe_parameters(max_results: 1)
         rescue
           return false
         end

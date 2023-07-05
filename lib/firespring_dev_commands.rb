@@ -18,4 +18,6 @@ rootdir = File.realpath(File.dirname(libdir))
 $LOAD_PATH.unshift rootdir
 
 # Load all ruby files
+# rubocop:disable Lint/RedundantDirGlobSort
 Dir.glob("#{libdir}/**/*.rb").sort.each { |file| require file }
+# rubocop:enable Lint/RedundantDirGlobSort

@@ -22,7 +22,7 @@ module Dev
       def put(bucket:, key:, filename:, acl: 'private')
         begin
           File.open(filename, 'rb') do |file|
-            client.put_object(bucket: bucket, key: key, body: file, acl: acl)
+            client.put_object(bucket:, key:, body: file, acl:)
           end
         rescue => e
           raise "s3 file upload failed: #{e.message}"

@@ -264,7 +264,7 @@ module Dev
       # Print the compose command that will be executed and then execute it
       private def execute_command(command)
         LOG.debug " > #{command.join(' ')}"
-        ::Dev::Common.new.run_command(command, capture: capture)
+        ::Dev::Common.new.run_command(command, capture:)
       end
     end
   end

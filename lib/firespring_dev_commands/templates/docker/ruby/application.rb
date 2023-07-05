@@ -11,8 +11,8 @@ module Dev
 
           # Allow for custom container path for the application
           def initialize(application, container_path: nil, local_path: nil, exclude: [])
-            @ruby = Dev::Ruby.new(container_path: container_path, local_path: local_path)
-            super(application, exclude: exclude)
+            @ruby = Dev::Ruby.new(container_path:, local_path:)
+            super(application, exclude:)
           end
 
           # Create the rake task which runs linting for the application name
@@ -36,7 +36,7 @@ module Dev
 
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options: options).exec(*ruby.lint_command)
+                    Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_command)
                   end
 
                   namespace :lint do
@@ -46,7 +46,7 @@ module Dev
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options: options).exec(*ruby.lint_fix_command)
+                      Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_fix_command)
                     end
                   end
                 end
@@ -75,7 +75,7 @@ module Dev
 
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options: options).exec(*ruby.test_command)
+                    Dev::Docker::Compose.new(services: application, options:).exec(*ruby.test_command)
                   end
                 end
               end
