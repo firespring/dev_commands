@@ -8,8 +8,9 @@ module Dev
     # Class containing methods for interfacing with the docker compose cli
     class Compose
       # Config object for setting top level docker compose config options
-      Config = Struct.new(:project_dir, :project_name, :compose_files, :min_version, :max_version) do
+      Config = Struct.new(:executable_name, :project_dir, :project_name, :compose_files, :min_version, :max_version) do
         def initialize
+          self.executable_name = EXECUTABLE_NAME
           self.project_dir = DEV_COMMANDS_ROOT_DIR
           self.project_name = DEV_COMMANDS_PROJECT_NAME
           self.compose_files = ["#{DEV_COMMANDS_ROOT_DIR}/docker-compose.yml"]
@@ -69,12 +70,12 @@ module Dev
       # Checks the min and max version against the current docker version if they have been configured
       def check_version
         min_version = self.class.config.min_version
-        raise "requires #{EXECUTABLE_NAME} version >= #{min_version} (found #{self.class.version})" if min_version &&
-                                                                                                       !Dev::Common.new.version_greater_than(min_version, self.class.version)
+        version_too_low = min_version && !Dev::Common.new.version_greater_than(min_version, self.class.version)
+        raise "requires #{self.class.config.executable_name} version >= #{min_version} (found #{self.class.version})" if version_too_low
 
         max_version = self.class.config.max_version
-        raise "requires #{EXECUTABLE_NAME} version < #{max_version} (found #{self.class.version})" if max_version &&
-                                                                                                      Dev::Common.new.version_greater_than(max_version, self.class.version)
+        version_too_high = max_version && Dev::Common.new.version_greater_than(max_version, self.class.version)
+        raise "requires #{self.class.config.executable_name} version < #{max_version} (found #{self.class.version})" if version_too_high
       end
 
       # Pull in supported env settings and call build
@@ -83,6 +84,7 @@ module Dev
       def build
         merge_options('--parallel')
         merge_env_pull_option
+        merge_env_push_option
         merge_env_cache_option
         execute_command(build_command('build'))
       end
@@ -181,6 +183,13 @@ module Dev
         merge_options('--pull') if ENV['PULL'].to_s.strip == 'true'
       end
 
+      # Merge --push option if PUSH is set to true and no existing push options are present
+      private def merge_env_push_option
+        return if @options.any? { |it| it.include?('push') }
+
+        merge_options('--push') if ENV['PUSH'].to_s.strip == 'true'
+      end
+
       # Merge --no-build option unless BUILD is set to true and no existing build options are present
       private def merge_env_build_option
         return if @options.any? { |it| it.include?('build') }
@@ -230,7 +239,7 @@ module Dev
 
       # Build the compose command with the given inputs
       private def build_command(action, *cmd)
-        command = [EXECUTABLE_NAME]
+        command = self.class.config.executable_name.split(/\s+/)
         command << '--project-directory' << project_dir
         command << '-p' << project_name if project_name
         Array(compose_files).compact.each { |file| command << '-f' << file }
