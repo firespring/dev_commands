@@ -1,4 +1,4 @@
-FROM ruby:3.1-slim-bullseye
+FROM ruby:3.2-slim-bullseye
 MAINTAINER Firespring "opensource@firespring.com"
 
 # Set up the working directory
