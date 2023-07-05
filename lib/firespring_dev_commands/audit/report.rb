@@ -31,7 +31,7 @@ module Dev
       # Output the text of the filtered report items
       # Exit with a non-zero status if any vulnerabilities were found
       def check
-        puts(to_s)
+        puts(self)
         return if filtered_items.empty?
 
         at_exit { exit(1) }

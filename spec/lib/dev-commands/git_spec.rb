@@ -10,9 +10,9 @@ describe Dev::Git do
 
   let(:instance) do
     described_class.new(
-      main_branch: main_branch,
-      staging_branch: staging_branch,
-      info: info
+      main_branch:,
+      staging_branch:,
+      info:
     )
   end
 

@@ -23,7 +23,7 @@ module Dev
       # If none is found, it returns a Jira user object with only the id set
       def self.lookup(id)
         user = Dev::Jira.config.user_lookup_list&.find { |it| it.id == id }
-        user ||= new(name: '', email: '', id: id)
+        user ||= new(name: '', email: '', id:)
         user
       end
     end

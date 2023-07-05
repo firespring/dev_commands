@@ -59,19 +59,19 @@ module Dev
     end
 
     # Query jira using the given jql and yield each matching result
-    def issues(jql, &block)
+    def issues(jql, &)
       start_at = 0
       max_results = 100
 
       # Query Jira and yield all issues it returns
-      issues = @client.Issue.jql(jql, start_at: start_at, max_results: max_results)
-      issues.map { |data| Issue.new(data) }.each(&block)
+      issues = @client.Issue.jql(jql, start_at:, max_results:)
+      issues.map { |data| Issue.new(data) }.each(&)
 
       # If we returned the max_results then there may be more - add the max results to where we start at and query again
       while issues.length >= max_results
         start_at += max_results
-        issues = @client.Issue.jql(jql, start_at: start_at, max_results: max_results)
-        issues.map { |data| Issue.new(data) }.each(&block)
+        issues = @client.Issue.jql(jql, start_at:, max_results:)
+        issues.map { |data| Issue.new(data) }.each(&)
       end
     end
   end

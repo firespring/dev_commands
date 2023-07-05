@@ -23,7 +23,7 @@ module Dev
 
               ids << id
               Dev::Audit::Report::Item.new(
-                id: id,
+                id:,
                 name: vulnerability['name'],
                 title: it['title'],
                 url: it['url'],

@@ -31,15 +31,4 @@ Gem::Specification.new do |s|
   s.add_dependency 'libxml-ruby', '4.1.1'
   s.add_dependency 'public_suffix', '5.0.1'
   s.add_dependency 'rake', '~> 13.0.6'
-
-  # Dev/Test dependencies
-  s.add_development_dependency 'builder', '~> 3.2.4'
-  s.add_development_dependency 'bundler-audit', '~> 0.9.1'
-  s.add_development_dependency 'launchy', '~> 2.5.2'
-  s.add_development_dependency 'rspec', '~> 3.12.0'
-  s.add_development_dependency 'rubocop', '~> 1.54.1'
-  s.add_development_dependency 'rubocop-performance', '~> 1.18.0'
-  s.add_development_dependency 'rubocop-rake', '~> 0.6.0'
-  s.add_development_dependency 'simplecov', '~> 0.22.0'
-  s.add_development_dependency 'yard', '~> 0.9.34'
 end

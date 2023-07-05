@@ -49,9 +49,9 @@ module Dev
         # Create the cloudformation stack
         client.create_stack(
           stack_name: name,
-          template_url: template_url,
+          template_url:,
           parameters: parameters.default,
-          capabilities: capabilities,
+          capabilities:,
           on_failure: failure_behavior
         )
         @state = STARTED
@@ -77,9 +77,9 @@ module Dev
         # Update the cloudformation stack
         client.update_stack(
           stack_name: name,
-          template_url: template_url,
+          template_url:,
           parameters: parameters.preserve,
-          capabilities: capabilities
+          capabilities:
         )
         @state = STARTED
         LOG.info "#{name} stack update started at #{Time.now.to_s.light_yellow}"
@@ -144,8 +144,8 @@ module Dev
 
         client.wait_until(
           :"stack_#{type}",
-          {stack_name: stack_name},
-          {max_attempts: max_attempts, delay: delay}
+          {stack_name:},
+          {max_attempts:, delay:}
         )
       rescue ::Aws::Waiters::Errors::WaiterFailed => e
         raise "Action failed to complete: #{e.message}"
@@ -181,7 +181,7 @@ module Dev
         s3 = Dev::Aws::S3.new
         template_bucket = s3.cf_bucket.name
         key = "#{File.basename(filename)}/#{SecureRandom.uuid}"
-        s3.put(bucket: template_bucket, key: key, filename: filename)
+        s3.put(bucket: template_bucket, key:, filename:)
       end
     end
   end

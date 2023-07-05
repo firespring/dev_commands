@@ -56,7 +56,7 @@ module Dev
         code = ENV['AWS_TOKEN_CODE'] || Dev::Common.new.ask("Enter the MFA code for the #{ENV.fetch('USERNAME', '')} user serial #{serial}")
         raise 'MFA is required' unless code.to_s.strip
 
-        sts = ::Aws::STS::Client.new(profile: 'default', region: region)
+        sts = ::Aws::STS::Client.new(profile: 'default', region:)
         creds = sts.assume_role(
           serial_number: serial,
           role_arn: role,
@@ -88,7 +88,7 @@ module Dev
         return if registry_ids.empty?
 
         puts
-        registry_ids.each { |id| registry_login!(registry_id: id, region: region) }
+        registry_ids.each { |id| registry_login!(registry_id: id, region:) }
         puts
       end
 
@@ -101,8 +101,8 @@ module Dev
         raise 'region is required' if region.to_s.strip.empty?
 
         registry = "#{registry_id}.dkr.ecr.#{region}.amazonaws.com"
-        docker_cli_login!(registry: registry, region: region)
-        docker_lib_login!(registry_id: registry_id, region: region)
+        docker_cli_login!(registry:, region:)
+        docker_lib_login!(registry_id:, region:)
 
         ENV['ECR_REGISTRY_ID'] ||= registry_id
         ENV['ECR_REGISTRY'] ||= registry
@@ -115,7 +115,7 @@ module Dev
         registry_id ||= Dev::Aws::Account.new.ecr_registry_ids.first
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         warn '[DEPRECATION] `Dev::Aws::Login#docker_login!` is deprecated. Please use `Dev::Aws::Login#registry_login!` instead.'
-        docker_cli_login!(registry: "#{registry_id}.dkr.ecr.#{region}.amazonaws.com", region: region)
+        docker_cli_login!(registry: "#{registry_id}.dkr.ecr.#{region}.amazonaws.com", region:)
         puts
       end
 
@@ -135,13 +135,13 @@ module Dev
         registry_id ||= Dev::Aws::Account.new.ecr_registry_ids.first
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
         warn '[DEPRECATION] `Dev::Aws::Login#ecr_login!` is deprecated. Please use `Dev::Aws::Login#registry_login!` instead.'
-        docker_lib_login!(registry_id: registry_id, region: region)
+        docker_lib_login!(registry_id:, region:)
       end
 
       # Authroizes the docker ruby library to pull/push images from the Aws container registry
       private def docker_lib_login!(registry_id:, region:)
         # Grab your authentication token from AWS ECR
-        ecr_client = ::Aws::ECR::Client.new(region: region)
+        ecr_client = ::Aws::ECR::Client.new(region:)
         tokens = ecr_client.get_authorization_token(registry_ids: Array(registry_id)).authorization_data
         tokens.each do |token|
           # Remove the https:// to authenticate

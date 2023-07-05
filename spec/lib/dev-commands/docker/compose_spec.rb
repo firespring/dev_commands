@@ -13,14 +13,14 @@ describe Dev::Docker::Compose do
 
   let(:instance) do
     described_class.new(
-      compose_files: compose_files,
-      environment: environment,
-      options: options,
-      project_dir: project_dir,
-      project_name: project_name,
-      services: services,
-      volumes: volumes,
-      capture: capture
+      compose_files:,
+      environment:,
+      options:,
+      project_dir:,
+      project_name:,
+      services:,
+      volumes:,
+      capture:
     )
   end
 
@@ -106,7 +106,7 @@ describe Dev::Docker::Compose do
 
     it 'runs the command' do
       allow(LOG).to receive(:debug)
-      expect_any_instance_of(::Dev::Common).to receive(:run_command).with(command, capture: instance.capture)
+      expect_any_instance_of(Dev::Common).to receive(:run_command).with(command, capture: instance.capture)
       subject
     end
   end

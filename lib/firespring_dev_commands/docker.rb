@@ -74,7 +74,7 @@ module Dev
     def prune_volumes
       opts = {}
       opts[:filters] = {all: ['true']}.to_json if Dev::Common.new.version_greater_than('22.9999.0', self.class.version) && ENV['ALL_VOLUMES'].to_s.strip != 'false'
-      _prune('volumes', opts: opts)
+      _prune('volumes', opts:)
     end
 
     # Prunes/removes all unused images
@@ -88,7 +88,7 @@ module Dev
       format_prune(type, response)
     rescue ::Docker::Error::ServerError => e
       # Specifically check for 'prune already running' error and retry if found
-      if /already running/.match?(e.to_s)
+      if e.to_s.include?('already running')
         sleep 2
         retry
       end

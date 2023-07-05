@@ -289,7 +289,7 @@ module Dev
       raise 'branch does not exist' unless branch_exists?(dir, branch)
 
       # No need to merge into ourself
-      current_branch = branch_name(dir: dir)
+      current_branch = branch_name(dir:)
       return true if current_branch == branch
 
       indent "Merging #{branch} into #{current_branch}"
@@ -326,7 +326,7 @@ module Dev
       g = ::Git.open(dir)
       g.fetch('origin', prune: true)
 
-      branch = branch_name(dir: dir)
+      branch = branch_name(dir:)
       indent "Pulling branch #{branch} from origin"
       indent g.pull('origin', branch)
       true
@@ -361,7 +361,7 @@ module Dev
       g = ::Git.open(dir)
       g.fetch('origin', prune: true)
 
-      branch = branch_name(dir: dir)
+      branch = branch_name(dir:)
       indent "Pushing branch #{branch} to origin"
       indent g.push('origin', branch)
       true
