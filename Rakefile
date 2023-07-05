@@ -14,7 +14,6 @@ Dev::Docker.configure do |c|
 end
 
 Dev::Docker::Compose.configure do |c|
-  c.executable_name = 'docker compose'
   c.min_version = '1.28.5'
   c.max_version = '3.0.0'
 end
