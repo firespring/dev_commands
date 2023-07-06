@@ -39,7 +39,7 @@ module Dev
 
       # Find all pipelines matching the regex_match and find the status for each of them
       def status(name)
-        pipeline = client.get_pipeline_state(name: name)
+        pipeline = client.get_pipeline_state(name:)
         print_pipeline_information(pipeline)
       rescue ::Aws::CodePipeline::Errors::PipelineNotFoundException
         LOG.error "No pipeline found with name #{name}".light_yellow

@@ -1,4 +1,4 @@
-require_relative './base_interface'
+require_relative 'base_interface'
 
 module Dev
   module Template
