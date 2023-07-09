@@ -7,14 +7,16 @@ module Dev
   class Docker
     # Class containing methods for interfacing with the docker compose cli
     class Compose
+      # The name of the docker compose executable
+      EXECUTABLE_NAME = %w(docker compose).freeze
+
       # Config object for setting top level docker compose config options
-      Config = Struct.new(:executable_name, :project_dir, :project_name, :compose_files, :min_version, :max_version) do
+      Config = Struct.new(:project_dir, :project_name, :compose_files, :min_version, :max_version) do
         def initialize
-          self.executable_name = EXECUTABLE_NAME
           self.project_dir = DEV_COMMANDS_ROOT_DIR
           self.project_name = DEV_COMMANDS_PROJECT_NAME
           self.compose_files = ["#{DEV_COMMANDS_ROOT_DIR}/docker-compose.yml"]
-          self.min_version = nil
+          self.min_version = '2.0.0'
           self.max_version = nil
         end
       end
@@ -34,13 +36,10 @@ module Dev
 
         # Returns the version of the docker-compose executable on the system
         def version
-          @version ||= `#{EXECUTABLE_NAME} --version`.match(/version v?([0-9.]+)/)[1]
+          version_cmd = EXECUTABLE_NAME.dup << 'version'
+          @version ||= `#{version_cmd.join(' ')}`.match(/version v?([0-9.]+)/)[1]
         end
       end
-
-      # @todo Change this to "docker compose" when everyone is off v1
-      # The name of the docker compose executable
-      EXECUTABLE_NAME = 'docker-compose'.freeze
 
       attr_accessor :capture, :compose_files, :environment, :options, :project_dir, :project_name, :services, :user, :volumes
 
@@ -71,11 +70,11 @@ module Dev
       def check_version
         min_version = self.class.config.min_version
         version_too_low = min_version && !Dev::Common.new.version_greater_than(min_version, self.class.version)
-        raise "requires #{self.class.config.executable_name} version >= #{min_version} (found #{self.class.version})" if version_too_low
+        raise "requires docker compose version >= #{min_version} (found #{self.class.version})" if version_too_low
 
         max_version = self.class.config.max_version
         version_too_high = max_version && Dev::Common.new.version_greater_than(max_version, self.class.version)
-        raise "requires #{self.class.config.executable_name} version < #{max_version} (found #{self.class.version})" if version_too_high
+        raise "requires docker compose version < #{max_version} (found #{self.class.version})" if version_too_high
       end
 
       # Pull in supported env settings and call build
@@ -239,7 +238,7 @@ module Dev
 
       # Build the compose command with the given inputs
       private def build_command(action, *cmd)
-        command = self.class.config.executable_name.split(/\s+/)
+        command = EXECUTABLE_NAME.dup
         command << '--project-directory' << project_dir
         command << '-p' << project_name if project_name
         Array(compose_files).compact.each { |file| command << '-f' << file }
