@@ -201,6 +201,8 @@ module Dev
     private def image_info(image)
       [].tap do |ary|
         arch = image.json&.dig('Architecture')
+        variant = image.json&.dig('Variant')
+        arch = "#{arch}/#{variant}" if variant
         id = image.info&.dig('id')&.split(':')&.last&.slice(0..11)
         created = timesince(Time.at(image.info&.dig('Created')))
         size = filesize(image.info&.dig('Size'))
@@ -253,7 +255,10 @@ module Dev
     private def container_info(container)
       id = container.id&.slice(0..11)
       image = container.info&.dig('Image')
-      arch = ::Docker::Image.get(image).json&.dig('Architecture')
+      image_json = ::Docker::Image.get(image).json
+      arch = image_json&.dig('Architecture')
+      variant = image_json&.dig('Variant')
+      arch = "#{arch}/#{variant}" if variant
       command = container.info&.dig('Command')
       created = timesince(Time.at(container.info&.dig('Created')))
       status = container.info&.dig('Status')
