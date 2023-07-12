@@ -15,7 +15,7 @@ module Dev
 
         ::Slack.configure do |c|
           c.token = ENV['SLACK_API_TOKEN']
-          c.logger = LOG
+          c.logger = LOG if ENV['ENABLE_SLACK_DEBUG'].to_s.strip == 'true'
         end
       end
       new.configure
