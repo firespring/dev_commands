@@ -10,19 +10,14 @@ module Dev
     end
 
     def post(channel:, text:)
-      client.chat_postMessage(channel: channel, text: text)
+      client.chat_postMessage(channel:, text:)
     end
 
     def upload_text(channel:, text:, title: 'Text File', filename: 'file.txt')
       raise 'text should be a string' unless text.is_a?(String)
 
-      client.files_upload(
-        channels: channel,
-        title: title,
-        file: Faraday::UploadIO.new(StringIO.new(text), 'text/plain'),
-        filename: filename,
-        filetype: 'text'
-      )
+      file = Faraday::UploadIO.new(StringIO.new(text), 'text/plain')
+      client.files_upload(channels: channel, title:, file:, filename:, filetype: 'text')
     end
   end
 end
