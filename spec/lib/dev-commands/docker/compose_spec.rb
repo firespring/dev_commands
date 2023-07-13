@@ -24,6 +24,10 @@ describe Dev::Docker::Compose do
     )
   end
 
+  before :each do
+    allow(described_class).to receive(:version).and_return('2.15.0')
+  end
+
   describe '.initialize' do
     subject { instance }
 
