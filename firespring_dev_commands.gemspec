@@ -31,4 +31,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'libxml-ruby', '4.1.1'
   s.add_dependency 'public_suffix', '5.0.1'
   s.add_dependency 'rake', '~> 13.0.6'
+  s.add_dependency 'slack-ruby-client', '~> 2.1.0'
 end
