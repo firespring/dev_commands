@@ -14,7 +14,7 @@ module Dev
         Dotenv.load(CONFIG_FILE) if File.exist?(CONFIG_FILE)
 
         ::Slack.configure do |c|
-          c.token = ENV.fetch('SLACK_API_TOKEN')
+          c.token = ENV.fetch('SLACK_API_TOKEN', nil)
           c.logger = LOG if ENV['ENABLE_SLACK_DEBUG'].to_s.strip == 'true'
         end
       end
