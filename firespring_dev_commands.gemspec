@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.summary = 'Development environment maintenance command library'
   s.description = 'Ruby library for creating/maintaining your development environment'
   s.homepage = 'https://github.com/firespring/dev-commands-ruby'
-  s.required_ruby_version = '>= 3.2'
+  s.required_ruby_version = '>= 3.1'
   s.author = 'Firespring'
   s.files = Dir['lib/**/*.rb', 'LICENSE', 'README.md']
   s.license = 'MIT'
