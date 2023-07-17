@@ -10,7 +10,7 @@ module Dev
       # Yields that config object to any given block
       # Returns the resulting config object
       def self.config
-        @config ||= Config.new(default_login_role_name: Dev::Aws::DEFAULT_LOGIN_ROLE_NAME)
+        @config ||= Config.new({default_login_role_name: Dev::Aws::DEFAULT_LOGIN_ROLE_NAME})
         yield(@config) if block_given?
         @config
       end
