@@ -45,7 +45,7 @@ module Dev
         role = profileini['role_arn'] || defaultini['role_arn']
         # NOTE: We supported role name for a period of time but we are switching back to role_arn.
         #       Leaving this here for a period of time until it can be deprecated
-        role = "arn:aws:iam::#{account}:role/#{profileini['role_name'] || defaultini['role_name']}" unless role
+        role ||= "arn:aws:iam::#{account}:role/#{profileini['role_name'] || defaultini['role_name']}"
         # TODO: role_name is deprecated. Eventually, we should remove the above line
 
         session_name = profileini['role_session_name'] || defaultini['role_session_name']
