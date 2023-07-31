@@ -42,9 +42,11 @@ module Dev
         serial = "arn:aws:iam::#{Dev::Aws::Account.new.root.id}:mfa/#{serial}" if serial
         serial ||= profileini['mfa_serial'] || defaultini['mfa_serial']
 
-        role = profileini['role_name'] || defaultini['role_name']
-        role = "arn:aws:iam::#{account}:role/#{role}" if role
-        role ||= profileini['role_arn'] || defaultini['role_arn']
+        role = profileini['role_arn'] || defaultini['role_arn']
+        # NOTE: We supported role name for a period of time but we are switching back to role_arn.
+        #       Leaving this here for a period of time until it can be deprecated
+        role ||= "arn:aws:iam::#{account}:role/#{profileini['role_name'] || defaultini['role_name']}"
+        # TODO: role_name is deprecated. Eventually, we should remove the above line
 
         session_name = profileini['role_session_name'] || defaultini['role_session_name']
         session_duration = profileini['session_duration'] || defaultini['session_duration']
@@ -72,10 +74,10 @@ module Dev
       # Returns the config ini file
       # Runs the setup for our current account if it's not already setup
       def setup_cfgini(account)
-        cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
+        cfgini = Dev::Aws::Account.config_ini
         unless cfgini.has_section?("profile #{account}")
           Dev::Aws::Account.new.write!(account)
-          cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
+          cfgini = Dev::Aws::Account.config_ini
         end
         cfgini
       end
