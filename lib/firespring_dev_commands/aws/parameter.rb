@@ -27,6 +27,21 @@ module Dev
       rescue ::Aws::SSM::Errors::ParameterNotFound
         raise "parameter #{name} does not exist in #{Dev::Aws::Profile.new.current}"
       end
+
+      # TODO: Add logic for if there's more
+      def list(path, recursive: true, with_decryption: true)
+        client.get_parameters_by_path(
+          path: path,
+          recursive: recursive,
+          with_decryption: with_decryption
+        )&.parameters
+      end
+
+      def put(name, value, **params)
+        params[:type] ||= 'String'
+        params[:overwrite] ||= true
+        client.put_parameter(name: name, value: value, **params)
+      end
     end
   end
 end
