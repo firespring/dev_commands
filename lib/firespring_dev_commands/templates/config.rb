@@ -71,7 +71,17 @@ module Dev
                     params[:key_id] = Dev::Aws::Parameter.new.get_value("#{path}/kms/id")
                   end
 
-                  message = _set_confirmation_message(param_path, old_value.value, old_value.type, new_value, params[:type])
+                  message = 'This will change '.light_green +
+                            param_path.light_yellow +
+                            ' from "'.light_green +
+                            old_value.value.light_yellow +
+                            '" ('.light_green +
+                            old_value.type.light_yellow +
+                            ') to "'.light_green +
+                            new_value.light_yellow +
+                            '" ('.light_green +
+                            params[:type].light_yellow +
+                            '). Continue'.light_green
                   Dev::Common.new.with_confirmation(message, color_message: false) do
                     Dev::Aws::Parameter.new.put(param_path, new_value, **params)
                   end
@@ -81,21 +91,6 @@ module Dev
           end
         end
         # rubocop:enable Metrics/MethodLength
-
-        # Create the confirmation message text
-        def _set_confirmation_message(path, old_value, old_value_type, new_value, new_value_type)
-          'This will change '.light_green +
-            path.light_yellow +
-            ' from "'.light_green +
-            old_value.light_yellow +
-            '" ('.light_green +
-            old_value_type.light_yellow +
-            ') to "'.light_green +
-            new_value.light_yellow +
-            '" ('.light_green +
-            new_value_type.light_yellow +
-            '). Continue'.light_green
-        end
       end
     end
   end
