@@ -30,7 +30,7 @@ Dev::EndOfLife.config do |c|
   c.product_versions = [
     Dev::EndOfLife::ProductVersion.new('debian', '11', 'base OS version running in the container we use for test/package'),
     Dev::EndOfLife::ProductVersion.new('docker-engine', '23.0', 'the docker version running in the container we use for test/package'),
-    Dev::EndOfLife::ProductVersion.new('ruby', '3.2', 'the version of ruby running in the container we use for test/package')
+    Dev::EndOfLife::ProductVersion.new('ruby', '3.1', 'the version of ruby running in the container we use for test/package')
   ]
 end
 Dev::Template::Eol.new
