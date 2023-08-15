@@ -11,6 +11,10 @@ module Dev
       # The local file where temporary credentials are stored
       CONFIG_FILE = "#{Dev::Aws::CONFIG_DIR}/credentials".freeze
 
+      def self.config_ini
+        IniFile.new(filename: CONFIG_FILE, default: 'default')
+      end
+
       # The account the profile is currently logged in to
       def logged_in_account
         ::Aws::STS::Client.new.get_caller_identity.account
@@ -72,7 +76,7 @@ module Dev
         puts 'Configuring default credential values'
 
         # Write access key / secret key in the credentials file
-        credini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/credentials", default: 'default')
+        credini = self.class.config_ini
         defaultini = credini['default']
 
         access_key_default = defaultini['aws_access_key_id']
@@ -87,7 +91,7 @@ module Dev
       # Write Aws account specific settings to the credentials file
       def write!(account, creds)
         # Write access key / secret key / session token in the credentials file
-        credini = IniFile.new(filename: CONFIG_FILE, default: 'default')
+        credini = self.class.config_ini
         defaultini = credini[account]
 
         defaultini['aws_access_key_id'] = creds.access_key_id
@@ -132,7 +136,7 @@ module Dev
         return unless File.exist?(CONFIG_FILE)
 
         # Otherwise load access key / secret key / session token from the credentials file into the environment
-        credini = IniFile.new(filename: CONFIG_FILE, default: 'default')
+        credini = self.class.config_ini
         profile_credentials = credini[Dev::Aws::Profile.new.current]
         return unless profile_credentials
 

@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'libxml-ruby', '3.2.1' # Required to support Windows
   s.add_dependency 'public_suffix', '5.0.0' # Pinned because moving to 5.0.1 causes issues in other projects
   s.add_dependency 'rake', '~> 13.0.0'
+  s.add_dependency 'slack-ruby-client', '~> 2.1.0'
 
   # Dev/Test dependencies
   s.add_development_dependency 'builder', '~> 3.2.4'

@@ -23,6 +23,10 @@ module Dev
       # The name of the file containing the Aws settings
       CONFIG_FILE = "#{Dev::Aws::CONFIG_DIR}/config".freeze
 
+      def self.config_ini
+        IniFile.new(filename: CONFIG_FILE, default: 'default')
+      end
+
       # TODO: registry is deprecated and should be removed on the next major release
       attr_accessor :root, :children, :default, :registry, :ecr_registry_ids
 
@@ -75,7 +79,7 @@ module Dev
         puts 'Configuring default login values'
 
         # Write region and mfa serial to config file
-        cfgini = IniFile.new(filename: "#{Dev::Aws::CONFIG_DIR}/config", default: 'default')
+        cfgini = self.class.config_ini
         defaultini = cfgini['default']
 
         region_default = defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
@@ -101,7 +105,7 @@ module Dev
       # Setup Aws account specific settings
       def setup!(account)
         # Run base setup if it doesn't exist
-        Rake::Task['aws:configure:default'].invoke unless File.exist?(CONFIG_FILE)
+        Rake::Task['aws:configure:default'].invoke unless File.exist?(CONFIG_FILE) && self.class.config_ini.has_section?('default')
 
         puts
         puts "Configuring #{account} login values"
@@ -115,7 +119,7 @@ module Dev
         raise 'Configure default account settings first (rake aws:configure:default)' unless File.exist?(CONFIG_FILE)
 
         # Parse the ini file and load values
-        cfgini = IniFile.new(filename: CONFIG_FILE, default: 'default')
+        cfgini = self.class.config_ini
         defaultini = cfgini['default']
         profileini = cfgini["profile #{account}"]
 
@@ -124,13 +128,21 @@ module Dev
         region_default = profileini['region'] || defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         profileini['region'] = Dev::Common.new.ask('Default region name', region_default)
 
-        # NOTE: We had an old config for "role_arn" which included the entire arn. We deprecated that config since
-        #       it made it much more difficult to switch between different accounts.
-        role_name_default = profileini['role_name'] || profileini['role_arn']&.split(%r{role/})&.last || self.class.config.default_login_role_name
-        profileini['role_name'] = Dev::Common.new.ask('Default role name', role_name_default)
-        # TODO: role_arn is deprecated. Eventually, we should delete the role_arn entry from the config. Leaving it for now
+        # NOTE: Turns out the role_arn is needed by the aws cli so we are changing directions here. Eventually we should remove the role_name
+        #       from the ini files and only store the role arn. However we need to still keep the functinoality so that the user is only asked
+        #       for the role name - not the entire arn
+        role_name_default = if profileini['role_name']
+                              profileini['role_name']
+                            elsif profileini['role_arn']
+                              profileini['role_arn']&.split(%r{role/})&.last
+                            else
+                              self.class.config.default_login_role_name
+                            end
+        role_name = Dev::Common.new.ask('Default role name', role_name_default)
+        profileini['role_arn'] = "arn:aws:iam::#{account}:role/#{role_name}"
+        # TODO: role_name is deprecated. Eventually, we should delete the role_name entry from the config. Leaving it for now
         #       because some projects may be using older versions of the dev_commands library
-        # profileini.delete('role_arn')
+        # profileini.delete('role_name')
 
         cfgini.write
       end
