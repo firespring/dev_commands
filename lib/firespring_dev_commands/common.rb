@@ -89,8 +89,8 @@ module Dev
       true
     end
 
-    # Remove all leading non '{' characters
-    # Remove all trailing non '}' characters
+    # Remove all leading non left-curly-brace characters
+    # Remove all trailing non right-curly-brace characters
     def strip_non_json(str)
       str.sub(/\A[^{]*{/m, '{').sub(/}[^}]*\z/m, '}')
     end

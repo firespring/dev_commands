@@ -11,6 +11,7 @@ module Dev
       # The local file where temporary credentials are stored
       CONFIG_FILE = "#{Dev::Aws::CONFIG_DIR}/credentials".freeze
 
+      # Returns the config ini file associated with this object
       def self.config_ini
         IniFile.new(filename: CONFIG_FILE, default: 'default')
       end
