@@ -69,6 +69,13 @@ module Dev
         @state = FAILED
       end
 
+      # Get the cloudformation stack
+      def exist?
+        !client.describe_stacks(stack_name: name).stacks.empty?
+      rescue ::Aws::CloudFormation::Errors::ValidationError
+        false
+      end
+
       # Update the cloudformation stack
       def update(should_wait: true)
         # Call upload function to get the s3 url

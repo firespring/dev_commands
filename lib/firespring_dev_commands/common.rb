@@ -40,8 +40,10 @@ module Dev
     # Wraps a block of code in a y/n question.
     # If the user answers 'y' then the block is executed.
     # If the user answers 'n' then the block is skipped.
-    def with_confirmation(message, default = 'y')
-      print "\n  #{message}? ".light_green
+    def with_confirmation(message, default = 'y', color_message: true)
+      message = "\n  #{message}? "
+      message = message.light_green if color_message
+      print message
       print '('.light_green << 'y'.light_yellow << '/'.light_green << 'n'.light_yellow << ') '.light_green
 
       answer = default
@@ -87,8 +89,8 @@ module Dev
       true
     end
 
-    # Remove all leading non '{' characters
-    # Remove all trailing non '}' characters
+    # Remove all leading non left-curly-brace characters
+    # Remove all trailing non right-curly-brace characters
     def strip_non_json(str)
       str.sub(/\A[^{]*{/m, '{').sub(/}[^}]*\z/m, '}')
     end

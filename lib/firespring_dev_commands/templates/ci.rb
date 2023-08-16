@@ -31,6 +31,8 @@ module Dev
 
                 # Start create on all stacks without waiting so they are created in parallel
                 cloudformations.each do |cloudformation|
+                  next if cloudformation.exist?
+
                   cloudformation.create(should_wait: false)
                 end
                 LOG.info 'Waiting for all stacks to finish create'
@@ -62,6 +64,8 @@ module Dev
 
                 # Start update on all stacks without waiting so they are updated in parallel
                 cloudformations.each do |cloudformation|
+                  next unless cloudformation.exist?
+
                   cloudformation.update(should_wait: false)
                 end
                 LOG.info 'Waiting for all stacks to finish update'
@@ -93,6 +97,8 @@ module Dev
 
                 # Start delete on all stacks without waiting so they are deleted in parallel
                 cloudformations.each do |cloudformation|
+                  next unless cloudformation.exist?
+
                   cloudformation.delete(should_wait: false)
                 end
                 LOG.info 'Waiting for all stacks to finish delete'
