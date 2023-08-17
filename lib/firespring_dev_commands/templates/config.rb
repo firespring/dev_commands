@@ -32,8 +32,10 @@ module Dev
                 desc "List all #{application} configs"
                 task list: %w(init) do
                   puts
+                  puts "Listing all parameters which start with #{path_prefix}:".light_green
+                  puts
                   Dev::Aws::Parameter.new.list(path_prefix).each do |it|
-                    puts "  #{it.name} => #{it.value} (#{it.type})"
+                    puts "  #{it.name.light_white} => #{it.value.light_white} (#{it.type})"
                   end
                   puts
                 end
