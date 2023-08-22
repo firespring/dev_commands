@@ -6,11 +6,14 @@ module Dev
     class Application
       # Contains rake tasks for displaying and setting application variables in parameter store
       class Config < Dev::Template::ApplicationInterface
-        attr_reader :path
+        attr_reader :path_prefix, :key_parameter_path
 
-        # Allow for custom config path for the application
-        def initialize(name, path, exclude: [])
-          @path = path
+        # Allow for custom config path_prefix for the application
+        # Allow for custom key parameter path (otherwise base it off the path prefix)
+        def initialize(name, path_prefix, key_parameter_path: nil, exclude: [])
+          @path_prefix = path_prefix
+          @key_parameter_path = key_parameter_path || "#{path_prefix}/kms/id"
+
           super(name, exclude:)
         end
 
@@ -18,7 +21,7 @@ module Dev
         def create_list_task!
           # Have to set a local variable to be accessible inside of the instance_eval block
           application = @name
-          path = @path
+          path_prefix = @path_prefix
           exclude = @exclude
 
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -29,8 +32,10 @@ module Dev
                 desc "List all #{application} configs"
                 task list: %w(init) do
                   puts
-                  Dev::Aws::Parameter.new.list(path).each do |it|
-                    puts "  #{it.name} => #{it.value} (#{it.type})"
+                  puts "Listing all parameters which start with #{path_prefix}:".light_green
+                  puts
+                  Dev::Aws::Parameter.new.list(path_prefix).each do |it|
+                    puts "  #{it.name.light_white} => #{it.value.light_white} (#{it.type})"
                   end
                   puts
                 end
@@ -44,7 +49,8 @@ module Dev
         def create_set_task!
           # Have to set a local variable to be accessible inside of the instance_eval block
           application = @name
-          path = @path
+          path_prefix = @path_prefix
+          key_parameter_path = @key_parameter_path
           exclude = @exclude
 
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -58,7 +64,7 @@ module Dev
                      "\n\toptionally specify ENCRYPT=true to change a String type to a SecureString type"
                 task set: %w(ensure_aws_credentials) do
                   raise 'NAME is required' if ENV['NAME'].to_s.strip.blank?
-                  raise 'NAME is not found in this apps parameters' if Dev::Aws::Parameter.new.list(path).none? { |it| it.name == ENV['NAME'] }
+                  raise 'NAME is not found in this apps parameters' if Dev::Aws::Parameter.new.list(path_prefix).none? { |it| it.name == ENV['NAME'] }
                   raise 'VALUE is required' if ENV['VALUE'].to_s.strip.blank?
 
                   param_path = ENV.fetch('NAME', nil)
@@ -68,7 +74,7 @@ module Dev
                   params = {type: 'String'}
                   if ENV['ENCRYPT'].to_s.strip == 'true' || old_value.type == 'SecureString'
                     params[:type] = 'SecureString'
-                    params[:key_id] = Dev::Aws::Parameter.new.get_value("#{path}/kms/id")
+                    params[:key_id] = Dev::Aws::Parameter.new.get_value(key_parameter_path)
                   end
 
                   message = 'This will change '.light_green +
