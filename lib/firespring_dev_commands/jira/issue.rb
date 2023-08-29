@@ -39,6 +39,7 @@ module Dev
       private def in_progress_history
         raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
 
+        # Find the first instance in the histoy where the status moved to "In Progress"
         @in_progress_history ||= histories.reverse.find { |history| history.items.find { |item| item['fieldId'] == 'status' && item['toString'] == 'In Progress' } }
         raise 'unable to find "In Progress" history entry needed to calculate cycle time' unless @in_progress_history
 
@@ -48,7 +49,8 @@ module Dev
       private def in_review_history
         raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
 
-        @in_review_history = histories.reverse.find { |history| history.items.find { |item| item['fieldId'] == 'status' && item['toString'] == 'In Review' } }
+        # Find the first instance in the histoy where the status moved to "In Review"
+        @in_review_history ||= histories.reverse.find { |history| history.items.find { |item| item['fieldId'] == 'status' && item['toString'] == 'In Review' } }
         raise 'unable to find "In Review" history entry needed to calculate cycle time' unless @in_review_history
 
         @in_review_history
@@ -57,7 +59,8 @@ module Dev
       private def closed_history
         raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
 
-        @closed_history = histories.find { |history| history.items.find { |item| item['fieldId'] == 'status' && item['toString'] == 'Closed' } }
+        # Find the last instance in the histoy where the status moved to "Closed"
+        @closed_history ||= histories.find { |history| history.items.find { |item| item['fieldId'] == 'status' && item['toString'] == 'Closed' } }
         raise 'unable to find "Closed" history entry needed to calculate cycle time' unless @closed_history
 
         @closed_history
