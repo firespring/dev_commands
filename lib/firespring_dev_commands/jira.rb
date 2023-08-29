@@ -9,15 +9,16 @@ module Dev
     # "user_lookup_list" should be an array of Jira::User objects representing the usernames, ids, etc for all jira users
     #    This is a bit clumsy but currently the jira api only returns the user id with issues
     #    and there is no way to query this information from Jira directly.
-    Config = Struct.new(:username, :token, :url, :points_field_name, :user_lookup_list, :read_timeout, :http_debug) do
+    Config = Struct.new(:username, :token, :url, :points_field_name, :expand, :user_lookup_list, :read_timeout, :http_debug) do
       def initialize
         self.username = nil
         self.token = nil
         self.url = nil
         self.points_field_name = nil
+        self.expand = []
         self.user_lookup_list = []
         self.read_timeout = 120
-        self.http_debug = false
+        self.http_debug = true
       end
     end
 
@@ -62,15 +63,16 @@ module Dev
     def issues(jql, &)
       start_at = 0
       max_results = 100
+      expand = self.class.config.expand
 
       # Query Jira and yield all issues it returns
-      issues = @client.Issue.jql(jql, start_at:, max_results:)
+      issues = @client.Issue.jql(jql, start_at:, max_results:, expand:)
       issues.map { |data| Issue.new(data) }.each(&)
 
       # If we returned the max_results then there may be more - add the max results to where we start at and query again
       while issues.length >= max_results
         start_at += max_results
-        issues = @client.Issue.jql(jql, start_at:, max_results:)
+        issues = @client.Issue.jql(jql, start_at:, max_results:, expand:)
         issues.map { |data| Issue.new(data) }.each(&)
       end
     end
