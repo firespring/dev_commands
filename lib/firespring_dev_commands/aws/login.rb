@@ -14,7 +14,7 @@ module Dev
         account ||= Dev::Aws::Account.new.select
 
         # Authorize if our creds are not active
-        authorize!(account) unless Dev::Aws::Credentials.new.active?(account)
+        authorize!(account)
 
         # Ensure the local env is pointed to the profile we selected
         Dev::Aws::Profile.new.write!(account)
@@ -38,9 +38,9 @@ module Dev
 
         region = profileini['region'] || defaultini['region'] || Dev::Aws::DEFAULT_REGION
 
-        # Explicitly set the region to the one we are logging in to. Then exit if we are already logged in.
+        # Explicitly set the region to the one we are logging in to. Then return if we are already logged in.
         # This is to fix an issue where you are attempting to log in to an account in a different region.
-        # We were seeing issue where it would still be attempting to use the old region until the process exited
+        # Without this fix it would still be attempting to use the old region until the process exited
         ENV['AWS_DEFAULT_REGION'] = region
         return if Dev::Aws::Credentials.new.active?(account)
 
