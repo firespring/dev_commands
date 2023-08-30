@@ -38,6 +38,12 @@ module Dev
 
         region = profileini['region'] || defaultini['region'] || Dev::Aws::DEFAULT_REGION
 
+        # Explicitly set the region to the one we are logging in to. Then exit if we are already logged in.
+        # This is to fix an issue where you are attempting to log in to an account in a different region.
+        # We were seeing issue where it would still be attempting to use the old region until the process exited
+        ENV['AWS_DEFAULT_REGION'] = region
+        return if Dev::Aws::Credentials.new.active?(account)
+
         serial = profileini['mfa_serial_name'] || defaultini['mfa_serial_name']
         serial = "arn:aws:iam::#{Dev::Aws::Account.new.root.id}:mfa/#{serial}" if serial
         serial ||= profileini['mfa_serial'] || defaultini['mfa_serial']
