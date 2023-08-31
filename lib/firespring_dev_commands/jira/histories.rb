@@ -1,5 +1,3 @@
-require 'pry'
-
 module Dev
   class Jira
     class Histories
