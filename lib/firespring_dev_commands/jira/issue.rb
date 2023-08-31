@@ -23,12 +23,12 @@ module Dev
 
       def cycle_time
         # Calculate the difference and convert to days
-        ((last_closed_history.created - first_in_progress_history.created) / 60 / 60 / 24).round(2)
+        ((last_closed_history.created - last_in_progress_history.created) / 60 / 60 / 24).round(2)
       end
 
       def in_progress_cycle_time
         # Calculate the difference and convert to days
-        ((first_in_review_history.created - first_in_progress_history.created) / 60 / 60 / 24).round(2)
+        ((first_in_review_history.created - last_in_progress_history.created) / 60 / 60 / 24).round(2)
       end
 
       def in_review_cycle_time
@@ -36,15 +36,15 @@ module Dev
         ((last_closed_history.created - first_in_review_history.created) / 60 / 60 / 24).round(2)
       end
 
-      private def first_in_progress_history
+      private def last_in_progress_history
         raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
 
         # Find the first instance in the histoy where the status moved to "In Progress"
         @in_progress_history ||= histories.select do |history|
           history.items.find do |item|
-            item['fieldId'] == 'status' && item['toString'] == 'In Progress'
+            item['fieldId'] == 'status' && item['fromString'] == 'Open' && item['toString'] == 'In Progress'
           end
-        end.min_by(&:created)
+        end.max_by(&:created)
         raise 'unable to find "In Progress" history entry needed to calculate cycle time' unless @in_progress_history
 
         @in_progress_history
