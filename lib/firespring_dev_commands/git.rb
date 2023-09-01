@@ -378,7 +378,7 @@ module Dev
     # Clones the repo_name into the dir
     # Optionally specify a repo_org
     # Optionally specify a branch to check out (defaults to the repository default branch)
-    def clone_repo(dir:, repo_name:, repo_org: 'firespring', branch: nil)
+    def clone_repo(dir:, repo_name:, repo_org: 'firespring', branch: nil, depth: nil)
       if Dir.exist?("#{dir}/.git")
         puts "#{dir} already cloned".light_green
         return
@@ -390,6 +390,7 @@ module Dev
 
       opts = {}
       opts[:branch] = branch unless branch.to_s.strip.empty?
+      opts[:depth] = depth unless depth.to_s.strip.empty?
       g = ::Git.clone(ssh_repo_url(repo_name, repo_org), dir, opts)
       g.fetch('origin', prune: true)
     end
