@@ -18,7 +18,7 @@ module Dev
         self.expand = []
         self.user_lookup_list = []
         self.read_timeout = 120
-        self.http_debug = true
+        self.http_debug = false
       end
     end
 
