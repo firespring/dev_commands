@@ -203,7 +203,7 @@ module Dev
 
     # Checks out the given branch in the given repo
     # Defaults to the current directory
-    def checkout(branch, dir: default_project_dir)
+    def checkout(branch, dir: default_project_dir, raise_errors: false)
       raise 'branch is required' if branch.to_s.strip.empty?
       return unless File.exist?(dir)
 
@@ -224,12 +224,14 @@ module Dev
       indent g.pull('origin', actual_branch)
       true
     rescue ::Git::GitExecuteError => e
+      raise e if raise_errors
+
       print_errors(e.message)
       false
     end
 
     # Create the given branch in the given repo
-    def create_branch(branch, dir: default_project_dir)
+    def create_branch(branch, dir: default_project_dir, raise_errors: false)
       raise 'branch is required' if branch.to_s.strip.empty?
       raise "refusing to create protected branch '#{branch}'" if %w(master develop).any?(branch.to_s.strip)
       return unless File.exist?(dir)
@@ -240,7 +242,7 @@ module Dev
       g = ::Git.open(dir)
       g.fetch('origin', prune: true)
 
-      puts "Fetching the latest changes for base branch #{staging_branch}"
+      puts "Fetching the latest changes for base branch \"#{staging_branch}\""
       g.checkout(staging_branch)
       g.pull('origin', staging_branch)
 
@@ -251,6 +253,19 @@ module Dev
       g.config("branch.#{branch}.merge", "refs/heads/#{branch}")
       puts
     rescue ::Git::GitExecuteError => e
+      raise e if raise_errors
+
+      print_errors(e.message)
+      false
+    end
+
+    def add(*paths, dir: default_project_dir, raise_errors: false)
+      g = ::Git.open(dir)
+      indent g.add(paths)
+      true
+    rescue ::Git::GitExecuteError => e
+      raise e if raise_errors
+
       print_errors(e.message)
       false
     end
@@ -277,7 +292,7 @@ module Dev
     end
 
     # Merge the given branch into the given repo
-    def merge(branch, dir: default_project_dir)
+    def merge(branch, dir: default_project_dir, raise_errors: false)
       raise 'branch is required' if branch.to_s.strip.empty?
       return unless File.exist?(dir)
 
@@ -296,6 +311,8 @@ module Dev
       indent g.merge(branch)
       true
     rescue ::Git::GitExecuteError => e
+      raise e if raise_errors
+
       print_errors(e.message)
       false
     end
@@ -320,7 +337,7 @@ module Dev
     end
 
     # Pull the given repo
-    def pull(dir: default_project_dir)
+    def pull(dir: default_project_dir, raise_errors: false)
       return unless File.exist?(dir)
 
       g = ::Git.open(dir)
@@ -331,6 +348,8 @@ module Dev
       indent g.pull('origin', branch)
       true
     rescue ::Git::GitExecuteError => e
+      raise e if raise_errors
+
       print_errors(e.message)
       false
     end
@@ -355,7 +374,7 @@ module Dev
     end
 
     # Push the given repo
-    def push(dir: default_project_dir)
+    def push(dir: default_project_dir, raise_errors: false)
       return unless File.exist?(dir)
 
       g = ::Git.open(dir)
@@ -366,6 +385,8 @@ module Dev
       indent g.push('origin', branch)
       true
     rescue ::Git::GitExecuteError => e
+      raise e if raise_errors
+
       print_errors(e.message)
       false
     end
