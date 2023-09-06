@@ -3,9 +3,9 @@ module Dev
     # Contains information and methods representing a Jira issue
     class Issue
       # Issue subtypes which do not map to a story type
-      NON_STORY_TYPES = ['review', 'sub-task', 'code review sub-task', 'pre-deploy sub-task', 'deploy sub-task', 'devops sub-task'].freeze
+      NON_STORY_TYPES = ['epic', 'review', 'sub-task', 'code review sub-task', 'pre-deploy sub-task', 'deploy sub-task', 'devops sub-task'].freeze
 
-      attr_accessor :data, :project, :id, :title, :points, :assignee, :resolved_date
+      attr_accessor :data, :project, :id, :title, :points, :assignee, :resolved_date, :histories, :last_in_progress_history, :first_in_review_history, :last_closed_history
 
       def initialize(data)
         @data = data
@@ -15,10 +15,71 @@ module Dev
         @points = calculate_points(data)
         @assignee = Jira::User.lookup(data.assignee&.accountId)
         @resolved_date = data.resolutiondate
+        @histories = Jira::Histories.populate(data)
+        @last_in_progress_history = nil
+        @first_in_review_history = nil
+        @last_closed_history = nil
+      end
+
+      def cycle_time
+        # Calculate the difference and convert to days
+        ((last_closed_history.created - last_in_progress_history.created) / 60 / 60 / 24).round(2)
+      end
+
+      def in_progress_cycle_time
+        # Calculate the difference and convert to days
+        ((first_in_review_history.created - last_in_progress_history.created) / 60 / 60 / 24).round(2)
+      end
+
+      def in_review_cycle_time
+        # Calculate the difference and convert to days
+        ((last_closed_history.created - first_in_review_history.created) / 60 / 60 / 24).round(2)
+      end
+
+      private def last_in_progress_history
+        raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
+
+        # Find the first instance in the histoy where the status moved to "In Progress"
+        @last_in_progress_history ||= histories.select do |history|
+          history.items.find do |item|
+            item['fieldId'] == 'status' && item['fromString'] == 'Open' && item['toString'] == 'In Progress'
+          end
+        end.max_by(&:created)
+        raise 'unable to find "In Progress" history entry needed to calculate cycle time' unless @last_in_progress_history
+
+        @last_in_progress_history
+      end
+
+      private def first_in_review_history
+        raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
+
+        # Find the first instance in the histoy where the status moved to "In Review"
+        @first_in_review_history ||= histories.select do |history|
+          history.items.find do |item|
+            item['fieldId'] == 'status' && item['toString'] == 'In Review'
+          end
+        end.min_by(&:created)
+        raise 'unable to find "In Review" history entry needed to calculate cycle time' unless @first_in_review_history
+
+        @first_in_review_history
+      end
+
+      private def last_closed_history
+        raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
+
+        # Find the last instance in the histoy where the status moved to "Closed"
+        @last_closed_history ||= histories.select do |history|
+          history.items.find do |item|
+            item['fieldId'] == 'status' && item['toString'] == 'Closed'
+          end
+        end.max_by(&:created)
+        raise 'unable to find "Closed" history entry needed to calculate cycle time' unless @last_closed_history
+
+        @last_closed_history
       end
 
       # Returns the value of the jira points field or 0 if the field is not found
-      def calculate_points(data)
+      private def calculate_points(data)
         return data.send(Dev::Jira.config.points_field_name).to_i if Dev::Jira.config.points_field_name && data.respond_to?(Dev::Jira.config.points_field_name)
 
         0
