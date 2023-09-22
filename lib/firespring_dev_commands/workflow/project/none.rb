@@ -2,28 +2,12 @@ module Dev
   module Workflow
     module Project
       class None < Base
-        attr_accessor :credentials
-
         def initialize
           @credentials = Credentials.new
-        end
-
-        def name
-          self.class.name.demodulize
-        end
-      end
-    end
-  end
-end
-
-module Dev
-  module Workflow
-    module Project
-      class None
-        class Credentials < Base
-          def active?
-            true
-          end
+          @start = Start.new
+          @review = Review.new
+          @delete = Delete.new
+          @finish = Finish.new
         end
       end
     end

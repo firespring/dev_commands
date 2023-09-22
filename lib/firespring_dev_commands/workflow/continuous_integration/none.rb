@@ -1,6 +1,6 @@
 module Dev
   module Workflow
-    module Cicd
+    module ContinuousIntegration
       class None < Base
         attr_accessor :credentials
 
@@ -18,7 +18,7 @@ end
 
 module Dev
   module Workflow
-    module Cicd
+    module ContinuousIntegration
       class None
         class Credentials < Base
           def active?

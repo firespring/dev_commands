@@ -1,16 +1,28 @@
 module Dev
   module Workflow
-    module Cicd
+    module ContinuousIntegration
       class Base
         def name
-            raise 'not implemented'
+          raise 'not implemented'
         end
-      end
 
-      class Credentials
-        class Base
-          def active?
-            raise 'not implemented'
+        class Start
+        end
+
+        class Review
+        end
+
+        class Delete
+        end
+
+        class Finish
+        end
+
+        class Credentials
+          class Base
+            def active?
+              raise 'not implemented'
+            end
           end
         end
       end

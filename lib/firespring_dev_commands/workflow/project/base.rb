@@ -2,8 +2,14 @@ module Dev
   module Workflow
     module Project
       class Base
+        attr_accessor :credentials, :start, :review, :delete, :finish
+
+        def initialize
+          raise 'not implemented'
+        end
+
         def name
-            raise 'not implemented'
+          self.class.name.demodulize
         end
       end
 
@@ -12,6 +18,26 @@ module Dev
           def active?
             raise 'not implemented'
           end
+        end
+      end
+
+      class Start
+        class Base
+        end
+      end
+
+      class Review
+        class Base
+        end
+      end
+
+      class Delete
+        class Base
+        end
+      end
+
+      class Finish
+        class Base
         end
       end
     end
