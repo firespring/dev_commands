@@ -5,11 +5,7 @@ module Dev
         attr_accessor :credentials, :start, :review, :delete, :finish
 
         def initialize
-          @credentials = Credentials.new
-          @start = Start.new
-          @review = Review.new
-          @delete = Delete.new
-          @finish = Finish.new
+          raise 'not implemented'
         end
 
         def name

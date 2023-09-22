@@ -2,19 +2,12 @@ module Dev
   module Workflow
     module SourceControl
       class None < Base
-      end
-    end
-  end
-end
-
-module Dev
-  module Workflow
-    module Project
-      class None
-        class Credentials < Base
-#          def active?
-#            true
-#          end
+        def initialize
+          @credentials = None::Credentials.new
+          @start = None::Start.new
+          @review = None::Review.new
+          @delete = None::Delete.new
+          @finish = None::Finish.new
         end
       end
     end
