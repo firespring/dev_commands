@@ -2,7 +2,7 @@ module Dev
   module Workflow
     module Project
       class None
-        class Delete < Base
+        class Delete < Delete::Base
         end
       end
     end

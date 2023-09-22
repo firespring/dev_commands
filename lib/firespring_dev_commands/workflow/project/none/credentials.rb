@@ -2,7 +2,7 @@ module Dev
   module Workflow
     module Project
       class None
-        class Credentials < Base
+        class Credentials < Credentials::Base
           def active?
             true
           end

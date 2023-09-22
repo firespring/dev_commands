@@ -2,7 +2,7 @@ module Dev
   module Workflow
     module Project
       class None
-        class Review < Base
+        class Review < Review::Base
         end
       end
     end

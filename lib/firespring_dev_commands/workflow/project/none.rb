@@ -3,11 +3,11 @@ module Dev
     module Project
       class None < Base
         def initialize
-          @credentials = Credentials.new
-          @start = Start.new
-          @review = Review.new
-          @delete = Delete.new
-          @finish = Finish.new
+          @credentials = None::Credentials.new
+          @start = None::Start.new
+          @review = None::Review.new
+          @delete = None::Delete.new
+          @finish = None::Finish.new
         end
       end
     end
