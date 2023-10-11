@@ -38,7 +38,7 @@ module Dev
 
               project_management.start.prerequisites
               sc_management.start.create_branches
-
+              project_managent.start.update
             end
           end
         end
