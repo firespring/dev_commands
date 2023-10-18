@@ -57,26 +57,137 @@ module Dev
           {Authorization: "TISJWT #{token}"}.merge(addtl_headers)
         end
 
-        def get(path, args: {})
-          # TODO: Figure out how to add args
-
-          response = client.request_get(path, headers)
-          puts response.inspect
+        def get(path, params: {})
+          params = URI.encode_www_form(params)
+          response = client.request_get("#{path}?#{params}", headers)
 
           # Raise an error if we got a non-success from TIS
           raise "error response from TimeInStatus (#{response.code}): #{response.message}" unless response.is_a?(Net::HTTPSuccess)
 
-          puts "RESPONSE IS #{response.body.inspect}"
+          JSON.parse(response.body)
 
-          tis_data = JSON.parse(response.body)
-
-          #        rescue => e
-          #          LOG.error("Error looking up severity for #{cve}: #{e.message}")
-          #          LOG.error('WARNING: Unable to determine severity - ignoring with UNKNOWN')
+          #rescue => e
+          #  LOG.error("Error looking up severity for #{cve}: #{e.message}")
+          #  LOG.error('WARNING: Unable to determine severity - ignoring with UNKNOWN')
         end
 
-        def list(jql = '')
-          get('/rest/list')
+        def list(jql, start_date: '2021-01-01')
+          get(
+            '/rest/list',
+            params: {
+              filterType: 'customjql',
+              customjql: jql,
+              columnsBy: 'statusDuration',
+              multiVisitBehavior: 'first',
+              startDate: start_date,
+              dateRangeField: 'created',
+              calendar: 'normalHours',
+              dayLength: '24HourDays'
+            }
+          )
+        end
+
+        def issue(key)
+          get(
+            '/rest/issue',
+            params: {
+              issueKey: key,
+              columnsBy: 'statusDuration',
+              calendar: 'normalHours'
+            }
+          )
+        end
+
+
+
+        # How do we convert this to objects?
+=begin
+  "table": {
+    "header": {
+      "headerColumns": [
+        {
+          "id": "issuekey",
+          "value": "Key"
+        },
+        {
+          "id": "summary",
+          "value": "Summary"
+        }
+      ],
+      "groupByColumns": [
+
+      ],
+      "fieldColumns": [
+
+      ],
+      "valueColumns": [
+        {
+          "id": "1",
+          "value": "Open",
+          "isConsolidated": false
+        },
+        {
+          "id": "6",
+          "value": "Closed",
+          "isConsolidated": false
+        }
+      ]
+    },
+    "body": {
+      "rows": [
+        {
+          "headerColumns": [
+            {
+              "id": "issuekey",
+              "value": "FDP-45970"
+            },
+            {
+              "id": "summary",
+              "value": "Add cycle time to the dashboards"
+            }
+          ],
+          "groupByColumns": [
+
+          ],
+          "fieldColumns": [
+
+          ],
+          "valueColumns": [
+            {
+              "id": "1",
+              "value": "10314.3828333333", # minutes
+              "raw": "618862970",
+              "count": "1"
+            },
+            {
+              "id": "6",
+              "value": "10104.07285",
+              "raw": "606244371",
+              "count": "1"
+            }
+          ],
+          "currentState": [
+            {
+              "id": "6",
+              "value": "10104.07285",
+              "raw": "606244371"
+            }
+          ]
+        }
+      ]
+    }
+  }=end
+
+
+
+
+        # TODO: Needs to hit the jira url
+        #def status
+        #  get('/rest/api/3/status')
+        #end
+
+        def calendar
+          get('/rest/calendar')
         end
       end
     end
