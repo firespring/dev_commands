@@ -52,6 +52,17 @@ task release: %i(gem:release) do
   LOG.debug 'Releasing all libraries'
 end
 
+task joetest: [:init] do
+  #Dev::Jira::Issue::TimeInStatus.configure do |c|
+  #  c.http_debug = true
+  #end
+
+  #jql = 'project = FDP AND issuetype in (Bug, Epic, "Incident Alert", "Individual Rock", Research, Story) ORDER BY Rank ASC'
+  jql = 'issue=FDP-45970'
+  list = Dev::Jira::Issue::TimeInStatus.new.list(jql)
+  puts JSON.pretty_generate(list)
+end
+
 # Monkeypatch to scope down the available commands
 module Bundler
   class GemHelper
