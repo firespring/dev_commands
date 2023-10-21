@@ -6,15 +6,12 @@ require_relative 'base_interface'
 module Dev
   module Template
     class Workflow < Dev::Template::BaseInterface
-      attr_reader :prefix, :project_management, :sc_management, :neview_management, :cicd_management
+      attr_reader :prefix, :workflow
 
       # Base interface template customized for codepipelines which require a pipeline pattern which will match the pipeline name
-      def initialize(prefix: 'feature', project_management: nil, sc_management: nil, review_management: nil, cicd_management: nil, exclude: [])
+      def initialize(prefix: 'feature', workflow: nil, exclude: [])
         @prefix = prefix || 'feature'
-        @project_management = project_management || Dev::Workflow::Project::None.new
-        @sc_management = sc_management || Dev::Workflow::SourceControl::None.new
-        @review_management = review_management || Dev::Workflow::Review::None.new
-        @cicd_management = cicd_management || Dev::Workflow::ContinuousIntegration::None.new
+        @workflow = workflow || Dev::Workflow::Default.new
 
         super(exclude:)
       end
@@ -23,8 +20,7 @@ module Dev
         # Have to set a local variable to be accessible inside of the instance_eval block
         exclude = @exclude
         prefix = @prefix
-        project_management = @project_management
-        sc_management = @sc_management
+        workflow = @workflow
 
         DEV_COMMANDS_TOP_LEVEL.instance_eval do
           namespace prefix do
@@ -33,12 +29,7 @@ module Dev
             desc 'TODO' \
                  "\n\tmore TODO"
             task start: %w(init) do
-              raise "Unable to authenticate with #{project_management.name}" unless project_management&.credentials&.active?
-              raise "Unable to authenticate with #{sc_management.name}" unless sc_management&.credentials&.active?
-
-              project_management.start.prerequisites
-              sc_management.start.create_branches
-              project_managent.start.update
+              workflow.start
             end
           end
         end

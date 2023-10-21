@@ -89,3 +89,5 @@ module Bundler
   end
 end
 Bundler::GemHelper.install_tasks
+
+Dev::Template::Workflow.new
