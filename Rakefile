@@ -89,3 +89,11 @@ module Bundler
   end
 end
 Bundler::GemHelper.install_tasks
+
+task :joetest do
+  client = Dev::TargetProcess.new
+  query = Dev::TargetProcess::Query.new
+  states = ['In Progress']
+  query << "(EntityState.Name in ('#{states.join("', '")}'))"
+  results = client.get('UserStories', query: query)
+end
