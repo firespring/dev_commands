@@ -64,31 +64,12 @@ module Dev
       }
     end
 
-#    def self.ateam_id
-#      @ateam_id
-#    end
-#
-#    def self.thundercats_id
-#      @thundercats_id
-#    end
-#
-#    def self.design_id
-#      @design_id
-#    end
-#
-#    def self.sbf_qa_id
-#      @sbf_qa_id
-#    end
-#
-#    def self.sbf_role_id
-#      @sbf_role_id
-#    end
-#
-#    def self.sbf_projects
-#      @sbf_projects
-#    end
+    def user_stories(query)
+      stories = get(Dev::TargetProcess::UserStory::PATH, query)
+      stories.map { |it| Dev::TargetProcess::UserStory.new(it) }
+    end
 
-    def get(path, query: Dev::TargetProcess::Query.new)
+    def get(path, query)
       query_string = query.generate
       url = "/api/v1/#{path}"
       url << "?#{URI.encode_www_form(query_string)}" unless query_string.empty?
