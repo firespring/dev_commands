@@ -89,15 +89,3 @@ module Bundler
   end
 end
 Bundler::GemHelper.install_tasks
-
-task :joetest do
-  query = Dev::TargetProcess::Query.new
-  query.filter_by_final
-
-  eow = DateTime.now.beginning_of_week
-  bow = (eow - 1).beginning_of_week
-  query.filter_by_end_dates(bow, eow)
-  puts query.generate
-
-  puts Dev::TargetProcess.new.user_stories(query)
-end

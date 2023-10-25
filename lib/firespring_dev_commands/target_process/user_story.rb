@@ -12,7 +12,7 @@ module Dev
         @description = data['Description']
         @state = data['EntityState']['Name']
         @project = Project.new(data['Project']) if data['Project']
-        @owner = User.new(data['User']) if data['User']
+        @owner = User.new(data['Owner']) if data['Owner']
         @creator = User.new(data['Creator']) if data['Creator']
         @release = Release.new(data['Release']) if data['Release']
         @team = Team.new(data['Team']) if data['Team']
