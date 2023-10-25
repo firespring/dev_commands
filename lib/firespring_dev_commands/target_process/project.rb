@@ -1,13 +1,12 @@
 module Dev
   class TargetProcess
-    class User
-      attr_accessor :id, :type, :name, :login
+    class Project
+      attr_accessor :id, :type, :name
 
       def initialize(data)
         @id = data['Id']
         @type = data['ResourceType']
-        @name = data['FullName']
-        @login = data['Login']
+        @name = data['Name']
       end
     end
   end

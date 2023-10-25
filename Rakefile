@@ -91,9 +91,13 @@ end
 Bundler::GemHelper.install_tasks
 
 task :joetest do
-  client = Dev::TargetProcess.new
   query = Dev::TargetProcess::Query.new
-  states = ['In Progress']
-  query << "(EntityState.Name in ('#{states.join("', '")}'))"
-  results = client.get('UserStories', query: query)
+  query.filter_by_final
+
+  eow = DateTime.now.beginning_of_week
+  bow = (eow - 1).beginning_of_week
+  query.filter_by_end_dates(bow, eow)
+  puts query.generate
+
+  puts Dev::TargetProcess.new.user_stories(query)
 end

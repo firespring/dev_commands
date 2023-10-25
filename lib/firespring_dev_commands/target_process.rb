@@ -65,11 +65,16 @@ module Dev
     end
 
     def user_stories(query, &)
-      stories = get(UserStory::PATH, query)
-      stories.map { |it| UserStory.new(it) }.each(&)
+      [].tap do |ary|
+        get(UserStory::PATH, query) do |result|
+          ary << UserStory.new(result)
+        end
+        ary.each(&)
+      end
     end
 
-    def get(path, query)
+    # TODO: Should we just yield everything here? We can aggregate in calling methods?
+    def get(path, query, &)
       query_string = query.generate
       url = "/api/v1/#{path}"
       url << "?#{URI.encode_www_form(query_string)}" unless query_string.empty?
@@ -80,16 +85,19 @@ module Dev
       parsed_response = JSON.parse(response.body)
       return parsed_response unless parsed_response.key?('Items')
 
-      result = parsed_response['Items']
+      parsed_response['Items'].each(&)
+
       while parsed_response['Next'] do
         response = client.request_get(parsed_response['Next'], headers)
         raise "Error querying #{parsed_response['Next']} [#{query_string}]: #{response.inspect}" unless response.response.is_a?(Net::HTTPSuccess)
 
         parsed_response = JSON.parse(response.body)
-        result.concat(parsed_response['Items'])
+        return parsed_response unless parsed_response.key?('Items')
+
+        parsed_response['Items'].each(&)
       end
 
-      result
+      nil
     end
 
     def self.parse_dot_net_time(string)
