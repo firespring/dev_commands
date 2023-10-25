@@ -41,7 +41,7 @@ module Dev
       def cycle_time
         return 1.0 unless start_date && end_date
 
-        (end_date - start_date).to_f
+        (end_date - start_date).to_f / (60 * 60 * 24)
       end
     end
   end
