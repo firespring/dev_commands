@@ -18,15 +18,6 @@ module Dev
         self.password = ENV.fetch(TP_PASSWORD, nil)
         self.url = ENV.fetch(TP_URL, nil)
         self.http_debug = false
-
-#        SBF_PROJECT_ID=217
-#        @ateam_id = 19003
-#        @thundercats_id = 19002
-#        @thundercats_current_velocity = 0
-#        @design_id = 20749
-#        @sbf_qa_id = 20750
-#        @sbf_role_id = 10
-#        @sbf_projects = ['infrastructure', 'St Baldricks']
       end
     end
 
@@ -58,7 +49,7 @@ module Dev
       @client.verify_mode = OpenSSL::SSL::VERIFY_PEER
       @client.set_debug_output(LOG) if self.class.config.http_debug
       @headers = {
-        'authorization' =>  "Basic #{auth}",
+        'authorization' => "Basic #{auth}",
         'content-type' => 'application/json',
         'accept' => 'application/json'
       }
@@ -73,7 +64,6 @@ module Dev
       end
     end
 
-    # TODO: Should we just yield everything here? We can aggregate in calling methods?
     def get(path, query, &)
       query_string = query.generate
       url = "/api/v1/#{path}"
@@ -87,7 +77,7 @@ module Dev
 
       parsed_response['Items'].each(&)
 
-      while parsed_response['Next'] do
+      while parsed_response['Next']
         response = client.request_get(parsed_response['Next'], headers)
         raise "Error querying #{parsed_response['Next']} [#{query_string}]: #{response.inspect}" unless response.response.is_a?(Net::HTTPSuccess)
 

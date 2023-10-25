@@ -1,9 +1,10 @@
 module Dev
   class TargetProcess
     class UserStory
-      PATH = '/UserStories'
+      PATH = '/UserStories'.freeze
 
-      attr_accessor :type, :id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent, :last_state_change_date, :project, :owner, :creator, :release, :team, :priority, :state, :original_data
+      attr_accessor :type, :id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent, :last_state_change_date, :project,
+                    :owner, :creator, :release, :team, :priority, :state, :original_data
 
       def initialize(data)
         @id = data['Id']
@@ -37,7 +38,7 @@ module Dev
       def cycle_time
         return 1.0 unless start_date && end_date
 
-        return (end_date - start_date).to_f
+        (end_date - start_date).to_f
       end
     end
   end

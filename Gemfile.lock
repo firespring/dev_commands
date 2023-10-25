@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     firespring_dev_commands (2.1.10.pre.alpha.1)
-      activesupport (~> 7.0.6)
+      activesupport (~> 7.1.1)
       aws-sdk-cloudformation (~> 1.83.0)
       aws-sdk-codepipeline (~> 1.59.0)
       aws-sdk-ecr (~> 1.61.0)
@@ -23,10 +23,15 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.6)
+    activesupport (7.1.1)
+      base64
+      bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
+      connection_pool (>= 2.2.5)
+      drb
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
+      mutex_m
       tzinfo (~> 2.0)
     addressable (2.8.4)
       public_suffix (>= 2.0.2, < 6.0)
@@ -64,6 +69,8 @@ GEM
       aws-sigv4 (~> 1.1)
     aws-sigv4 (1.6.0)
       aws-eventstream (~> 1, >= 1.0.2)
+    base64 (0.1.1)
+    bigdecimal (3.1.4)
     builder (3.2.4)
     bundler-audit (0.9.1)
       bundler (>= 1.2.0, < 3)
@@ -71,12 +78,15 @@ GEM
     coderay (1.1.3)
     colorize (1.1.0)
     concurrent-ruby (1.2.2)
+    connection_pool (2.4.1)
     diff-lcs (1.5.0)
     docile (1.4.0)
     docker-api (2.2.0)
       excon (>= 0.47.0)
       multi_json
     dotenv (2.8.1)
+    drb (2.1.1)
+      ruby2_keywords
     excon (0.100.0)
     faraday (2.7.10)
       faraday-net_http (>= 2.0, < 3.1)
@@ -111,6 +121,7 @@ GEM
     minitest (5.18.1)
     multi_json (1.15.0)
     multipart-post (2.3.0)
+    mutex_m (0.1.2)
     oauth (0.6.2)
       snaky_hash (~> 2.0)
       version_gem (~> 1.1)

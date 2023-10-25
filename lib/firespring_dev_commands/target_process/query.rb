@@ -30,11 +30,11 @@ module Dev
       end
 
       def generate
-        {}.tap { |clause|
+        {}.tap do |clause|
           clause[:where] = where.join(' and ') unless where.nil? || where.empty?
           clause[:include] = "[#{incl.join(',')}]" unless incl.nil? || incl.empty?
           clause[:take] = take if take.to_i.positive?
-        }
+        end
       end
 
       def to_s
@@ -63,31 +63,8 @@ module Dev
       end
 
       def filter_by_missing_tests
-        self << "(LinkedTestPlan is nil)"
+        self << '(LinkedTestPlan is nil)'
       end
-
-=begin
-    def format_story_info(stories)
-      stories.map { |it|
-        name = it['Name']
-        cycle_time = ((Time.now - TargetProcess.parse_dot_net_time(it['StartDate'])) / 60 / 60 / 24).round(1)
-        points = it['Effort'].to_i
-        time_spent = it['TimeSpent'].to_i
-        "#{TargetProcess::truncate(name)}  (#{cycle_time}d/#{points}pts/#{time_spent}hrs)"
-      }
-    end
-
-    def self.bug_info(team_ids, start_date, end_date)
-      finished_story_ids = TargetProcess::TeamAssignment.stories_finished_by_team(team_ids, start_date, end_date).map { |it| it['Assignable']['Id'] }
-
-      query = Query.new
-      filter_by_user_story_ids(query, finished_story_ids)
-      query.include = 'Bugs'
-      TargetProcess::get_helper('/UserStories', query)
-    end
-
-=end
-
     end
   end
 end
