@@ -1,6 +1,8 @@
 module Dev
   class TargetProcess
+    # Class containing user story information
     class UserStory
+      # The api path for user story requests
       PATH = '/UserStories'.freeze
 
       attr_accessor :type, :id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent, :last_state_change_date, :project,
@@ -35,6 +37,7 @@ module Dev
         Time.at(string.slice(6, 10).to_i)
       end
 
+      # Calculate the cycle time as the amount of time the story was open
       def cycle_time
         return 1.0 unless start_date && end_date
 

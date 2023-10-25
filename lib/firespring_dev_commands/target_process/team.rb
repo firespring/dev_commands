@@ -1,5 +1,6 @@
 module Dev
   class TargetProcess
+    # Class containing team information
     class Team
       attr_accessor :id, :type, :name
 

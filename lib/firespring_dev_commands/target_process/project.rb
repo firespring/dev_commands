@@ -1,5 +1,6 @@
 module Dev
   class TargetProcess
+    # Class containing project information
     class Project
       attr_accessor :id, :type, :name
 

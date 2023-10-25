@@ -1,15 +1,21 @@
 require 'net/http'
 
 module Dev
+  # Class for querying target process data from their api
   class TargetProcess
+    # The config file to try to load credentials from
     CONFIG_FILE = "#{Dir.home}/.env.tp".freeze
 
+    # The text of the username variable key
     TP_USERNAME = 'TP_USERNAME'.freeze
 
+    # The text of the password variable key
     TP_PASSWORD = 'TP_PASSWORD'.freeze
 
+    # The text of the url variable key
     TP_URL = 'TP_URL'.freeze
 
+    # Config object for setting top level jira config options
     Config = Struct.new(:username, :password, :url, :http_debug) do
       def initialize
         Dotenv.load(CONFIG_FILE) if File.exist?(CONFIG_FILE)
@@ -37,7 +43,7 @@ module Dev
 
     attr_accessor :username, :password, :url, :auth, :client, :headers
 
-    # Initialize a new jira client using the given inputs
+    # Initialize a new target process client using the given inputs
     def initialize(username: self.class.config.username, password: self.class.config.password, url: self.class.config.url)
       @username = username
       @password = password
@@ -55,6 +61,9 @@ module Dev
       }
     end
 
+    # Perform a query to the user story api path
+    # Call the given block (if present) with each user story
+    # Return all user stories
     def user_stories(query, &)
       [].tap do |ary|
         get(UserStory::PATH, query) do |result|
@@ -64,6 +73,9 @@ module Dev
       end
     end
 
+    # Perform a get request to the given path using the given query
+    # Call the given block (if present) with each piece of data
+    # Return all pieces of data
     def get(path, query, &)
       query_string = query.generate
       url = "/api/v1/#{path}"
@@ -88,14 +100,6 @@ module Dev
       end
 
       nil
-    end
-
-    def self.parse_dot_net_time(string)
-      Time.at(string.slice(6, 10).to_i)
-    end
-
-    def self.parse_dot_net_date(string)
-      parse_dot_net_time(string).to_date
     end
   end
 end

@@ -1,5 +1,6 @@
 module Dev
   class TargetProcess
+    # Class containing user information
     class User
       attr_accessor :id, :type, :name, :login
 

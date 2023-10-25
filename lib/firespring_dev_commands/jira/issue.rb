@@ -21,21 +21,25 @@ module Dev
         @last_closed_history = nil
       end
 
+      # Returns the cycle time of the issue (time between in progress and closed states)
       def cycle_time
         # Calculate the difference and convert to days
         ((last_closed_history.created - last_in_progress_history.created) / 60 / 60 / 24).round(2)
       end
 
+      # Returns the time the issue was in progress (time between in progress and in review states)
       def in_progress_cycle_time
         # Calculate the difference and convert to days
         ((first_in_review_history.created - last_in_progress_history.created) / 60 / 60 / 24).round(2)
       end
 
+      # Returns the time the issue was in review (time between in review and closed states)
       def in_review_cycle_time
         # Calculate the difference and convert to days
         ((last_closed_history.created - first_in_review_history.created) / 60 / 60 / 24).round(2)
       end
 
+      # Loop through the issue history and find the most recent state change from Open to In Progress
       private def last_in_progress_history
         raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
 
@@ -50,6 +54,7 @@ module Dev
         @last_in_progress_history
       end
 
+      # Loop through the issue history and find the oldest state change to In Review
       private def first_in_review_history
         raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
 
@@ -64,6 +69,7 @@ module Dev
         @first_in_review_history
       end
 
+      # Loop through the issue history and find the most recent state change to closed
       private def last_closed_history
         raise 'you must expand the changelog field to calculate cycle time' if histories.nil?
 

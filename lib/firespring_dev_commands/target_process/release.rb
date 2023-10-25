@@ -1,5 +1,6 @@
 module Dev
   class TargetProcess
+    # Class containing release information
     class Release
       attr_accessor :id, :type, :name
 
