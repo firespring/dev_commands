@@ -64,9 +64,9 @@ module Dev
       }
     end
 
-    def user_stories(query)
-      stories = get(Dev::TargetProcess::UserStory::PATH, query)
-      stories.map { |it| Dev::TargetProcess::UserStory.new(it) }
+    def user_stories(query, &)
+      stories = get(UserStory::PATH, query)
+      stories.map { |it| UserStory.new(it) }.each(&)
     end
 
     def get(path, query)
@@ -99,10 +99,5 @@ module Dev
     def self.parse_dot_net_date(string)
       parse_dot_net_time(string).to_date
     end
-
-#    def self.truncate(string)
-#      return "#{string[0...37]}..." if string.length > 37
-#      (string + ' ' * 40)[0, 40]
-#    end
   end
 end
