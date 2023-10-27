@@ -2,8 +2,11 @@ module Dev
   class TargetProcess
     # Class containing user story information
     class UserStory
+      # The resource type for the api endpoint
+      RESOURCE_TYPE = 'UserStories'
+
       # The api path for user story requests
-      PATH = '/UserStories'.freeze
+      PATH = "/#{RESOURCE_TYPE}".freeze
 
       attr_accessor :type, :id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent, :last_state_change_date, :project,
                     :owner, :creator, :release, :team, :priority, :state, :original_data
@@ -13,7 +16,7 @@ module Dev
         @type = data['ResourceType']
         @name = data['Name']
         @description = data['Description']
-        @state = data['EntityState']['Name']
+        @state = data['EntityState']['Name'] if data['EntityState']
         @project = Project.new(data['Project']) if data['Project']
         @owner = User.new(data['Owner']) if data['Owner']
         @creator = User.new(data['Creator']) if data['Creator']

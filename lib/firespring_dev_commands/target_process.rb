@@ -73,6 +73,18 @@ module Dev
       end
     end
 
+    # Perform a query to the team assignments api path
+    # Call the given block (if present) with each team assignment
+    # Return all team assignments
+    def team_assignments(query, &)
+      [].tap do |ary|
+        get(TeamAssignment::PATH, query) do |result|
+          ary << TeamAssignment.new(result)
+        end
+        ary.each(&)
+      end
+    end
+
     # Perform a get request to the given path using the given query
     # Call the given block (if present) with each piece of data
     # Return all pieces of data

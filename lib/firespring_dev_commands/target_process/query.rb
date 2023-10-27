@@ -52,6 +52,9 @@ module Dev
         self << "(Id in ('#{user_story_ids.join("', '")}'))"
       end
 
+      def filter_by_team_ids(team_ids)
+        self << "(Team.Id in ('#{team_ids.join("', '")}'))" unless team_ids.nil? || team_ids.empty?
+      end
       # Add a filter that looks for stories whose project id is contained in the list of ids given
       def filter_by_project(projects)
         self << "(Project.Name in ('#{projects.join("', '")}'))"
@@ -67,15 +70,33 @@ module Dev
         self << "(EntityState.IsFinal eq 'true')"
       end
 
+      def filter_start_date_between(start_date, end_date)
+        self << "(StartDate gte '#{start_date}')" if start_date
+        self << "(StartDate lt '#{end_date}')" if end_date
+      end
+
       # Add a filter that looks for stories whose end date is between the given dates
-      def filter_by_end_dates(start_date, end_date)
-        self << "(EndDate gt '#{start_date}')" if start_date
+      def filter_end_date_between(start_date, end_date)
+        self << "(EndDate gte '#{start_date}')" if start_date
         self << "(EndDate lt '#{end_date}')" if end_date
       end
 
       # Add a filter that looks for stories which do not have a linked test plan
       def filter_by_missing_tests
         self << '(LinkedTestPlan is nil)'
+      end
+
+      def filter_by_started_not_finished
+        self << "(StartDate is not nil)"
+        self << "(EndDate is nil)"
+      end
+
+      def filter_by_entity_type(entity_type)
+        self << "(Assignable.EntityType.Name eq '#{entity_type}')" unless entity_type.nil?
+      end
+
+      def filter_by_entity_ids(entity_ids)
+        self << "(Assignable.Id in ('#{entity_ids.join("', '")}'))" unless entity_ids.nil? || entity_ids.empty?
       end
     end
   end
