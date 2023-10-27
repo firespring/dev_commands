@@ -3,10 +3,10 @@ module Dev
     # Class containing user story information
     class UserStory
       # The resource type for the api endpoint
-      RESOURCE_TYPE = 'UserStories'.freeze
+      RESOURCE_TYPE = 'UserStory'.freeze
 
       # The api path for user story requests
-      PATH = "/#{RESOURCE_TYPE}".freeze
+      PATH = '/UserStories'.freeze
 
       attr_accessor :type, :id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent, :last_state_change_date, :project,
                     :owner, :creator, :release, :team, :priority, :state, :original_data

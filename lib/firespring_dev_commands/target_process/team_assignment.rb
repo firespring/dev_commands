@@ -3,10 +3,10 @@ module Dev
     # Class containing project information
     class TeamAssignment
       # The resource type for the api endpoint
-      RESOURCE_TYPE = 'TeamAssignments'.freeze
+      RESOURCE_TYPE = 'TeamAssignment'.freeze
 
       # The api path for team assignment requests
-      PATH = "/#{RESOURCE_TYPE}".freeze
+      PATH = '/TeamAssignments'.freeze
 
       attr_accessor :id, :type, :start_date, :end_date, :team, :story
 

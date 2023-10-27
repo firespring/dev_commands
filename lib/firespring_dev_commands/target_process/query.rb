@@ -47,6 +47,7 @@ module Dev
         generate
       end
 
+      # TODO: Do these need moved to their associated entities?
       # Add a filter that looks for stories whose id is contained in the list of ids given
       def filter_by_user_story_ids(user_story_ids)
         self << "(Id in ('#{user_story_ids.join("', '")}'))"
