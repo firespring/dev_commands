@@ -3,7 +3,7 @@ module Dev
     # Class containing user story information
     class UserStory
       # The resource type for the api endpoint
-      RESOURCE_TYPE = 'UserStories'
+      RESOURCE_TYPE = 'UserStories'.freeze
 
       # The api path for user story requests
       PATH = "/#{RESOURCE_TYPE}".freeze

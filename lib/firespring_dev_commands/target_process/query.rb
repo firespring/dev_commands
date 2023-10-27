@@ -55,6 +55,7 @@ module Dev
       def filter_by_team_ids(team_ids)
         self << "(Team.Id in ('#{team_ids.join("', '")}'))" unless team_ids.nil? || team_ids.empty?
       end
+
       # Add a filter that looks for stories whose project id is contained in the list of ids given
       def filter_by_project(projects)
         self << "(Project.Name in ('#{projects.join("', '")}'))"
@@ -87,8 +88,8 @@ module Dev
       end
 
       def filter_by_started_not_finished
-        self << "(StartDate is not nil)"
-        self << "(EndDate is nil)"
+        self << '(StartDate is not nil)'
+        self << '(EndDate is nil)'
       end
 
       def filter_by_entity_type(entity_type)
