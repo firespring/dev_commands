@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.email = 'opensource@firespring.com'
   s.metadata['rubygems_mfa_required'] = 'true'
 
-  s.add_dependency 'activesupport', '~> 7.0.6'
+  s.add_dependency 'activesupport', '~> 7.1.1'
   s.add_dependency 'aws-sdk-cloudformation', '~> 1.83.0'
   s.add_dependency 'aws-sdk-codepipeline', '~> 1.59.0'
   s.add_dependency 'aws-sdk-ecr', '~> 1.61.0'

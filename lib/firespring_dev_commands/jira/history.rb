@@ -2,6 +2,7 @@ require 'date'
 
 module Dev
   class Jira
+    # Class contains history data for jira objects
     class History
       attr_accessor :date, :id, :author, :created, :items
 

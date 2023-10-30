@@ -203,6 +203,7 @@ module Dev
 
     # Checks out the given branch in the given repo
     # Defaults to the current directory
+    # optionally raise errors
     def checkout(branch, dir: default_project_dir, raise_errors: false)
       raise 'branch is required' if branch.to_s.strip.empty?
       return unless File.exist?(dir)
@@ -231,6 +232,8 @@ module Dev
     end
 
     # Create the given branch in the given repo
+    # Defaults to the current directory
+    # optionally raise errors
     def create_branch(branch, dir: default_project_dir, raise_errors: false)
       raise 'branch is required' if branch.to_s.strip.empty?
       raise "refusing to create protected branch '#{branch}'" if %w(master develop).any?(branch.to_s.strip)
@@ -259,6 +262,9 @@ module Dev
       false
     end
 
+    # Add the given paths to git
+    # Defaults to the current directory
+    # optionally raise errors
     def add(*paths, dir: default_project_dir, raise_errors: false)
       g = ::Git.open(dir)
       indent g.add(paths)
@@ -292,6 +298,8 @@ module Dev
     end
 
     # Merge the given branch into the given repo
+    # Defaults to the current directory
+    # optionally raise errors
     def merge(branch, dir: default_project_dir, raise_errors: false)
       raise 'branch is required' if branch.to_s.strip.empty?
       return unless File.exist?(dir)
@@ -337,6 +345,8 @@ module Dev
     end
 
     # Pull the given repo
+    # Defaults to the current directory
+    # optionally raise errors
     def pull(dir: default_project_dir, raise_errors: false)
       return unless File.exist?(dir)
 
@@ -374,6 +384,8 @@ module Dev
     end
 
     # Push the given repo
+    # Defaults to the current directory
+    # optionally raise errors
     def push(dir: default_project_dir, raise_errors: false)
       return unless File.exist?(dir)
 
