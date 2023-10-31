@@ -45,6 +45,10 @@ module Dev
 
     # Initialize a new target process client using the given inputs
     def initialize(username: self.class.config.username, password: self.class.config.password, url: self.class.config.url)
+      raise 'username is required' if username.to_s.strip.empty?
+      raise 'password is required' if password.to_s.strip.empty?
+      raise 'url is required' if url.to_s.strip.empty?
+
       @username = username
       @password = password
       @auth = Base64.strict_encode64("#{@username}:#{@password}")
@@ -61,6 +65,18 @@ module Dev
       }
     end
 
+    # Perform a query to the release api path
+    # Call the given block (if present) with each release
+    # Return all releases
+    def releases(query, &)
+      [].tap do |ary|
+        get(Release::PATH, query) do |result|
+          ary << Release.new(result)
+        end
+        ary.each(&)
+      end
+    end
+
     # Perform a query to the user story api path
     # Call the given block (if present) with each user story
     # Return all user stories
@@ -68,6 +84,18 @@ module Dev
       [].tap do |ary|
         get(UserStory::PATH, query) do |result|
           ary << UserStory.new(result)
+        end
+        ary.each(&)
+      end
+    end
+
+    # Perform a query to the user story history api path
+    # Call the given block (if present) with each user story history
+    # Return all user stories
+    def user_story_histories(query, &)
+      [].tap do |ary|
+        get(UserStoryHistory::PATH, query) do |result|
+          ary << UserStoryHistory.new(result)
         end
         ary.each(&)
       end
