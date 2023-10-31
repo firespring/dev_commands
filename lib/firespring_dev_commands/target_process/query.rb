@@ -83,6 +83,11 @@ module Dev
         self << "(EndDate lt '#{end_date}')" if end_date
       end
 
+      def filter_date_between(start_date, end_date)
+        self << "(Date gte '#{start_date}')" if start_date
+        self << "(Date lt '#{end_date}')" if end_date
+      end
+
       # Add a filter that looks for stories which do not have a linked test plan
       def filter_by_missing_tests
         self << '(LinkedTestPlan is nil)'
