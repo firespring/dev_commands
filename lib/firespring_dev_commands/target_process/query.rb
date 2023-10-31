@@ -100,6 +100,11 @@ module Dev
       def filter_by_entity_ids(entity_ids)
         self << "(Assignable.Id in ('#{entity_ids.join("', '")}'))" unless entity_ids.nil? || entity_ids.empty?
       end
+
+      def filter_by_deploy_date(start_date, end_date = nil)
+        self << "('CustomFields.Deploy Date' gt '#{start_date}')" if start_date
+        self << "('CustomFields.Deploy Date' lt '#{end_date}')" if end_date
+      end
     end
   end
 end

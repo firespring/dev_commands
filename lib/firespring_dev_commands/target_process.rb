@@ -61,6 +61,18 @@ module Dev
       }
     end
 
+    # Perform a query to the release api path
+    # Call the given block (if present) with each release
+    # Return all releases
+    def releases(query, &)
+      [].tap do |ary|
+        get(Release::PATH, query) do |result|
+          ary << Release.new(result)
+        end
+        ary.each(&)
+      end
+    end
+
     # Perform a query to the user story api path
     # Call the given block (if present) with each user story
     # Return all user stories
