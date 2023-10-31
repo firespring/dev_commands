@@ -53,6 +53,7 @@ module Dev
         self << "(Id in ('#{user_story_ids.join("', '")}'))"
       end
 
+      # Add a filter that looks for stories whose team id is contained in the list of ids given
       def filter_by_team_ids(team_ids)
         self << "(Team.Id in ('#{team_ids.join("', '")}'))" unless team_ids.nil? || team_ids.empty?
       end
@@ -72,6 +73,7 @@ module Dev
         self << "(EntityState.IsFinal eq 'true')"
       end
 
+      # Add a filter that looks for start dates between the given dates`
       def filter_start_date_between(start_date, end_date)
         self << "(StartDate gte '#{start_date}')" if start_date
         self << "(StartDate lt '#{end_date}')" if end_date
@@ -83,6 +85,7 @@ module Dev
         self << "(EndDate lt '#{end_date}')" if end_date
       end
 
+      # Add a filter that looks for entities whose date is between the given dates
       def filter_date_between(start_date, end_date)
         self << "(Date gte '#{start_date}')" if start_date
         self << "(Date lt '#{end_date}')" if end_date
@@ -93,19 +96,23 @@ module Dev
         self << '(LinkedTestPlan is nil)'
       end
 
+      # Add a filter that looks for items with a set start date and null end date
       def filter_by_started_not_finished
         self << '(StartDate is not nil)'
         self << '(EndDate is nil)'
       end
 
+      # Add a filter that looks for assignable entity types that match the name
       def filter_by_entity_type(entity_type)
         self << "(Assignable.EntityType.Name eq '#{entity_type}')" unless entity_type.nil?
       end
 
+      # Add a filter that looks for assignable ids which are included in the given array
       def filter_by_entity_ids(entity_ids)
         self << "(Assignable.Id in ('#{entity_ids.join("', '")}'))" unless entity_ids.nil? || entity_ids.empty?
       end
 
+      # Add a filter that looks for a custom deploy date between the given dates`
       def filter_by_deploy_date(start_date, end_date = nil)
         self << "('CustomFields.Deploy Date' gt '#{start_date}')" if start_date
         self << "('CustomFields.Deploy Date' lt '#{end_date}')" if end_date
