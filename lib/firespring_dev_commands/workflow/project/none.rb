@@ -3,26 +3,23 @@ module Dev
     module Project
       class None < Base
         def initialize
-        end
-
-        def name
-          self.class.name
+          # Nothing to do here
         end
 
         def start
-          LOG.info("In #{name} start")
+          LOG.debug("No #{flow_type} #{__method__} commands have been defined")
         end
 
         def review
-          LOG.info("In #{name} review")
+          LOG.debug("No #{flow_type} #{__method__} commands have been defined")
         end
 
         def finish
-          LOG.info("In #{name} finish")
+          LOG.debug("No #{flow_type} #{__method__} commands have been defined")
         end
 
         def delete
-          LOG.info("In #{name} delete")
+          LOG.debug("No #{flow_type} #{__method__} commands have been defined")
         end
       end
     end

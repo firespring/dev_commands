@@ -10,20 +10,24 @@ module Dev
           self.class.name.demodulize
         end
 
+        def flow_type
+          self.class.name.deconstantize.demodulize
+        end
+
         def start
-          LOG.info("In #{name} start")
+          raise 'not implemented'
         end
 
         def review
-          LOG.info("In #{name} review")
+          raise 'not implemented'
         end
 
         def finish
-          LOG.info("In #{name} finish")
+          raise 'not implemented'
         end
 
         def delete
-          LOG.info("In #{name} delete")
+          raise 'not implemented'
         end
       end
     end

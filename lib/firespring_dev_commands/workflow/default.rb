@@ -1,41 +1,42 @@
 module Dev
   module Workflow
     class Default < Base
-      attr_accessor :project_management, :sc_management, :review_management, :cicd_management
+      attr_accessor :project, :source_control, :continuous_integration
 
-      def initialize(project_management: nil, sc_management: nil, review_management: nil, cicd_management: nil)
-        @project_management = project_management || Dev::Workflow::Project::None.new
-        @sc_management = sc_management || Dev::Workflow::SourceControl::None.new
-        @review_management = review_management || Dev::Workflow::Review::None.new
-        @cicd_management = cicd_management || Dev::Workflow::ContinuousIntegration::None.new
+      def initialize(project: nil, source_control: nil, review: nil, continuous_integration: nil)
+        @project = project || Dev::Workflow::Project::None.new
+        raise "project must be a project" unless @project.is_a?(Dev::Workflow::Project::Base)
+
+        @source_control = source_control || Dev::Workflow::SourceControl::None.new
+        raise "source control must be a source control" unless @source_control.is_a?(Dev::Workflow::SourceControl::Base)
+
+        @continuous_integration = continuous_integration || Dev::Workflow::ContinuousIntegration::None.new
+        raise "continuous integration must be a continuous integration" unless @continuous_integration.is_a?(Dev::Workflow::ContinuousIntegration::Base)
+
       end
 
       def start
-        project_management.start
-        sc_management.start
-        review_management.start
-        cicd_management.start
+        project.start
+        source_control.start
+        continuous_integration.start
       end
 
       def review
-        project_management.review
-        sc_management.review
-        review_management.review
-        cicd_management.review
+        project.review
+        source_control.review
+        continuous_integration.review
       end
 
       def finish
-        project_management.finish
-        sc_management.finish
-        review_management.finish
-        cicd_management.finish
+        project.finish
+        source_control.finish
+        continuous_integration.finish
       end
 
       def delete
-        project_management.delete
-        sc_management.delete
-        review_management.delete
-        cicd_management.delete
+        project.delete
+        source_control.delete
+        continuous_integration.delete
       end
     end
   end

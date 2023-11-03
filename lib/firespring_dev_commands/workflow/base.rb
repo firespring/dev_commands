@@ -2,7 +2,6 @@ module Dev
   module Workflow
     class Base
       def initailze
-        puts "IN BASE INIT"
         raise "not implemented"
       end
 
