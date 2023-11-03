@@ -231,6 +231,25 @@ module Dev
       false
     end
 
+    # Create the given branch in all repositories with some additional formatting
+    def create_all(branch)
+      @success = true
+      puts
+      puts "Creating #{branch} in each repo".light_yellow if project_dirs.length > 1
+      project_dirs.each do |project_dir|
+        next unless File.exist?(project_dir)
+
+        repo_basename = File.basename(File.realpath(project_dir))
+        header = " #{repo_basename} "
+        puts center_pad(header).light_green
+        @success &= create_branch(branch, dir: project_dir)
+        puts center_pad.light_green
+      end
+      puts
+
+      raise "Failed creating branch #{branch} one or more repositories" unless @success
+    end
+
     # Create the given branch in the given repo
     # Defaults to the current directory
     # optionally raise errors
@@ -245,6 +264,14 @@ module Dev
       g = ::Git.open(dir)
       g.fetch('origin', prune: true)
 
+      # TODO: Check what the output looks like here
+      # If the branch already exists, check it out and pull
+      if branch_exists?(dir, branch)
+        checkout(branch, dir:)
+        return
+      end
+
+      # TODO: Support alt base branch?
       puts "Fetching the latest changes for base branch \"#{staging_branch}\""
       g.checkout(staging_branch)
       g.pull('origin', staging_branch)
