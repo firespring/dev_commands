@@ -23,9 +23,7 @@ module Dev
           namespace workflow.prefix do
             return if exclude.include?(:start)
 
-            # TODO Add what variables you can pass in to configure your workflow
-            desc 'Perform the "start" workflow' \
-                 "\n\tmore TODO"
+            desc workflow.start_desc
             task start: %w(init) do
               workflow.start
             end
@@ -44,6 +42,7 @@ module Dev
 
             desc 'Perform the "review" workflow' \
                  "\n\tmore TODO"
+            desc workflow.review_desc
             task review: %w(init) do
               workflow.review
             end
@@ -63,6 +62,7 @@ module Dev
 
             desc 'Perform the "delete" workflow' \
                  "\n\tmore TODO"
+            desc workflow.delete_desc
             task delete: %w(init) do
               workflow.delete
             end
@@ -81,6 +81,7 @@ module Dev
 
             desc 'Perform the "finish" workflow' \
                  "\n\tmore TODO"
+            desc workflow.finish_desc
             task finish: %w(init) do
               workflow.finish
             end

@@ -9,7 +9,15 @@ module Dev
         self.class.name.demodulize
       end
 
+      def start_desc
+        raise "not implemented"
+      end
+
       def start
+        raise "not implemented"
+      end
+
+      def review_desc
         raise "not implemented"
       end
 
@@ -17,11 +25,19 @@ module Dev
         raise "not implemented"
       end
 
-      def finish
+      def delete_desc
         raise "not implemented"
       end
 
       def delete
+        raise "not implemented"
+      end
+
+      def finish_desc
+        raise "not implemented"
+      end
+
+      def finish
         raise "not implemented"
       end
     end
