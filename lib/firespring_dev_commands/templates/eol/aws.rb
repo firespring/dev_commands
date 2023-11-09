@@ -14,11 +14,17 @@ module Dev
             return if exclude.include?(:eol)
 
             desc 'Compares the current date to the EOL date for aws resources'
+            #task eol: %w(init ensure_aws_credentials) do
             task eol: %w(init) do
+              account_id = Dev::Aws::Profile.new.current
+              account_name = Dev::Aws::Account.new.name_by_account(account_id)
+              LOG.info "  Current AWS Account is #{account_name} (#{account_id})".light_yellow
+
               versions = Dev::EndOfLife::Aws.new.elasticache_products +
-                         Dev::EndOfLife::Aws.new.lambda_products +
-                         Dev::EndOfLife::Aws.new.opensearch_products +
-                         Dev::EndOfLife::Aws.new.rds_products
+                Dev::EndOfLife::Aws.new.lambda_products +
+                Dev::EndOfLife::Aws.new.opensearch_products +
+                Dev::EndOfLife::Aws.new.rds_products
+
               Dev::EndOfLife.new(product_versions: versions.compact).check
             end
           end

@@ -40,16 +40,20 @@ module Dev
       end
 
       def rds_products
+        supported_aws_engines = ['mysql', 'postgresql']
+        supported_eol_engines = ['mssqlserver', 'mysql', 'postgresql', 'sqlite']
+
         client = ::Aws::RDS::Client.new
         client.describe_db_instances.db_instances.filter_map do |instance|
-          # TODO: Currently only supporting mysql
-          unless instance.engine == 'mysql'
-            puts "WARNING: unsupported engine #{instance.engine} found".light_yellow
-            next
-          end
-
           name = instance.db_instance_identifier
-          product = "amazon-rds-#{instance.engine}"
+          product = if supported_aws_engines.include?(instance.engine)
+                      "amazon-rds-#{instance.engine}"
+                    elsif supported_eol_engines.include?(instance.engine)
+                      instance.engine
+                    else
+                      puts "WARNING: unsupported engine #{instance.engine} found".light_yellow
+                      next
+                    end
           version = instance.engine_version.reverse.split('.')[-2..].join('.').reverse
           Dev::EndOfLife::ProductVersion.new(product, version, name)
         end
