@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'aws-sdk-cloudformation', '~> 1.83.0'
   s.add_dependency 'aws-sdk-codepipeline', '~> 1.59.0'
   s.add_dependency 'aws-sdk-ecr', '~> 1.61.0'
+  s.add_dependency 'aws-sdk-lambda', '~> 1.101.0'
   s.add_dependency 'aws-sdk-s3', '~> 1.127.0'
   s.add_dependency 'aws-sdk-ssm', '~> 1.154.0'
   s.add_dependency 'aws-sdk-sts', '~> 1.10.0'
