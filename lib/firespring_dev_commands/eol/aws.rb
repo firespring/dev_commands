@@ -8,17 +8,17 @@ module Dev
     class Aws
       def elasticache_products
         client = ::Aws::ElastiCache::Client.new
-        client.describe_cache_clusters.cache_clusters.map do |cluster|
+        client.describe_cache_clusters.cache_clusters.filter_map do |cluster|
           name = cluster.cache_cluster_id
           product = cluster.engine
-          version = cluster.engine_version.reverse.split('.')[-2..-1].join('.').reverse
+          version = cluster.engine_version.reverse.split('.')[-2..].join('.').reverse
           Dev::EndOfLife::ProductVersion.new(product, version, name)
-        end.compact
+        end
       end
 
       def lambda_products
         client = ::Aws::Lambda::Client.new
-        client.list_functions.functions.map do |function|
+        client.list_functions.functions.filter_map do |function|
           # Runtime is empty if using a docker image
           next unless function.runtime
 
@@ -26,22 +26,22 @@ module Dev
           product = function.runtime.split(/[0-9]/, 2).first
           version = function.runtime.split(/#{product}/, 2).last.chomp('.x')
           Dev::EndOfLife::ProductVersion.new(product, version, name)
-        end.compact
+        end
       end
 
       def opensearch_products
         client = ::Aws::OpenSearchService::Client.new
-        client.list_domain_names.domain_names.map do |domain|
+        client.list_domain_names.domain_names.filter_map do |domain|
           name = domain.domain_name
           product = domain.engine_type
           version = client.describe_domain(domain_name: name).domain_status.engine_version.split('_').last.split('.').first
           Dev::EndOfLife::ProductVersion.new(product, version, name)
-        end.compact
+        end
       end
 
       def rds_products
         client = ::Aws::RDS::Client.new
-        client.describe_db_instances.db_instances.map do |instance|
+        client.describe_db_instances.db_instances.filter_map do |instance|
           # TODO: Currently only supporting mysql
           unless instance.engine == 'mysql'
             puts "WARNING: unsupported engine #{instance.engine} found".light_yellow
@@ -50,9 +50,9 @@ module Dev
 
           name = instance.db_instance_identifier
           product = instance.engine
-          version = instance.engine_version.reverse.split('.')[-2..-1].join('.').reverse
+          version = instance.engine_version.reverse.split('.')[-2..].join('.').reverse
           Dev::EndOfLife::ProductVersion.new(product, version, name)
-        end.compact
+        end
 
         # TODO: Add db cluster info too?
       end
