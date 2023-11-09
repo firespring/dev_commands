@@ -34,7 +34,6 @@ Dev::EndOfLife.config do |c|
   ]
 end
 Dev::Template::Eol.new
-Dev::Template::Eol::Aws.new
 
 desc 'Open the project readme in a browser'
 task :docs do
