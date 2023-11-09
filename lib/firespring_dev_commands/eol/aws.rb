@@ -49,7 +49,7 @@ module Dev
           end
 
           name = instance.db_instance_identifier
-          product = instance.engine
+          product = "amazon-rds-#{instance.engine}"
           version = instance.engine_version.reverse.split('.')[-2..].join('.').reverse
           Dev::EndOfLife::ProductVersion.new(product, version, name)
         end
