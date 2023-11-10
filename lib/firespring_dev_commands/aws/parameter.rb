@@ -24,20 +24,12 @@ module Dev
 
       # Retrieve all parameters which start with the given path
       def list(path, recursive: true, with_decryption: true)
-        next_token = nil
-
-        parameters = []
-        loop do
-          response = client.get_parameters_by_path(
-            path:,
-            recursive:,
-            with_decryption:,
-            next_token:
-          )
-          parameters += response.parameters
-          break unless (next_token = response.next_token)
+        [].tap do |ary|
+          params = {path: path, recursive: recursive, with_decryption: with_decryption}
+          Dev::Aws::each_page(client, :get_parameters_by_path, params) do |response|
+            ary.concat(response.parameters)
+          end
         end
-        parameters
       end
 
       # Sets the given parameter name's value to the given value

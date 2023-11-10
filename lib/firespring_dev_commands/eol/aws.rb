@@ -10,7 +10,7 @@ module Dev
         client = ::Aws::ElastiCache::Client.new
 
         [].tap do |ary|
-          query_all(client, :describe_cache_clusters) do |response|
+          Dev::Aws::each_page(client, :describe_cache_clusters) do |response|
             response.cache_clusters.each do |cluster|
               name = cluster.cache_cluster_id
               product = cluster.engine
@@ -25,7 +25,7 @@ module Dev
         client = ::Aws::Lambda::Client.new
 
         [].tap do |ary|
-          query_all(client, :list_functions) do |response|
+          Dev::Aws::each_page(client, :list_functions) do |response|
             response.functions.each do |function|
               # Runtime is empty if using a docker image
               # TODO Should we still handle this case?
@@ -44,7 +44,7 @@ module Dev
         client = ::Aws::OpenSearchService::Client.new
 
         [].tap do |ary|
-          query_all(client, :list_domain_names) do |response|
+          Dev::Aws::each_page(client, :list_domain_names) do |response|
             response.domain_names.each do |domain|
               name = domain.domain_name
               product = domain.engine_type
@@ -64,7 +64,7 @@ module Dev
         client = ::Aws::RDS::Client.new
 
         [].tap do |ary|
-          query_all(client, :describe_db_instances) do |response|
+          Dev::Aws::each_page(client, :describe_db_instances) do |response|
             response.db_instances.each do |instance|
               name = instance.db_instance_identifier
               engine = instance.engine.tr('aurora-', '')
@@ -85,7 +85,7 @@ module Dev
         client = ::Aws::RDS::Client.new
 
         [].tap do |ary|
-          query_all(client, :describe_db_clusters) do |response|
+          Dev::Aws::each_page(client, :describe_db_clusters) do |response|
             response.db_clusters.each do |cluster|
               name = cluster.db_cluster_identifier
               engine = cluster.engine.tr('aurora-', '')
@@ -98,19 +98,6 @@ module Dev
               ary << Dev::EndOfLife::ProductVersion.new(product, version, name)
             end
           end
-        end
-      end
-
-      def query_all(client, query, params = {})
-        response = client.send(query, params)
-        yield response
-
-        next_token = response.next_token if response.respond_to?(:next_token)
-        while next_token
-          params[:next_token] = next_token
-          response = client.send(query, params)
-          yield response
-          next_token = response.next_token
         end
       end
     end

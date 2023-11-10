@@ -21,16 +21,10 @@ module Dev
       def pipelines(regex_match = nil)
         raise 'regex_match must be a regexp' if regex_match && !regex_match.is_a?(Regexp)
 
-        params = {}
-        response = client.list_pipelines(params)
-        pipelines = response.pipelines
-
-        next_token = response.next_token
-        while next_token
-          params[:next_token] = next_token
-          response = client.list_pipelines(params)
-          pipelines += response.pipelines
-          next_token = response.next_token
+        pipelines = [].tap do |ary|
+          Dev::Aws::each_page(client, :list_pipelines) do |response|
+            ary.concat(response.pipelines)
+          end
         end
 
         pipelines.select! { |it| it.name.match(regex_match) } if regex_match
