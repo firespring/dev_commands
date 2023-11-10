@@ -40,7 +40,7 @@ module Dev
     # Wraps a block of code in a y/n question.
     # If the user answers 'y' then the block is executed.
     # If the user answers 'n' then the block is skipped.
-    def with_confirmation(message, default = 'y', color_message: true)
+    def with_confirmation(message, default = 'y', color_message: true, exit_unconfirmed: true)
       message = "\n  #{message}" << '? '.light_green
       message = message.light_green if color_message
       print message
@@ -49,13 +49,15 @@ module Dev
       answer = default
       answer = $stdin.gets unless ENV['NON_INTERACTIVE'] == 'true'
 
-      unless answer.strip.casecmp('y').zero?
+      if answer.strip.casecmp('y').zero?
+        puts
+        yield
+      elsif exit_unconfirmed
         puts "\n  Cancelled.\n".light_yellow
         exit 1
+      else
+        puts
       end
-      puts
-
-      yield
     end
 
     # Asks for user input using the given message and returns it
