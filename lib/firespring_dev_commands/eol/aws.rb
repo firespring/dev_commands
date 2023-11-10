@@ -5,7 +5,15 @@ require 'aws-sdk-opensearchservice'
 
 module Dev
   class EndOfLife
+    # Class which queries several different AWS product types and
+    # returns ProductVersion entities which can be checked for EOL
     class Aws
+      # Queries and returns product versions for the default product types
+      def default_products
+        (elasticache_products + lambda_products + opensearch_products + rds_products).flatten.compact
+      end
+
+      # Queries and returns product versions for elasticache products
       def elasticache_products
         client = ::Aws::ElastiCache::Client.new
 
@@ -21,6 +29,7 @@ module Dev
         end
       end
 
+      # Queries and returns product versions for lambda products
       def lambda_products
         client = ::Aws::Lambda::Client.new
 
@@ -28,7 +37,6 @@ module Dev
           Dev::Aws.each_page(client, :list_functions) do |response|
             response.functions.each do |function|
               # Runtime is empty if using a docker image
-              # TODO Should we still handle this case?
               next unless function.runtime
 
               name = function.function_name
@@ -40,6 +48,7 @@ module Dev
         end
       end
 
+      # Queries and returns product versions for opensearch products
       def opensearch_products
         client = ::Aws::OpenSearchService::Client.new
 
@@ -55,11 +64,13 @@ module Dev
         end
       end
 
+      # Queries and returns product versions for rds products
       def rds_products
-        _rds_instances + _rds_clusters
+        rds_instance_products + rds_cluster_products
       end
 
-      def _rds_instances
+      # Queries and returns product versions for rds instance products
+      def rds_instance_products
         aws_engines = %w(mysql postgresql)
         client = ::Aws::RDS::Client.new
 
@@ -80,7 +91,8 @@ module Dev
         end
       end
 
-      def _rds_clusters
+      # Queries and returns product versions for rds cluster products
+      def rds_cluster_products
         aws_engines = %w(mysql postgresql)
         client = ::Aws::RDS::Client.new
 
