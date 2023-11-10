@@ -16,7 +16,7 @@ module Dev
       response = client.send(query, params)
       yield response
 
-      while response.next_page? do
+      while response.next_page?
         response = response.next_page
         yield response
       end

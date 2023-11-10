@@ -25,8 +25,8 @@ module Dev
       # Retrieve all parameters which start with the given path
       def list(path, recursive: true, with_decryption: true)
         [].tap do |ary|
-          params = {path: path, recursive: recursive, with_decryption: with_decryption}
-          Dev::Aws::each_page(client, :get_parameters_by_path, params) do |response|
+          params = {path:, recursive:, with_decryption:}
+          Dev::Aws.each_page(client, :get_parameters_by_path, params) do |response|
             ary.concat(response.parameters)
           end
         end

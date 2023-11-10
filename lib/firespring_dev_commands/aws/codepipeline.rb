@@ -22,7 +22,7 @@ module Dev
         raise 'regex_match must be a regexp' if regex_match && !regex_match.is_a?(Regexp)
 
         pipelines = [].tap do |ary|
-          Dev::Aws::each_page(client, :list_pipelines) do |response|
+          Dev::Aws.each_page(client, :list_pipelines) do |response|
             ary.concat(response.pipelines)
           end
         end

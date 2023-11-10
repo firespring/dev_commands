@@ -109,9 +109,9 @@ module Dev
             LOG.info "  Current AWS Account is #{account_name} (#{account_id})".light_yellow
 
             versions = Dev::EndOfLife::Aws.new.elasticache_products +
-              Dev::EndOfLife::Aws.new.lambda_products +
-              Dev::EndOfLife::Aws.new.opensearch_products +
-              Dev::EndOfLife::Aws.new.rds_products
+                       Dev::EndOfLife::Aws.new.lambda_products +
+                       Dev::EndOfLife::Aws.new.opensearch_products +
+                       Dev::EndOfLife::Aws.new.rds_products
 
             Dev::EndOfLife.new(product_versions: versions.compact).check
           end

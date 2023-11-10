@@ -10,7 +10,7 @@ module Dev
         client = ::Aws::ElastiCache::Client.new
 
         [].tap do |ary|
-          Dev::Aws::each_page(client, :describe_cache_clusters) do |response|
+          Dev::Aws.each_page(client, :describe_cache_clusters) do |response|
             response.cache_clusters.each do |cluster|
               name = cluster.cache_cluster_id
               product = cluster.engine
@@ -25,15 +25,15 @@ module Dev
         client = ::Aws::Lambda::Client.new
 
         [].tap do |ary|
-          Dev::Aws::each_page(client, :list_functions) do |response|
+          Dev::Aws.each_page(client, :list_functions) do |response|
             response.functions.each do |function|
               # Runtime is empty if using a docker image
               # TODO Should we still handle this case?
               next unless function.runtime
 
               name = function.function_name
-              product = function&.runtime.split(/[0-9]/, 2).first
-              version = function&.runtime.split(/#{product}/, 2).last.chomp('.x')
+              product = function&.runtime&.split(/[0-9]/, 2)&.first
+              version = function&.runtime&.split(/#{product}/, 2)&.last&.chomp('.x')
               ary << Dev::EndOfLife::ProductVersion.new(product, version, name)
             end
           end
@@ -44,7 +44,7 @@ module Dev
         client = ::Aws::OpenSearchService::Client.new
 
         [].tap do |ary|
-          Dev::Aws::each_page(client, :list_domain_names) do |response|
+          Dev::Aws.each_page(client, :list_domain_names) do |response|
             response.domain_names.each do |domain|
               name = domain.domain_name
               product = domain.engine_type
@@ -64,7 +64,7 @@ module Dev
         client = ::Aws::RDS::Client.new
 
         [].tap do |ary|
-          Dev::Aws::each_page(client, :describe_db_instances) do |response|
+          Dev::Aws.each_page(client, :describe_db_instances) do |response|
             response.db_instances.each do |instance|
               name = instance.db_instance_identifier
               engine = instance.engine.tr('aurora-', '')
@@ -85,7 +85,7 @@ module Dev
         client = ::Aws::RDS::Client.new
 
         [].tap do |ary|
-          Dev::Aws::each_page(client, :describe_db_clusters) do |response|
+          Dev::Aws.each_page(client, :describe_db_clusters) do |response|
             response.db_clusters.each do |cluster|
               name = cluster.db_cluster_identifier
               engine = cluster.engine.tr('aurora-', '')
