@@ -1,8 +1,6 @@
-require 'rubygems'
-require 'bundler/setup'
 require 'firespring_dev_commands'
-require 'yard'
-require 'launchy'
+require 'bundler'
+Bundler.require
 
 YARD::Rake::YardocTask.new do |t|
   t.files = ['lib/**/*.rb']
