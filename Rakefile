@@ -1,6 +1,4 @@
 require 'firespring_dev_commands'
-require 'bundler'
-Bundler.require
 
 YARD::Rake::YardocTask.new do |t|
   t.files = ['lib/**/*.rb']
