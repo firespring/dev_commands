@@ -64,27 +64,27 @@ module Dev
     # All other inputs cause the code to exit
     def exit_unless_confirmed(message, default: nil, colorize: true)
       # If a default is given, it must be y or n
-      raise 'invalid default' unless default == 'y' || default == 'n' if default
+      raise 'invalid default' if default && !%w(y n).include?(default)
 
-      #print the colorized message (if requested) with the default (if given)
+      # print the colorized message (if requested) with the default (if given)
       print(confirmation_message(message, default:, colorize:))
 
       # Default to the default
       # Read from stdin unless non_interactive is set to true
       answer = gather_input(default:)
 
-      unless answer.casecmp('y').zero?
-        puts "\n  Cancelled.\n".light_yellow
-        exit 1
-      end
+      return if answer.casecmp('y').zero?
+
+      puts "\n  Cancelled.\n".light_yellow
+      exit 1
     end
 
     # Wraps a block of code in a y/n question
     # If the user answers 'y' then the block is executed
     # All other inputs cause the block to be skipped
-    def when_confirmed(message, default: nil, colorize: true, &blk)
+    def when_confirmed(message, default: nil, colorize: true)
       # If a default is given, it must be y or n
-      raise 'invalid default' unless default == 'y' || default == 'n' if default
+      raise 'invalid default' if default && !%w(y n).include?(default)
 
       # print the colorized message (if requested) with the default (if given)
       print(confirmation_message(message, default:, colorize:))
@@ -101,8 +101,9 @@ module Dev
     # If a default value was specified and no answer was given, return the default
     def gather_input(default: nil)
       answer = $stdin.gets.to_s.strip unless ENV['NON_INTERACTIVE'] == 'true'
-      aswer = answer.to_s.strip
+      answer.to_s.strip
       return default if default && answer.empty?
+
       answer
     end
 
@@ -130,6 +131,7 @@ module Dev
     # Colorize the string if it has been requested
     def conditional_colorize(string, colorize:, color:)
       return string.send(color) if colorize
+
       string
     end
 
