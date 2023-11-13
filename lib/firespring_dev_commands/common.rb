@@ -40,7 +40,8 @@ module Dev
     # Wraps a block of code in a y/n question.
     # If the user answers 'y' then the block is executed.
     # If the user answers 'n' then the block is skipped.
-    def with_confirmation(message, default = 'y', color_message: true, exit_unconfirmed: true)
+    # @deprecated Please use {Common#when_confirmed} instead
+    def with_confirmation(message, default = 'y', color_message: true)
       message = "\n  #{message}" << '? '.light_green
       message = message.light_green if color_message
       print message
@@ -49,15 +50,87 @@ module Dev
       answer = default
       answer = $stdin.gets unless ENV['NON_INTERACTIVE'] == 'true'
 
-      if answer.strip.casecmp('y').zero?
-        puts
-        yield
-      elsif exit_unconfirmed
+      unless answer.strip.casecmp('y').zero?
         puts "\n  Cancelled.\n".light_yellow
         exit 1
-      else
-        puts
       end
+      puts
+
+      yield
+    end
+
+    # Exits unless the user confirms they want to continue
+    # If the user answers 'y' then the code will continue
+    # All other inputs cause the code to exit
+    def exit_unless_confirmed(message, default: nil, colorize: true)
+      # If a default is given, it must be y or n
+      raise 'invalid default' unless default == 'y' || default == 'n' if default
+
+      #print the colorized message (if requested) with the default (if given)
+      print(confirmation_message(message, default:, colorize:))
+
+      # Default to the default
+      # Read from stdin unless non_interactive is set to true
+      answer = gather_input(default:)
+
+      unless answer.casecmp('y').zero?
+        puts "\n  Cancelled.\n".light_yellow
+        exit 1
+      end
+    end
+
+    # Wraps a block of code in a y/n question
+    # If the user answers 'y' then the block is executed
+    # All other inputs cause the block to be skipped
+    def when_confirmed(message, default: nil, colorize: true, &blk)
+      # If a default is given, it must be y or n
+      raise 'invalid default' unless default == 'y' || default == 'n' if default
+
+      # print the colorized message (if requested) with the default (if given)
+      print(confirmation_message(message, default:, colorize:))
+
+      # Default to the default
+      # Read from stdin unless non_interactive is set to true
+      answer = gather_input(default:)
+
+      # Yield to the block if confirmed
+      yield if answer.casecmp('y').zero?
+    end
+
+    # Receive a string from the user on stdin unless non_interactive is set to true
+    # If a default value was specified and no answer was given, return the default
+    def gather_input(default: nil)
+      answer = $stdin.gets.to_s.strip unless ENV['NON_INTERACTIVE'] == 'true'
+      aswer = answer.to_s.strip
+      return default if default && answer.empty?
+      answer
+    end
+
+    # Build a confirmation message, colorizing each individual part appropriately
+    # Include the default value in the message if one was specified
+    def confirmation_message(question, default:, colorize:)
+      message = conditional_colorize(question, colorize:, color: :light_green)
+      options = conditional_colorize('(', colorize:, color: :light_green)
+      options << conditional_colorize('y', colorize:, color: :light_yellow)
+      options << conditional_colorize('/', colorize:, color: :light_green)
+      options << conditional_colorize('n', colorize:, color: :light_yellow)
+      options << conditional_colorize(')', colorize:, color: :light_green)
+
+      unless default.to_s.strip.empty?
+        options << ' '
+        options << conditional_colorize('[', colorize:, color: :light_green)
+        options << conditional_colorize(default.to_s.strip, colorize:, color: :light_yellow)
+        options << conditional_colorize(']', colorize:, color: :light_green)
+      end
+
+      options << conditional_colorize(':', colorize:, color: :light_green)
+      "#{message} #{options} "
+    end
+
+    # Colorize the string if it has been requested
+    def conditional_colorize(string, colorize:, color:)
+      return string.send(color) if colorize
+      string
     end
 
     # Asks for user input using the given message and returns it
