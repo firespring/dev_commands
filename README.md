@@ -16,8 +16,6 @@ gem 'firespring_dev_commands', path: '/path/to/dev_commands'
 
 * Add the following to your Rakefile
 ```
-require 'rubygems'
-require 'bundler/setup'
 require 'firespring_dev_commands'
 ```
 
