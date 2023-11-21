@@ -8,9 +8,10 @@ module Dev
       # The api path for team assignment requests
       PATH = '/TeamAssignments'.freeze
 
-      attr_accessor :id, :type, :start_date, :end_date, :team, :story
+      attr_accessor :data, :id, :type, :start_date, :end_date, :team, :story
 
       def initialize(data)
+        @data = data
         @id = data['Id']
         @type = data['ResourceType']
         @start_date = parse_time(data['StartDate'])

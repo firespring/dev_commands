@@ -8,9 +8,10 @@ module Dev
       # The api path for release requests
       PATH = '/Releases'.freeze
 
-      attr_accessor :id, :type, :name, :start_date, :end_date, :custom_fields
+      attr_accessor :data, :id, :type, :name, :start_date, :end_date, :custom_fields
 
       def initialize(data)
+        @data = data
         @id = data['Id']
         @type = data['ResourceType']
         @name = data['Name']
