@@ -4,6 +4,18 @@ require 'base64'
 module Dev
   # Class which contains methods to conenct to jira and query issues
   class Jira
+    # The config file to try to load credentials from
+    CONFIG_FILE = "#{Dir.home}/.env.jira".freeze
+
+    # The text of the username variable key
+    JIRA_USERNAME = 'JIRA_USERNAME'.freeze
+
+    # The text of the token variable key
+    JIRA_TOKEN = 'JIRA_TOKEN'.freeze
+
+    # The text of the url variable key
+    JIRA_URL = 'JIRA_URL'.freeze
+
     # Config object for setting top level jira config options
     # "points_field_name" is the field holding the value for points on a story. If this is not present, all points will default to 0
     # "user_lookup_list" should be an array of Jira::User objects representing the usernames, ids, etc for all jira users
@@ -11,9 +23,11 @@ module Dev
     #    and there is no way to query this information from Jira directly.
     Config = Struct.new(:username, :token, :url, :points_field_name, :expand, :user_lookup_list, :read_timeout, :http_debug) do
       def initialize
-        self.username = nil
-        self.token = nil
-        self.url = nil
+        Dotenv.load(CONFIG_FILE) if File.exist?(CONFIG_FILE)
+
+        self.username = ENV.fetch(JIRA_USERNAME, nil)
+        self.token = ENV.fetch(JIRA_TOKEN, nil)
+        self.url = ENV.fetch(JIRA_URL, nil)
         self.points_field_name = nil
         self.expand = []
         self.user_lookup_list = []
@@ -40,6 +54,10 @@ module Dev
 
     # Initialize a new jira client using the given inputs
     def initialize(username: self.class.config.username, token: self.class.config.token, url: self.class.config.url)
+      raise 'username is required' if username.to_s.strip.empty?
+      raise 'token is required' if token.to_s.strip.empty?
+      raise 'url is required' if url.to_s.strip.empty?
+
       @username = username
       @token = token
       @url = url

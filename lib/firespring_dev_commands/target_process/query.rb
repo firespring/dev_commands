@@ -107,6 +107,11 @@ module Dev
         self << "(Assignable.EntityType.Name eq '#{entity_type}')" unless entity_type.nil?
       end
 
+      # Add a filter that looks for assignable id that match the given id
+      def filter_by_entity_id(entity_id)
+        self << "(Assignable.Id eq '#{entity_id}')" unless entity_id.nil?
+      end
+
       # Add a filter that looks for assignable ids which are included in the given array
       def filter_by_entity_ids(entity_ids)
         self << "(Assignable.Id in ('#{entity_ids.join("', '")}'))" unless entity_ids.nil? || entity_ids.empty?

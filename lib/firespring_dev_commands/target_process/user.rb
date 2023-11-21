@@ -2,9 +2,10 @@ module Dev
   class TargetProcess
     # Class containing user information
     class User
-      attr_accessor :id, :type, :name, :login
+      attr_accessor :data, :id, :type, :name, :login
 
       def initialize(data)
+        @data = data
         @id = data['Id']
         @type = data['ResourceType']
         @name = data['FullName']

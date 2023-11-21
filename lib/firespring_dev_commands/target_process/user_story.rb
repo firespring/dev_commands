@@ -8,10 +8,11 @@ module Dev
       # The api path for user story requests
       PATH = '/UserStories'.freeze
 
-      attr_accessor :type, :id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent, :last_state_change_date, :project,
-                    :owner, :creator, :release, :team, :priority, :state, :original_data
+      attr_accessor :data, :type, :id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent, :last_state_change_date,
+                    :project, :owner, :creator, :release, :team, :priority, :state
 
       def initialize(data)
+        @data = data
         @id = data['Id']
         @type = data['ResourceType']
         @name = data['Name']
@@ -30,7 +31,6 @@ module Dev
         @effort = data['Effort']
         @time_spent = data['TimeSpent']
         @last_state_change_date = parse_time(data['LastStateChangeDate'])
-        @original_data = original_data
       end
 
       # Parse the dot net time representation into something that ruby can use
@@ -45,6 +45,17 @@ module Dev
         return 1.0 unless start_date && end_date
 
         (end_date - start_date).to_f / (60 * 60 * 24)
+      end
+
+      # Returns the time the team was responsible for the issue was
+      def team_cycle_time(team_ids)
+        # Calculate the difference and convert to days
+        finished_dev_query = Dev::TargetProcess::Query.new
+        finished_dev_query.filter_by_team_ids(team_ids)
+        finished_dev_query.filter_by_entity_type(Dev::TargetProcess::UserStory::RESOURCE_TYPE)
+        finished_dev_query.filter_by_entity_id(id)
+        team_assignments = Dev::TargetProcess.new.team_assignments(finished_dev_query)
+        team_assignments.sum(&:cycle_time)
       end
     end
   end
