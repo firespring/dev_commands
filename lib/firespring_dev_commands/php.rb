@@ -58,12 +58,9 @@ module Dev
     end
 
     # Build the command to fix any security vulnerabilities that were found
-    # def audit_fix_command
-    #  audit_fix = base_command
-    #  audit_fix << 'audit' << 'fix'
-    #  audit_fix.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
-    #  audit_fix
-    # end
+    def audit_fix_command
+      raise 'not implemented'
+    end
 
     # Build the php install command
     def install_command
@@ -76,7 +73,7 @@ module Dev
     # Build the php lint command
     def lint_command
       lint = base_command
-      lint << 'lint'
+      lint << 'run' << 'lint'
       lint.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint
     end
@@ -84,7 +81,7 @@ module Dev
     # Build the php lint fix command
     def lint_fix_command
       lint_fix = base_command
-      lint_fix << 'lint-fix'
+      lint_fix << 'run' << 'lint-fix'
       lint_fix.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint_fix
     end
@@ -92,18 +89,14 @@ module Dev
     # Build the php test command
     def test_command
       test = []
-      test << './vendor/bin/phpunit'
+      test << 'run' << 'test'
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end
 
-    # Build the php fast test command
-    def test_fast_command(processes = 4)
-      test = []
-      test << './vendor/bin/paratest'
-      test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
-      test << "-p#{processes}" << '--runner=WrapperRunner'
-      test
+    # Build the php test (with coverage) command
+    def test_coverage_command
+      raise 'not implemented'
     end
   end
 end

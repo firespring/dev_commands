@@ -96,7 +96,7 @@ module Dev
       test
     end
 
-    # Build the node test command
+    # Build the node test (with coverage) command
     def test_coverage_command
       test = base_command
       test << 'run' << 'test:coverage'

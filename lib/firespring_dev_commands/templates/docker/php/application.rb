@@ -1,4 +1,5 @@
 require_relative '../../base_interface'
+require 'securerandom'
 
 module Dev
   module Template
@@ -7,11 +8,15 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php
+          attr_reader :php, :siloed_tests
 
           # Allow for custom container path for the application
-          def initialize(application, container_path: nil, local_path: nil, exclude: [])
+          def initialize(application, container_path: nil, local_path: nil, siloed_tests: nil, exclude: [])
             @php = Dev::Php.new(container_path:, local_path:)
+            # TODO: Better name
+            # TODO: Should this apply to all or just tests?
+            @siloed_tests = siloed_tests
+
             super(application, exclude:)
           end
 
@@ -102,6 +107,7 @@ module Dev
           def create_test_task!
             application = @name
             php = @php
+            siloed_tests = @siloed_tests
             exclude = @exclude
             return if exclude.include?(:test)
 
@@ -117,9 +123,13 @@ module Dev
                   task test: %w(init_docker up) do
                     LOG.debug("Running all php tests in the #{application} codebase")
 
+                    project_name = nil
+                    project_name = SecureRandom.hex if siloed_tests
+
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options:).exec(*php.test_command)
+                    Dev::Docker::Compose.new(project_name:, services: application, options:).exec(*php.test_command)
+                    # TODO: Add clean if we are siloed
                   end
                 end
               end
