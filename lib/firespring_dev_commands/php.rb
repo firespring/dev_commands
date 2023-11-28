@@ -88,7 +88,7 @@ module Dev
 
     # Build the php test command
     def test_command
-      test = []
+      test = base_command
       test << 'run' << 'test'
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test

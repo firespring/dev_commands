@@ -79,7 +79,8 @@ module Dev
                 end
 
                 namespace :php do
-                  desc "Run the php linting software against the #{application}'s codebase"
+                  desc "Run the php linting software against the #{application}'s codebase" \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task lint: %w(init_docker up_no_deps) do
                     LOG.debug("Check for php linting errors in the #{application} codebase")
 
@@ -119,7 +120,8 @@ module Dev
                 end
 
                 namespace :php do
-                  desc "Run all php tests against the #{application}'s codebase"
+                  desc "Run all php tests against the #{application}'s codebase" \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task test: %w(init_docker up) do
                     LOG.debug("Running all php tests in the #{application} codebase")
 
@@ -174,7 +176,8 @@ module Dev
                 namespace :php do
                   desc 'Run Composer Audit on the target application' \
                        "\n\tuse MIN_SEVERITY=(info low moderate high critical) to fetch only severity type selected and above (default=high)." \
-                       "\n\tuse IGNORELIST=(comma delimited list of cwe numbers) removes the entry from the list."
+                       "\n\tuse IGNORELIST=(comma delimited list of cwe numbers) removes the entry from the list." \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?
