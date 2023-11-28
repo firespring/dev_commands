@@ -90,7 +90,6 @@ module Dev
 
     def visible_user_rocks(&)
       {}.tap do |hsh|
-        #users = [User.new({"Id"=>199, "Type"=>"AngularUser", "Key"=>"AngularUser_199", "Name"=>"Joe Ebmeier", "ImageUrl"=>"https://s3.amazonaws.com/Radial/64/a61b57c6-c861-4eb0-baae-a35501242aab.png"})]
         visible_users.each do |user|
           hsh[user] = user_rocks(user.id)
         end
@@ -98,19 +97,19 @@ module Dev
       end
     end
 
-    def user_rocks(user_id, &)
+    def visible_users(&)
       [].tap do |ary|
-        get("/api/v1/rocks/user/#{user_id}") do |rock_data|
-          ary << Rock.new(rock_data)
+        get('/api/v1/users/mineviewable') do |user_data|
+          ary << User.new(user_data)
         end
         ary.each(&)
       end
     end
 
-    def visible_users(&)
+    def user_rocks(user_id, &)
       [].tap do |ary|
-        get('/api/v1/users/mineviewable') do |user_data|
-          ary << User.new(user_data)
+        get("/api/v1/rocks/user/#{user_id}") do |rock_data|
+          ary << Rock.new(rock_data)
         end
         ary.each(&)
       end
