@@ -65,6 +65,7 @@ module Dev
       }
     end
 
+    # TODO: Should we look at https://github.com/DannyBen/lightly for caching the token?
     def token
       @token ||= ENV.fetch(BLOOM_TOKEN, nil)
 
@@ -74,7 +75,7 @@ module Dev
           {
             grant_type: 'password',
             userName: username,
-            password: password
+            password:
           },
           headers: {
             'content-type' => 'application/json',
@@ -134,7 +135,7 @@ module Dev
       response = client.request_post(path, data, headers)
       raise "Error querying #{url}/#{path}: #{response.inspect}" unless response.response.is_a?(Net::HTTPSuccess)
 
-      parsed_response = JSON.parse(response.body)
+      JSON.parse(response.body)
     end
   end
 end

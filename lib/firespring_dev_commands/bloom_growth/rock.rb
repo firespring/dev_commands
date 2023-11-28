@@ -25,8 +25,6 @@ module Dev
           'On Track'
         when 2
           'Complete'
-        else
-          nil
         end
       end
 
