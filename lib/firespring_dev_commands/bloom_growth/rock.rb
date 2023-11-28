@@ -9,7 +9,7 @@ module Dev
         @id = data['Id']
         @type = data['Type']
         @name = data['Name'].to_s.strip
-        @owner = User.new(data['Owner'])
+        @owner = User.new(data['Owner']) if data['Owner']
         @complete = data['Complete']
         @state = completion_to_state(data['Completion'])
         @created = Time.parse(data['CreateTime']) if data['CreateTime']
