@@ -89,28 +89,10 @@ module Dev
       @token
     end
 
-    def visible_user_rocks(&)
-      {}.tap do |hsh|
-        visible_users.each do |user|
-          hsh[user] = user_rocks(user.id)
-        end
-        hsh.each(&)
-      end
-    end
-
     def visible_users(&)
       [].tap do |ary|
         get('/api/v1/users/mineviewable') do |user_data|
           ary << User.new(user_data)
-        end
-        ary.each(&)
-      end
-    end
-
-    def user_rocks(user_id, &)
-      [].tap do |ary|
-        get("/api/v1/rocks/user/#{user_id}") do |rock_data|
-          ary << Rock.new(rock_data)
         end
         ary.each(&)
       end

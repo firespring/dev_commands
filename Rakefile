@@ -85,16 +85,3 @@ module Bundler
   end
 end
 Bundler::GemHelper.install_tasks
-
-task :joetest do
-  puts
-  Dev::BloomGrowth.new.visible_user_rocks.each do |user, rocks|
-    puts "#{user.name}:"
-    rocks.each do |rock|
-      printf "  %-100s%s\n", rock.name, "(Due: #{rock.due}, State: #{rock.colorized_state})"
-    end
-    puts
-    puts
-  end
-  puts
-end
