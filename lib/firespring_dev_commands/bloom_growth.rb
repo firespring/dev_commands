@@ -1,6 +1,7 @@
 require 'net/http'
 
 module Dev
+  # Class for interacting with the Bloom Growth api
   class BloomGrowth
     # The config file to try to load credentials from
     CONFIG_FILE = "#{Dir.home}/.env.bloom".freeze
@@ -11,6 +12,7 @@ module Dev
     # The text of the password variable key
     BLOOM_PASSWORD = 'BLOOM_PASSWORD'.freeze
 
+    # The text of the token variable key
     BLOOM_TOKEN = 'BLOOM_TOKEN'.freeze
 
     # The text of the url variable key
@@ -65,8 +67,12 @@ module Dev
       }
     end
 
-    # TODO: Should we look at https://github.com/DannyBen/lightly for caching the token?
+    # Method for getting a bearer token for the bloom growth api. There are a couple of possible logic paths
+    #   - If a token has already been defined, use it
+    #   - If a token is found in the ENV, use it
+    #   - Otherwise, use the username and passowrd that has been configured to request a new token from bloom
     def token
+      # TODO: Should we look at https://github.com/DannyBen/lightly for caching the token?
       @token ||= ENV.fetch(BLOOM_TOKEN, nil)
 
       unless @token
@@ -89,6 +95,7 @@ module Dev
       @token
     end
 
+    # Return all user objects visible to the logged in user
     def visible_users(&)
       [].tap do |ary|
         get('/api/v1/users/mineviewable') do |user_data|
@@ -112,6 +119,8 @@ module Dev
       nil
     end
 
+    # Perform a post request to the given path using the gien data
+    # Return the parsed json body
     def post(path, data, headers: default_headers)
       data = data.to_json unless data.is_a?(String)
       response = client.request_post(path, data, headers)

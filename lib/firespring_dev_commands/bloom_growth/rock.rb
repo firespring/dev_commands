@@ -2,7 +2,8 @@ module Dev
   class BloomGrowth
     # Class containing rock information
     class Rock
-      attr_accessor :data, :id, :type, :name, :owner, :complete, :state, :created, :due
+      attr_accessor :data, :id, :type, :name, :owner, :complete, :completion_id, :created, :due
+      attr_reader :state
 
       def initialize(data)
         @data = data
@@ -11,13 +12,14 @@ module Dev
         @name = data['Name'].to_s.strip
         @owner = User.new(data['Owner']) if data['Owner']
         @complete = data['Complete']
-        @state = completion_to_state(data['Completion'])
+        @completion_id = data['Completion']
         @created = Time.parse(data['CreateTime']) if data['CreateTime']
         @due = Time.parse(data['DueDate']) if data['DueDate']
         @archived = data['Archived']
       end
 
-      def completion_to_state(completion_id)
+      # Convert the completion_id bloom growth gives us into a text version
+      def state
         case completion_id
         when 0
           'Off Track'
@@ -26,14 +28,6 @@ module Dev
         when 2
           'Complete'
         end
-      end
-
-      def colorized_state
-        return unless state
-        return state.light_red if state.downcase.include?('off track')
-        return state.light_green if state.downcase.include?('complete')
-
-        state.light_white
       end
     end
   end
