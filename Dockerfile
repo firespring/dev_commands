@@ -24,7 +24,7 @@ ADD Gemfile .
 ADD Gemfile.lock .
 ADD firespring_dev_commands.gemspec .
 ADD lib/firespring_dev_commands/version.rb ./lib/firespring_dev_commands/version.rb
-RUN bundle install
+RUN bundle install --with test
 
 # Copy the rest of the source in
 ADD . .
