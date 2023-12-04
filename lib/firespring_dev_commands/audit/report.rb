@@ -16,6 +16,7 @@ module Dev
         raise 'items must all be report items' unless @items.all?(Dev::Audit::Report::Item)
 
         @min_severity = min_severity || Level::HIGH
+        @error_on_unknown = error_on_unknown
         @ignorelist = Array(ignorelist).compact
       end
 
