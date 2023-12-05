@@ -7,11 +7,18 @@ module Dev
       module Node
         # Class for default rake tasks associated with a node project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :node
+          attr_reader :node, :start_deps_on_test
 
           # Allow for custom container path for the application
-          def initialize(application, container_path: nil, local_path: nil, exclude: [])
+          def initialize(
+            application,
+            container_path: nil,
+            local_path: nil,
+            start_deps_on_test: true,
+            exclude: []
+          )
             @node = Dev::Node.new(container_path:, local_path:)
+            @start_deps_on_test = start_deps_on_test
             super(application, exclude:)
           end
 
@@ -59,6 +66,7 @@ module Dev
             application = @name
             node = @node
             exclude = @exclude
+            up_cmd = @start_deps_on_test ? :up : :up_no_deps
             return if exclude.include?(:test)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -70,7 +78,7 @@ module Dev
 
                 namespace :node do
                   desc "Run all node tests against the #{application}'s codebase"
-                  task test: %w(init_docker up) do
+                  task test: %W(init_docker #{up_cmd}) do
                     LOG.debug("Running all node tests in the #{application} codebase")
 
                     options = []

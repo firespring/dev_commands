@@ -7,11 +7,18 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php
+          attr_reader :php, :start_deps_on_test
 
           # Allow for custom container path for the application
-          def initialize(application, container_path: nil, local_path: nil, exclude: [])
+          def initialize(
+            application,
+            container_path: nil,
+            local_path: nil,
+            start_deps_on_test: nil,
+            exclude: []
+          )
             @php = Dev::Php.new(container_path:, local_path:)
+            @start_deps_on_test = start_deps_on_test
             super(application, exclude:)
           end
 
@@ -103,6 +110,7 @@ module Dev
             application = @name
             php = @php
             exclude = @exclude
+            up_cmd = @start_deps_on_test ? :up : :up_no_deps
             return if exclude.include?(:test)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -114,7 +122,7 @@ module Dev
 
                 namespace :php do
                   desc "Run all php tests against the #{application}'s codebase"
-                  task test: %w(init_docker up) do
+                  task test: %W(init_docker #{up_cmd}) do
                     LOG.debug("Running all php tests in the #{application} codebase")
 
                     options = []
