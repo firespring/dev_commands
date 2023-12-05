@@ -8,14 +8,13 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php, :siloed_tests
+          attr_reader :php, :isolated_tests
 
           # Allow for custom container path for the application
-          def initialize(application, container_path: nil, local_path: nil, siloed_tests: nil, exclude: [])
+          def initialize(application, container_path: nil, local_path: nil, isolated_tests: false, run_new_container: false, exclude: [])
             @php = Dev::Php.new(container_path:, local_path:)
-            # TODO: Better name
-            # TODO: Should this apply to all or just tests?
-            @siloed_tests = siloed_tests
+            @isolated_tests = isolated_tests
+            @run_new_container = run_new_container
 
             super(application, exclude:)
           end
@@ -68,6 +67,7 @@ module Dev
           def create_lint_task!
             application = @name
             php = @php
+            run_new_container = @run_new_container
             exclude = @exclude
             return if exclude.include?(:lint)
 
@@ -82,6 +82,8 @@ module Dev
                   desc "Run the php linting software against the #{application}'s codebase" \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task lint: %w(init_docker up_no_deps) do
+                    # TODO: Conditionally run up unless running new container???
+                    # TODO: Change exec to run command, auto-remove?
                     LOG.debug("Check for php linting errors in the #{application} codebase")
 
                     options = []
@@ -108,7 +110,8 @@ module Dev
           def create_test_task!
             application = @name
             php = @php
-            siloed_tests = @siloed_tests
+            isolated_tests = @isolated_tests
+            run_new_container = @run_new_container
             exclude = @exclude
             return if exclude.include?(:test)
 
@@ -124,14 +127,15 @@ module Dev
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task test: %w(init_docker up) do
                     LOG.debug("Running all php tests in the #{application} codebase")
+                    # TODO: Conditionally run up unless running new container???
 
                     project_name = nil
-                    project_name = SecureRandom.hex if siloed_tests
+                    project_name = SecureRandom.hex if isolated_tests
 
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
                     Dev::Docker::Compose.new(project_name:, services: application, options:).exec(*php.test_command)
-                    # TODO: Add clean if we are siloed
+                    # TODO: Add clean if we are isolated_tests
                   end
                 end
               end
@@ -163,6 +167,7 @@ module Dev
             # Have to set a local variable to be accessible inside of the instance_eval block
             application = @name
             php = @php
+            run_new_container = @run_new_container
             exclude = @exclude
             return if exclude.include?(:audit)
 
@@ -179,6 +184,8 @@ module Dev
                        "\n\tuse IGNORELIST=(comma delimited list of cwe numbers) removes the entry from the list." \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
+                    # TODO: Conditionally run up unless running new container???
+                    # TODO: Change exec to run command, auto-remove?
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?
 
