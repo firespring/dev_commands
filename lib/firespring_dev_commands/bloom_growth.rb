@@ -72,7 +72,6 @@ module Dev
     #   - If a token is found in the ENV, use it
     #   - Otherwise, use the username and passowrd that has been configured to request a new token from bloom
     def token
-      # TODO: Should we look at https://github.com/DannyBen/lightly for caching the token?
       @token ||= ENV.fetch(BLOOM_TOKEN, nil)
 
       unless @token
@@ -88,7 +87,8 @@ module Dev
             'accept' => 'application/json'
           }
         )
-        @token = response['access_token']
+        # TODO: Should we look at https://github.com/DannyBen/lightly for caching the token?
+        @token = ENV[BLOOM_TOKEN] = response['access_token']
         LOG.info("Retrieved BloomGrowth token. Expires on #{Time.now + response['expires_in']}")
       end
 
