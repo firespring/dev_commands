@@ -11,7 +11,7 @@ DEV_COMMANDS_TOP_LEVEL = self
 
 # Load all gems referenced in the Gemfile
 require 'bundler'
-Bundler.require
+Bundler.require(:default)
 
 # Add libdir to the default ruby path
 libdir = File.realpath(File.dirname(__FILE__))

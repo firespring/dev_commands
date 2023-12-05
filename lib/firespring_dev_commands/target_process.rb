@@ -15,7 +15,7 @@ module Dev
     # The text of the url variable key
     TP_URL = 'TP_URL'.freeze
 
-    # Config object for setting top level jira config options
+    # Config object for setting top level target process config options
     Config = Struct.new(:username, :password, :url, :http_debug) do
       def initialize
         Dotenv.load(CONFIG_FILE) if File.exist?(CONFIG_FILE)
