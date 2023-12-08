@@ -7,18 +7,23 @@ module Dev
       module Ruby
         # Class for default rake tasks associated with a ruby project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :ruby, :start_deps_on_test
+          attr_reader :ruby, :start_container_dependencies_on_test
 
           # Allow for custom container path for the application
+          #
+          # @param application [String] The name of the application
+          # @param container_path [String] The path to the application inside of the container
+          # @param local_path [String] The path to the application on your local system
+          # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
           def initialize(
             application,
             container_path: nil,
             local_path: nil,
-            start_deps_on_test: nil,
+            start_container_dependencies_on_test: true,
             exclude: []
           )
             @ruby = Dev::Ruby.new(container_path:, local_path:)
-            @start_deps_on_test = start_deps_on_test
+            @start_container_dependencies_on_test = start_container_dependencies_on_test
             super(application, exclude:)
           end
 
@@ -66,7 +71,7 @@ module Dev
             application = @name
             ruby = @ruby
             exclude = @exclude
-            up_cmd = @start_deps_on_test ? :up : :up_no_deps
+            up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
             return if exclude.include?(:test)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
