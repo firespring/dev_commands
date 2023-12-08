@@ -8,7 +8,7 @@ module Dev
       # Normalize the ruby platform to return a docker platform architecture format
       def determine_compute_architecture
         case RUBY_PLATFORM
-        when /x86_64|amd64/
+        when /x86_64|amd64|x64-mingw/
           'linux/amd64' # 64-bit Intel/AMD architecture
         when /arm|aarch64/
           'linux/arm64' # ARM architecture
