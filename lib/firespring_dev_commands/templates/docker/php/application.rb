@@ -9,7 +9,7 @@ module Dev
         class Application < Dev::Template::ApplicationInterface
           attr_reader :php, :start_container_dependencies_on_test
 
-          # Allow for custom container path for the application
+          # Create the templated rake tasks for the php application
           #
           # @param application [String] The name of the application
           # @param container_path [String] The path to the application inside of the container
