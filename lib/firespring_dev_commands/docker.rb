@@ -103,11 +103,13 @@ module Dev
       LOG.info "\nDeleted #{type.capitalize}"
       deleted_items = info["#{type}Deleted"] || []
       deleted_items.each { |it| LOG.info "  #{it}" }
-      LOG.info "Total reclaimed space: #{filesize(info['SpaceReclaimed'])}"
+      LOG.info "Total reclaimed space: #{Dev::Common.new.filesize(info['SpaceReclaimed'])}"
     end
 
     # Print the given filesize using the most appropriate units
+    # @deprecated Please use {Common#filesize} instead
     private def filesize(size)
+      warn '[DEPRECATION] `Docker#filesize` is deprecated.  Please use `Common#filesize` instead.'
       return '0.0 B' if size.to_i.zero?
 
       units = %w(B KB MB GB TB Pb EB)
@@ -205,7 +207,7 @@ module Dev
         arch = "#{arch}/#{variant}" if variant
         id = image.info&.dig('id')&.split(':')&.last&.slice(0..11)
         created = timesince(Time.at(image.info&.dig('Created')))
-        size = filesize(image.info&.dig('Size'))
+        size = Dev::Common.new.filesize(image.info&.dig('Size'))
 
         repo_urls = image.info&.dig('RepoTags')
         repo_urls ||= ["#{image.info&.dig('RepoDigests')&.first&.split(':')&.first&.split('@')&.first}:<none>"]

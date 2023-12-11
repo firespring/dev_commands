@@ -146,6 +146,67 @@ module Dev
         execute_command(build_command('pull'))
       end
 
+      # Clean up all resources associated with the current project name after the block is executed
+      def with_project_prune(&block)
+        # Execute the block
+        yield
+
+      ensure
+        # Run the clean now that the block has been executed
+        # TODO: Call down here?
+        # TODO: Just call this prune?
+        project_prune
+      end
+
+      # Clean up all resources associated with the current project name
+      def project_prune
+        LOG.debug "In project prune"
+
+        raise 'No project name defined' if project_name.to_s.strip.empty?
+
+        ::Docker::Container.all(filters: {status: ['restarting', 'running']}.to_json).each do |container|
+          next unless container.info['Names'].any? { |name| name.rpartition('/')[-1].start_with?(project_name) }
+          begin
+            container.stop(timeout: 120)
+            LOG.info "Stopped container #{container.id[0, 12]}"
+          rescue => e
+            LOG.error "Error stopping container #{container.id[0, 12]}: #{e}"
+          end
+        end
+
+        sleep 1
+
+        ::Docker::Container.all(filters: {status: ['exited', 'created', 'paused', 'dead']}.to_json).each do |container|
+          next unless container.info['Names'].any? { |name| name.rpartition('/')[-1].start_with?(project_name) }
+          begin
+            container.remove(v: true)
+            LOG.info "Removed container #{container.id[0, 12]}"
+          rescue => e
+            LOG.error "Error stopping container #{container.id[0, 12]}: #{e}"
+          end
+        end
+
+        ::Docker::Network.all.each do |network|
+          next unless network.info['Name'].start_with?(project_name)
+          begin
+            network.remove
+            LOG.info "Removed network #{network.id[0, 12]}"
+          rescue => e
+            LOG.error "Error stopping network #{network.id[0, 12]}: #{e}"
+          end
+        end
+
+        ::Docker::Volume.all.each do |volume|
+          next unless volume.info['Name'].start_with?(project_name)
+          begin
+            volume.remove
+            LOG.info "Removed volume #{volume.id[0, 12]}"
+          rescue => e
+            LOG.error "Error stopping volume #{volume.id[0, 12]}: #{e}"
+          end
+        end
+      end
+
       # Get the first container matching the given name
       # If prefix is specified then this method will filter for compose services in the given project only
       # If status is specified then this method will filter containers in the given status only

@@ -8,14 +8,28 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php, :isolated_tests
+          attr_reader :php, :test_isolate, :test_deps
 
-          # Allow for custom container path for the application
-          def initialize(application, container_path: nil, local_path: nil, isolated_tests: false, run_new_container: false, exclude: [])
+          # Create the templated rake tasks for the php application
+          #
+          # @param application [String] The name of the application
+          # @param container_path [String] The path to the application inside of the container
+          # @param local_path [String] The path to the application on your local system
+
+          # TODO: 
+          # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
+          # TODO: Auto copy artifacts back?
+          def initialize(
+            application,
+            container_path: nil,
+            local_path: nil,
+            test_isolate: false,
+            test_deps: true,
+            exclude: []
+          )
             @php = Dev::Php.new(container_path:, local_path:)
-            @isolated_tests = isolated_tests
-            @run_new_container = run_new_container
-
+            @test_isolate = test_isolate
+            @test_deps = test_deps
             super(application, exclude:)
           end
 
@@ -110,8 +124,8 @@ module Dev
           def create_test_task!
             application = @name
             php = @php
-            isolated_tests = @isolated_tests
-            run_new_container = @run_new_container
+            test_isolate = @test_isolate
+            test_deps = @test_deps
             exclude = @exclude
             return if exclude.include?(:test)
 
@@ -125,17 +139,23 @@ module Dev
                 namespace :php do
                   desc "Run all php tests against the #{application}'s codebase" \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
-                  task test: %w(init_docker up) do
+                  task test: %W(init_docker) do
                     LOG.debug("Running all php tests in the #{application} codebase")
-                    # TODO: Conditionally run up unless running new container???
 
-                    project_name = nil
-                    project_name = SecureRandom.hex if isolated_tests
+                    project_name = test_isolate ? SecureRandom.hex : nil
 
+                    # TODO: What about tests that need things running?
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(project_name:, services: application, options:).exec(*php.test_command)
-                    # TODO: Add clean if we are isolated_tests
+                    options << '--no-deps' unless test_deps
+                    Dev::Docker::Compose.new(project_name:, services: application, options:).run(*php.test_command)
+
+                    # Clean up resources if we are on an isolated project name
+                    if test_isolate
+                      Dev::Docker::Compose.new(project_name:).down
+                      # TODO: Should we prune here or not? Don't want to clean up volumes that SBF needs?
+                      Dev::Docker.new.prune
+                    end
                   end
                 end
               end

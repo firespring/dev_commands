@@ -7,11 +7,23 @@ module Dev
       module Ruby
         # Class for default rake tasks associated with a ruby project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :ruby
+          attr_reader :ruby, :start_container_dependencies_on_test
 
-          # Allow for custom container path for the application
-          def initialize(application, container_path: nil, local_path: nil, exclude: [])
+          # Create the templated rake tasks for the ruby application
+          #
+          # @param application [String] The name of the application
+          # @param container_path [String] The path to the application inside of the container
+          # @param local_path [String] The path to the application on your local system
+          # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
+          def initialize(
+            application,
+            container_path: nil,
+            local_path: nil,
+            start_container_dependencies_on_test: true,
+            exclude: []
+          )
             @ruby = Dev::Ruby.new(container_path:, local_path:)
+            @start_container_dependencies_on_test = start_container_dependencies_on_test
             super(application, exclude:)
           end
 
@@ -59,6 +71,7 @@ module Dev
             application = @name
             ruby = @ruby
             exclude = @exclude
+            up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
             return if exclude.include?(:test)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -70,7 +83,7 @@ module Dev
 
                 namespace :ruby do
                   desc "Run all ruby tests against the #{application}'s codebase"
-                  task test: %w(init_docker up_no_deps) do
+                  task test: %W(init_docker #{up_cmd}) do
                     LOG.debug("Running all ruby tests in the #{application} codebase")
 
                     options = []
