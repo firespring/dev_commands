@@ -72,7 +72,7 @@ module Dev
               return if exclude.include?(:sh)
 
               desc "Open a shell into a running #{application} container"
-              task sh: %W(init_docker #{application}:up _pre_sh_hooks) do
+              task sh: %W(init_docker #{application}:up_no_deps _pre_sh_hooks) do
                 Dev::Docker::Compose.new(services: [application]).sh
                 Rake::Task[:_post_sh_hooks].execute
               end
@@ -154,7 +154,7 @@ module Dev
               return if exclude.include?(:reload)
 
               desc "Reloads the #{application} container"
-              task reload: %w(init_docker _pre_reload_hooks down up) do
+              task reload: %w(init_docker _pre_reload_hooks down up_no_deps) do
                 Rake::Task[:_post_reload_hooks].execute
               end
             end

@@ -3,11 +3,12 @@ module Dev
   class Audit
     # The class containing standardized information about an audit report
     class Report
-      attr_accessor :items, :min_severity, :ignorelist, :filtered_items
+      attr_accessor :items, :min_severity, :error_on_unknown, :ignorelist, :filtered_items
 
       def initialize(
         items,
         min_severity: ENV.fetch('MIN_SEVERITY', nil),
+        error_on_unknown: ENV.fetch('ERROR_ON_UNKNOWN', nil),
         ignorelist: ENV['IGNORELIST'].to_s.split(/\s*,\s*/)
       )
         # Items should be an array of Item objects
@@ -15,12 +16,18 @@ module Dev
         raise 'items must all be report items' unless @items.all?(Dev::Audit::Report::Item)
 
         @min_severity = min_severity || Level::HIGH
+        @error_on_unknown = error_on_unknown
         @ignorelist = Array(ignorelist).compact
       end
 
       # Get all severities greater than or equal to the minimum severity
       def desired_severities
-        LEVELS.slice(LEVELS.find_index(min_severity)..-1)
+        max_severity = if error_on_unknown.to_s.strip == 'true'
+                         -1
+                       else
+                         -2
+                       end
+        LEVELS.slice(LEVELS.find_index(min_severity)..max_severity)
       end
 
       # Run the filters against the report items and filter out any which should be excluded

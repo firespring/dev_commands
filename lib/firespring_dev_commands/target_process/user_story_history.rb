@@ -8,10 +8,11 @@ module Dev
       # The api path for user story requests
       PATH = '/UserStoryHistories'.freeze
 
-      attr_accessor :type, :id, :source_entity_id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort, :time_spent,
-                    :last_state_change_date, :project, :owner, :creator, :release, :team, :priority, :state, :original_data
+      attr_accessor :data, :type, :id, :source_entity_id, :name, :description, :start_date, :end_date, :create_date, :modify_date, :tags, :effort,
+                    :time_spent, :last_state_change_date, :project, :owner, :creator, :release, :team, :priority, :state
 
       def initialize(data)
+        @data = data
         @id = data['Id']
         @source_entity_id = data['SourceEntityId']
         @type = data['ResourceType']
@@ -31,7 +32,6 @@ module Dev
         @effort = data['Effort']
         @time_spent = data['TimeSpent']
         @last_state_change_date = parse_time(data['LastStateChangeDate'])
-        @original_data = original_data
       end
 
       # Parse the dot net time representation into something that ruby can use

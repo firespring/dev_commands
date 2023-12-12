@@ -9,6 +9,10 @@ DEV_COMMANDS_PROJECT_NAME = File.basename(DEV_COMMANDS_ROOT_DIR)
 # A reference to the top level object context
 DEV_COMMANDS_TOP_LEVEL = self
 
+# Load all gems referenced in the Gemfile
+require 'bundler'
+Bundler.require(:default)
+
 # Add libdir to the default ruby path
 libdir = File.realpath(File.dirname(__FILE__))
 $LOAD_PATH.unshift libdir
