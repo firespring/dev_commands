@@ -8,11 +8,13 @@ module Dev
     DEFAULT_PACKAGE_FILE = 'composer.json'.freeze
 
     # Config object for setting top level git config options
-    Config = Struct.new(:container_path, :local_path, :package_file) do
+    Config = Struct.new(:container_path, :local_path, :package_file, :coverage_class, :coverage_threshold) do
       def initialize
         self.container_path = DEFAULT_PATH
         self.local_path = DEV_COMMANDS_ROOT_DIR
         self.package_file = DEFAULT_PACKAGE_FILE
+        self.coverage_class = Dev::Coverage::None
+        self.coverage_threshold = nil
       end
     end
 
@@ -30,12 +32,17 @@ module Dev
       alias_method :configure, :config
     end
 
-    attr_accessor :container_path, :local_path, :package_file
+    attr_accessor :container_path, :local_path, :package_file, :coverage_class, :coverage_threshold, :coverage
 
-    def initialize(container_path: nil, local_path: nil, package_file: nil)
+    def initialize(container_path: nil, local_path: nil, package_file: nil, coverage_class: nil, coverage_threshold: nil)
       @container_path = container_path || self.class.config.container_path
       @local_path = local_path || self.class.config.local_path
       @package_file = package_file || self.class.config.package_file
+      @coverage_class = coverage_class || self.class.config.coverage_class
+      @coverage_threshold = coverage_threshold || self.class.config.coverage_threshold
+      raise 'coverage class must be an instance of Dev::Coverage::Base' unless @coverage_class.ancestors.include?(Dev::Coverage::Base)
+
+      @coverage = @coverage_class.new(container_path:, local_path:, threshold: @coverage_threshold)
     end
 
     # The base npm command that is the starting point for all subsequent commands
@@ -93,6 +100,7 @@ module Dev
     def test_command
       test = []
       test << './vendor/bin/phpunit'
+      test << coverage.options if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end
