@@ -1,5 +1,7 @@
 module Dev
+  # Module containing different classes for interfacing with coverage files
   module Coverage
+    # Class for checking code coverage using cobertura
     class Cobertura
       attr_reader :local_filename, :container_filename, :filename, :threshold
 
@@ -8,15 +10,18 @@ module Dev
         @local_filename = File.join(local_path || '.', @filename)
         @container_filename = File.join(container_path || '.', @filename)
         @threshold = threshold.to_f
-
-        # Remove any previous coverage info
-        FileUtils.rm_f(local_filename, verbose: true)
       end
 
-      def options
+      # Remove any previous versions of the local file that will be output
+      # return the phpunit options needed to regenerate the cobertura xml file
+      def php_options
+        # Remove any previous coverage info
+        FileUtils.rm_f(local_filename, verbose: true)
+
         %W(--coverage-cobertura #{container_filename})
       end
 
+      # Parse the cobertura file as a hash and check the total coverage against the desired threshold
       def check
         report = Ox.load(File.read(local_filename), mode: :hash)
         attrs, = report[:coverage]

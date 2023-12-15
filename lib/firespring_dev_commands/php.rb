@@ -95,7 +95,7 @@ module Dev
     def test_command
       test = []
       test << './vendor/bin/phpunit'
-      test << coverage.options if coverage
+      test << coverage.php_options if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end
