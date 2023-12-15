@@ -138,6 +138,11 @@ module Dev
       Docker::Compose.new.mapped_public_port(name, private_port)
     end
 
+    # Gets the default working dir of the container
+    def default_working_dir(container)
+      container.json['Config']['WorkingDir']
+    end
+
     # Copies the source path on your local machine to the destination path on the container
     def copy_to_container(container, source_path, dest_path)
       LOG.info "Copying #{source_path} to #{dest_path}... "

@@ -101,8 +101,8 @@ module Dev
     end
 
     # Run the check to ensure code coverage meets the desired threshold
-    def check_test_coverage
-      coverage.check
+    def check_test_coverage(application:)
+      coverage.check(application:)
     end
 
     # Build the php fast test command
