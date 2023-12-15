@@ -19,11 +19,11 @@ module Dev
 
       def check
         report = Ox.load(File.read(local_filename), mode: :hash)
-        attrs, sources, packages = report[:coverage]
+        attrs, = report[:coverage]
         cov_pct = attrs[:'line-rate'].to_f * 100
-        raise "Line coverage %.2f%% is less than the threshold %.2f%%" % [cov_pct, threshold] if cov_pct < threshold
+        raise format('Line coverage %.2f%% is less than the threshold %.2f%%', cov_pct, threshold) if cov_pct < threshold
 
-        puts "Line coverage %.2f%% is above the threshold %.2f%%" % [cov_pct, threshold]
+        puts format('Line coverage %.2f%% is above the threshold %.2f%%', cov_pct, threshold)
       end
     end
   end
