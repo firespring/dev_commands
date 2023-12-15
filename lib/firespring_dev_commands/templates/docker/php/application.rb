@@ -7,7 +7,7 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php, :start_container_dependencies_on_test, :coverage_class, :coverage_threshold
+          attr_reader :php, :start_container_dependencies_on_test
 
           # Create the templated rake tasks for the php application
           #
@@ -20,11 +20,10 @@ module Dev
             container_path: nil,
             local_path: nil,
             start_container_dependencies_on_test: true,
-            coverage_class: nil,
             coverage_threshold: nil,
             exclude: []
           )
-            @php = Dev::Php.new(container_path:, local_path:, coverage_class:, coverage_threshold:)
+            @php = Dev::Php.new(container_path:, local_path:, coverage_threshold:)
             @start_container_dependencies_on_test = start_container_dependencies_on_test
 
             super(application, exclude:)

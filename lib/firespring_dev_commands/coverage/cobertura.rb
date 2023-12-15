@@ -1,6 +1,6 @@
 module Dev
   module Coverage
-    class Cobertura < Base
+    class Cobertura
       attr_reader :local_filename, :container_filename, :filename, :threshold
 
       def initialize(filename: 'cobertura.xml', threshold: nil, container_path: nil, local_path: nil)
