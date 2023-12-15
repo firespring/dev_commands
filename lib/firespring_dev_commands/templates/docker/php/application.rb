@@ -135,7 +135,7 @@ module Dev
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
                     Dev::Docker::Compose.new(services: application, options:).exec(*php.test_command)
-                    php.coverage.check
+                    php.check_test_coverage
                   end
                 end
               end
