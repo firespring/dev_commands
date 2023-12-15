@@ -3,13 +3,11 @@ module Dev
   module Coverage
     # Class for checking code coverage using cobertura
     class Cobertura
-      attr_reader :local_path, :container_path, :filename, :threshold, :local_path, :local_filename, :container_path, :container_filename
+      attr_reader :local_filename, :container_filename, :filename, :threshold
 
       def initialize(filename: 'cobertura.xml', threshold: nil, container_path: nil, local_path: nil)
         @filename = filename
-        @local_path = local_path
         @local_filename = File.join(local_path || '.', @filename)
-        @container_path = container_path
         @container_filename = File.join(container_path || '.', @filename)
         @threshold = threshold.to_f
       end
@@ -29,8 +27,7 @@ module Dev
         # If an application has been specified and the file does not exist locally, attempt to copy it back from the docker container
         if application && !File.exist?(local_filename)
           container = Dev::Docker::Compose.new.container_by_name(application)
-          workdir = Dev::Docker.new.default_working_dir(container)
-          Dev::Docker.new.copy_from_container(container, File.join(workdir, filename), local_filename, required: true)
+          Dev::Docker.new.copy_from_container(container, container_filename, local_filename, required: true)
         end
 
         # Load the file from disk and parse with ox
