@@ -5,7 +5,7 @@ module Dev
     class Cobertura
       attr_reader :local_filename, :container_filename, :filename, :threshold
 
-      def initialize(filename: 'cobertura.xml', threshold: nil, container_path: nil, local_path: nil)
+      def initialize(filename: File.join('coverage', 'cobertura.xml'), threshold: nil, container_path: nil, local_path: nil)
         @filename = filename
         @local_filename = File.join(local_path || '.', @filename)
         @container_filename = File.join(container_path || '.', @filename)
