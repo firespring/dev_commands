@@ -38,6 +38,8 @@ module Dev
         raise 'Code coverage not met' if threshold && total_missed > threshold
       end
 
+      # Go through the package and add up all of the lines that were missed
+      # Ignore if the file was in the exlude list
       private def parse_package_missed(package)
         filename =  package.attributes[:name]
         return if exclude.any? { |it| it.match(filename) }
@@ -57,8 +59,9 @@ module Dev
         missed
       end
 
+      # Calculate the coverage percent based off the numbers we got and compare to the
+      # value cobertura reported. This is meant as a sanity check that we are reading the data correctly
       private def sanity_check_coverage_against_cobertura_values(package, missed, total)
-        filename =  package.attributes[:name]
         line_rate = package.attributes[:'line-rate']
         cobertura_reported_coverage = line_rate.to_f
         cobertura_reported_precision = line_rate.split('.').last.length
@@ -67,6 +70,7 @@ module Dev
         file_coverage = ((total - missed).to_f / total).round(cobertura_reported_precision) if total.positive?
         return if file_coverage == cobertura_reported_coverage
 
+        filename =  package.attributes[:name]
         puts "WARNINNG: #{filename} coverage (#{file_coverage}) differed from what cobertura reported (#{cobertura_reported_coverage})".light_yellow
       end
     end
