@@ -31,25 +31,44 @@ module Dev
         end
 
         # Load the file from disk and parse with ox
-        report = Ox.load(File.read(local_filename), mode: :hash)
-        _, _, files = report[:coverage]
 
-        covered = missed = 0
-        files.dig(:packages, :package)&.each do |_attrs, packages|
-          _, _, lines = *packages&.dig(:classes, :class)
-          lines&.dig(:lines, :line)&.each do |it|
-            it = it&.first if it.is_a?(Array)
-            if it&.dig(:hits).to_i.positive?
-              covered += 1
+        report = Ox.load(File.read(local_filename))
+        total_covered = total_missed = 0
+        report.coverage.locate("packages/package").each do |package|
+          filename =  package.attributes[:name]
+          line_rate = package.attributes[:'line-rate']
+          cobertura_reported_coverage = line_rate.to_f
+          cobertura_reported_precision = line_rate.split('.').last.length
+
+          file_covered = file_missed = 0
+          file_lines_counted = Set.new()
+          package.locate("classes/class/lines/line").each do |line|
+            # Don't count lines multiple times
+            line_number = line.attributes[:number]
+            next if file_lines_counted.include?(line_number)
+
+            file_lines_counted << line_number
+            if line.attributes[:hits].to_i.positive?
+              file_covered += 1
             else
-              missed += 1
+              file_missed += 1
             end
           end
-        end
+          file_lines_valid = file_covered + file_missed
+          file_coverage = 0.0
+          file_coverage = (file_covered.to_f / file_lines_valid).round(cobertura_reported_precision) if file_lines_valid.positive?
+          puts "WARNINNG: #{file_coverage} differed from what cobertura reported #{cobertura_reported_coverage}".light_yellow unless file_coverage == cobertura_reported_coverage
 
-        puts "Lines missing coverage was #{missed}"
+          total_covered += file_covered
+          total_missed += file_missed
+        end
+        total_lines_valid = total_covered + total_missed
+        total_coverage = 0.0
+        total_coverage = (total_covered.to_f / total_lines_valid).round(14) if total_lines_valid.positive?
+
+        puts "Lines missing coverage was #{total_missed}"
         puts "Configured threshold was #{threshold}" if threshold
-        raise 'Code coverage not met' if threshold && missed > threshold
+        raise 'Code coverage not met' if threshold && total_missed > threshold
       end
     end
   end
