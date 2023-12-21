@@ -30,45 +30,44 @@ module Dev
           Dev::Docker.new.copy_from_container(container, container_filename, local_filename, required: true)
         end
 
-        # Load the file from disk and parse with ox
-
         report = Ox.load(File.read(local_filename))
-        total_covered = total_missed = 0
-        report.coverage.locate("packages/package").each do |package|
-          filename =  package.attributes[:name]
-          line_rate = package.attributes[:'line-rate']
-          cobertura_reported_coverage = line_rate.to_f
-          cobertura_reported_precision = line_rate.split('.').last.length
-
-          file_covered = file_missed = 0
-          file_lines_counted = Set.new()
-          package.locate("classes/class/lines/line").each do |line|
-            # Don't count lines multiple times
-            line_number = line.attributes[:number]
-            next if file_lines_counted.include?(line_number)
-
-            file_lines_counted << line_number
-            if line.attributes[:hits].to_i.positive?
-              file_covered += 1
-            else
-              file_missed += 1
-            end
-          end
-          file_lines_valid = file_covered + file_missed
-          file_coverage = 0.0
-          file_coverage = (file_covered.to_f / file_lines_valid).round(cobertura_reported_precision) if file_lines_valid.positive?
-          puts "WARNINNG: #{file_coverage} differed from what cobertura reported #{cobertura_reported_coverage}".light_yellow unless file_coverage == cobertura_reported_coverage
-
-          total_covered += file_covered
-          total_missed += file_missed
+        total_missed = 0
+        report.coverage.locate('packages/package').each do |package|
+          total_missed += parse_package_missed(package)
         end
-        total_lines_valid = total_covered + total_missed
-        total_coverage = 0.0
-        total_coverage = (total_covered.to_f / total_lines_valid).round(14) if total_lines_valid.positive?
 
         puts "Lines missing coverage was #{total_missed}"
         puts "Configured threshold was #{threshold}" if threshold
         raise 'Code coverage not met' if threshold && total_missed > threshold
+      end
+
+      private def parse_package_missed(package)
+        missed = total = 0
+        already_counted = Set.new
+        package.locate('classes/class/lines/line').each do |line|
+          # Don't count lines multiple times
+          line_number = line.attributes[:number]
+          next if already_counted.include?(line_number)
+
+          already_counted << line_number
+          total += 1
+          missed += 1 unless line.attributes[:hits].to_i.positive?
+        end
+        sanity_check_coverage_against_cobertura_values(package, missed, total)
+        missed
+      end
+
+      private def sanity_check_coverage_against_cobertura_values(package, missed, total)
+        filename =  package.attributes[:name]
+        line_rate = package.attributes[:'line-rate']
+        cobertura_reported_coverage = line_rate.to_f
+        cobertura_reported_precision = line_rate.split('.').last.length
+
+        file_coverage = 0.0
+        file_coverage = ((total - missed).to_f / total).round(cobertura_reported_precision) if total.positive?
+        unless file_coverage == cobertura_reported_coverage
+          puts "WARNINNG: #{filename} coverage (#{file_coverage}) differed from what cobertura reported (#{cobertura_reported_coverage})".light_yellow
+        end
       end
     end
   end
