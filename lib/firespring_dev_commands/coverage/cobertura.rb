@@ -9,7 +9,7 @@ module Dev
         @filename = filename
         @local_filename = File.join(local_path || '.', @filename)
         @container_filename = File.join(container_path || '.', @filename)
-        @threshold = threshold.to_f
+        @threshold = threshold
       end
 
       # Remove any previous versions of the local file that will be output
@@ -32,10 +32,24 @@ module Dev
 
         # Load the file from disk and parse with ox
         report = Ox.load(File.read(local_filename), mode: :hash)
-        attrs, = report[:coverage]
-        cov_pct = attrs[:'line-rate'].to_f * 100
-        puts format('Line coverage was %.2f%%. Configured threshold was %.2f%%', cov_pct, threshold)
-        raise 'Code coverage not met' if cov_pct < threshold
+        _, _, files = report[:coverage]
+
+        covered = missed = 0
+        files.dig(:packages, :package)&.each do |_attrs, packages|
+          _, _, lines = *packages&.dig(:classes, :class)
+          lines&.dig(:lines, :line)&.each do |it|
+            it = it&.first if it.is_a?(Array)
+            if it&.dig(:hits).to_i.positive?
+              covered += 1
+            else
+              missed += 1
+            end
+          end
+        end
+
+        puts "Lines missing coverage was #{missed}"
+        puts "Configured threshold was #{threshold}" if threshold
+        raise 'Code coverage not met' if threshold && missed > threshold
       end
     end
   end
