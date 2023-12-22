@@ -70,7 +70,7 @@ module Dev
         file_coverage = ((total - missed).to_f / total).round(cobertura_reported_precision) if total.positive?
         return if file_coverage == cobertura_reported_coverage
 
-        filename =  package.attributes[:name]
+        filename = package.attributes[:name]
         puts "WARNINNG: #{filename} coverage (#{file_coverage}) differed from what cobertura reported (#{cobertura_reported_coverage})".light_yellow
       end
     end
