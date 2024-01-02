@@ -85,7 +85,3 @@ module Bundler
   end
 end
 Bundler::GemHelper.install_tasks
-
-task :joetest do
-  Dev::Coverage::Cobertura.new.check
-end

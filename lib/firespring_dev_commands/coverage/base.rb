@@ -5,7 +5,7 @@ module Dev
         raise 'not implemented'
       end
 
-      def check(application: nil)
+      def check(*)
         raise 'not implemented'
       end
     end

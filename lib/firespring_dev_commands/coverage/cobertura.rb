@@ -6,12 +6,15 @@ module Dev
       attr_reader :local_filename, :container_filename, :filename, :threshold, :exclude
 
       def initialize(filename: File.join('coverage', 'cobertura.xml'), threshold: nil, container_path: nil, local_path: nil, exclude: nil)
+        super()
+
         @filename = filename
         @local_filename = File.join(local_path || '.', @filename)
         @container_filename = File.join(container_path || '.', @filename)
         @threshold = threshold
         @exclude = (exclude || []).map do |it|
           next it if it.is_a?(Regex)
+
           Regex.new(it)
         end
       end
