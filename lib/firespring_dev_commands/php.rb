@@ -8,12 +8,12 @@ module Dev
     DEFAULT_PACKAGE_FILE = 'composer.json'.freeze
 
     # Config object for setting top level git config options
-    Config = Struct.new(:container_path, :local_path, :package_file, :coverage_threshold) do
+    Config = Struct.new(:container_path, :local_path, :package_file, :coverage) do
       def initialize
         self.container_path = DEFAULT_PATH
         self.local_path = DEV_COMMANDS_ROOT_DIR
         self.package_file = DEFAULT_PACKAGE_FILE
-        self.coverage_threshold = nil
+        self.coverage = nil
       end
     end
 
@@ -33,11 +33,11 @@ module Dev
 
     attr_accessor :container_path, :local_path, :package_file, :coverage
 
-    def initialize(container_path: nil, local_path: nil, package_file: nil, coverage_threshold: nil)
+    def initialize(container_path: nil, local_path: nil, package_file: nil, coverage: nil)
       @container_path = container_path || self.class.config.container_path
       @local_path = local_path || self.class.config.local_path
       @package_file = package_file || self.class.config.package_file
-      @coverage = Dev::Coverage::Cobertura.new(container_path:, local_path:, threshold: coverage_threshold)
+      @coverage = coverage || Dev::Coverage::None.new
     end
 
     # The base npm command that is the starting point for all subsequent commands
@@ -95,7 +95,7 @@ module Dev
     def test_command
       test = []
       test << './vendor/bin/phpunit'
-      test << coverage.php_options if coverage
+      test.concat(coverage.php_options) if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end

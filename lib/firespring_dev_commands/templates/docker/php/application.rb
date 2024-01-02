@@ -20,10 +20,10 @@ module Dev
             container_path: nil,
             local_path: nil,
             start_container_dependencies_on_test: true,
-            coverage_threshold: nil,
+            coverage: nil,
             exclude: []
           )
-            @php = Dev::Php.new(container_path:, local_path:, coverage_threshold:)
+            @php = Dev::Php.new(container_path:, local_path:, coverage:)
             @start_container_dependencies_on_test = start_container_dependencies_on_test
 
             super(application, exclude:)

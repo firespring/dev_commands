@@ -2,7 +2,7 @@ module Dev
   # Module containing different classes for interfacing with coverage files
   module Coverage
     # Class for checking code coverage using cobertura
-    class Cobertura
+    class Cobertura < Base
       attr_reader :local_filename, :container_filename, :filename, :threshold, :exclude
 
       def initialize(filename: File.join('coverage', 'cobertura.xml'), threshold: nil, container_path: nil, local_path: nil, exclude: nil)
@@ -10,7 +10,10 @@ module Dev
         @local_filename = File.join(local_path || '.', @filename)
         @container_filename = File.join(container_path || '.', @filename)
         @threshold = threshold
-        @exclude = exclude || []
+        @exclude = (exclude || []).map do |it|
+          next it if it.is_a?(Regex)
+          Regex.new(it)
+        end
       end
 
       # Remove any previous versions of the local file that will be output
@@ -55,12 +58,14 @@ module Dev
           missed += 1 unless line.attributes[:hits].to_i.positive?
         end
         total = lines_processed.length
+
         sanity_check_coverage_against_cobertura_values(package, missed, total)
         missed
       end
 
       # Calculate the coverage percent based off the numbers we got and compare to the
       # value cobertura reported. This is meant as a sanity check that we are reading the data correctly
+      # TODO: This should be removed after the above logic has been vetted
       private def sanity_check_coverage_against_cobertura_values(package, missed, total)
         line_rate = package.attributes[:'line-rate']
         cobertura_reported_coverage = line_rate.to_f
@@ -71,7 +76,7 @@ module Dev
         return if file_coverage == cobertura_reported_coverage
 
         filename = package.attributes[:name]
-        puts "WARNINNG: #{filename} coverage (#{file_coverage}) differed from what cobertura reported (#{cobertura_reported_coverage})".light_yellow
+        puts "WARNINNG: #{filename} coverage (#{file_coverage}) differed from what cobertura reported (#{cobertura_reported_coverage})"
       end
     end
   end
