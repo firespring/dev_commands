@@ -38,6 +38,7 @@ module Dev
       @local_path = local_path || self.class.config.local_path
       @package_file = package_file || self.class.config.package_file
       @coverage = coverage || Dev::Coverage::None.new
+      raise 'coverage must be an instance of the base class' unless @coverage.is_a?(Dev::Coverage::Base)
     end
 
     # The base npm command that is the starting point for all subsequent commands
