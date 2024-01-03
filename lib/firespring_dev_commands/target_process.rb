@@ -117,6 +117,8 @@ module Dev
     # Call the given block (if present) with each piece of data
     # Return all pieces of data
     def get(path, query, &)
+      return [] if query.empty?
+
       query_string = query.generate
       url = "/api/v1/#{path}"
       url << "?#{URI.encode_www_form(query_string)}" unless query_string.empty?
