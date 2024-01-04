@@ -2,12 +2,13 @@ module Dev
   class TargetProcess
     # Class for writing target process query statements
     class Query
-      attr_accessor :where, :incl, :take
+      attr_accessor :where, :incl, :take, :empty
 
       def initialize
         @where = []
         @incl = []
         @take = 250
+        @empty = false
       end
 
       # Add a new query clause
@@ -33,6 +34,11 @@ module Dev
         end
       end
 
+      # Check if any of the "in" statements were empty. If so then we don't want to actually run the query
+      def empty?
+        @empty == true
+      end
+
       # Generate the string representation for this query
       def generate
         {}.tap do |clause|
@@ -50,22 +56,38 @@ module Dev
       # TODO: Do these need moved to their associated entities?
       # Add a filter that looks for stories whose id is contained in the list of ids given
       def filter_by_user_story_ids(user_story_ids)
+        if user_story_ids.nil? || user_story_ids.empty?
+          @empty = true
+          return
+        end
         self << "(Id in ('#{user_story_ids.join("', '")}'))"
       end
 
       # Add a filter that looks for stories whose team id is contained in the list of ids given
       def filter_by_team_ids(team_ids)
-        self << "(Team.Id in ('#{team_ids.join("', '")}'))" unless team_ids.nil? || team_ids.empty?
+        if team_ids.nil? || team_ids.empty?
+          @empty = true
+          return
+        end
+        self << "(Team.Id in ('#{team_ids.join("', '")}'))"
       end
 
       # Add a filter that looks for stories whose project id is contained in the list of ids given
       def filter_by_project(projects)
+        if projects.nil? || projects.empty?
+          @empty = true
+          return
+        end
         self << "(Project.Name in ('#{projects.join("', '")}'))"
       end
 
       # Add a filter that looks for stories whose state is contained in the list of states given
       def filter_by_states(states)
-        self << "(EntityState.Name in ('#{states.join("', '")}'))" unless states.nil? || states.empty?
+        if states.nil? || states.empty?
+          @empty = true
+          return
+        end
+        self << "(EntityState.Name in ('#{states.join("', '")}'))"
       end
 
       # Add a filter that looks for stories whose state is set to final
@@ -114,7 +136,11 @@ module Dev
 
       # Add a filter that looks for assignable ids which are included in the given array
       def filter_by_entity_ids(entity_ids)
-        self << "(Assignable.Id in ('#{entity_ids.join("', '")}'))" unless entity_ids.nil? || entity_ids.empty?
+        if entity_ids.nil? || entity_ids.empty?
+          @empty = true
+          return
+        end
+        self << "(Assignable.Id in ('#{entity_ids.join("', '")}'))"
       end
 
       # Add a filter that looks for a custom deploy date between the given dates`
