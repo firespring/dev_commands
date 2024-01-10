@@ -20,10 +20,12 @@ module Dev
             container_path: nil,
             local_path: nil,
             start_container_dependencies_on_test: true,
+            coverage: nil,
             exclude: []
           )
-            @php = Dev::Php.new(container_path:, local_path:)
+            @php = Dev::Php.new(container_path:, local_path:, coverage:)
             @start_container_dependencies_on_test = start_container_dependencies_on_test
+
             super(application, exclude:)
           end
 
@@ -133,6 +135,7 @@ module Dev
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
                     Dev::Docker::Compose.new(services: application, options:).exec(*php.test_command)
+                    php.check_test_coverage(application:)
                   end
                 end
               end
