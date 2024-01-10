@@ -138,8 +138,14 @@ module Dev
       Docker::Compose.new.mapped_public_port(name, private_port)
     end
 
+    # Gets the default working dir of the container
+    def working_dir(container)
+      container.json['Config']['WorkingDir']
+    end
+
     # Copies the source path on your local machine to the destination path on the container
     def copy_to_container(container, source_path, dest_path)
+      dest_path = File.join(working_dir(container), dest_path) unless dest_path.start_with?(File::SEPARATOR)
       LOG.info "Copying #{source_path} to #{dest_path}... "
 
       container.archive_in(source_path, dest_path, overwrite: true)
@@ -154,6 +160,7 @@ module Dev
     # Copies the source path on the container to the destination path on your local machine
     # If required is set to true, the command will fail if the source path does not exist on the container
     def copy_from_container(container, source_path, dest_path, required: true)
+      source_path = File.join(working_dir(container), source_path) unless source_path.start_with?(File::SEPARATOR)
       LOG.info "Copying #{source_path} to #{dest_path}... "
 
       tar = StringIO.new
