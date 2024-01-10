@@ -47,14 +47,14 @@ end
 # Create the base init command
 DEV_COMMANDS_TOP_LEVEL.instance_eval do
   task :init do
-    LOG.debug 'In base init'
+    # Placeholder for general initialization tasks
   end
 end
 
 # Create the base init_docker command
 DEV_COMMANDS_TOP_LEVEL.instance_eval do
   task init_docker: %w(init) do
-    LOG.debug 'In base init docker'
+    # Placeholder for general docker initialization tasks
   end
 end
 

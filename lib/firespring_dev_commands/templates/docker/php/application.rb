@@ -8,26 +8,29 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php, :isolate_tests
+          attr_reader :php, :test_isolation, :test_deps
 
           # Create the templated rake tasks for the php application
           #
           # @param application [String] The name of the application
           # @param container_path [String] The path to the application inside of the container
           # @param local_path [String] The path to the application on your local system
-          # @param isolate_tests [Boolean] Whether or not to start tests in an isolated project and clean up after tests are run
+          # @param test_isolation [Boolean] Whether or not to start tests in an isolated project and clean up after tests are run
+          # @param test_deps [Boolean] Whether or not to start container dependencies when running tests
           # @param coverage [Dev::Coverage::Base] The coverage class which is an instance of Base to be used to evaluate coverage
           # TODO: Auto copy all artifacts back?
           def initialize(
             application,
             container_path: nil,
             local_path: nil,
-            isolate_tests: false,
+            test_isolation: false,
+            test_deps: false,
             coverage: nil,
             exclude: []
           )
             @php = Dev::Php.new(container_path:, local_path:, coverage:)
-            @isolate_tests = isolate_tests
+            @test_isolation = test_isolation
+            @test_deps = test_deps
 
             super(application, exclude:)
           end
@@ -95,8 +98,6 @@ module Dev
                   desc "Run the php linting software against the #{application}'s codebase" \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task lint: %w(init_docker up_no_deps) do
-                    # TODO: Conditionally run up unless running new container???
-                    # TODO: Change exec to run command, auto-remove?
                     LOG.debug("Check for php linting errors in the #{application} codebase")
 
                     options = []
@@ -123,7 +124,8 @@ module Dev
           def create_test_task!
             application = @name
             php = @php
-            isolate_tests = @isolate_tests
+            test_isolation = @test_isolation
+            up_cmd = @test_deps ? :up : :up_no_deps
             exclude = @exclude
             return if exclude.include?(:test)
 
@@ -134,26 +136,28 @@ module Dev
                   # This is just a placeholder to execute the dependencies
                 end
 
+                task test_init_docker: %w(init_docker) do
+                  Dev::Docker::Compose::configure do |c|
+                    c.project_name = SecureRandom.hex if test_isolation
+                  end
+                end
+
                 namespace :php do
                   desc "Run all php tests against the #{application}'s codebase" \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
-                  task test: %W(init_docker up_no_deps) do
+                  task test: %W(test_init_docker #{up_cmd}) do
                     LOG.debug("Running all php tests in the #{application} codebase")
 
-                    project_name = isolate_tests ? SecureRandom.hex : nil
-
-                    # TODO: What about tests that need things running?
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    #options << '--no-deps' unless test_deps
-                    #Dev::Docker::Compose.new(project_name:, services: application, options:).run(*php.test_command)
-                    Dev::Docker::Compose.new(project_name:, services: application, options:).exec(*php.test_command)
+                    Dev::Docker::Compose.new(services: application, options:).exec(*php.test_command)
                     php.check_test_coverage(application:)
 
                     # Clean up resources if we are on an isolated project name
-                    if isolate_tests
-                      Dev::Docker::Compose.new(project_name:).down
-                      Dev::Docker.new.prune('volumes')
+                    if test_isolation
+                      Dev::Docker::Compose.new.down
+                      #Can we remove volumes in down?
+                      Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
                     end
                   end
                 end

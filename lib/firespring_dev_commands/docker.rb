@@ -61,12 +61,12 @@ module Dev
 
     # Prunes/removes all unused containers
     def prune_containers
-      prune('containers')
+      _prune('containers')
     end
 
     # Prunes/removes all unused networks
     def prune_networks
-      prune('networks')
+      _prune('networks')
     end
 
     # Prunes/removes all unused volumes
@@ -74,16 +74,31 @@ module Dev
     def prune_volumes
       opts = {}
       opts[:filters] = {all: ['true']}.to_json if Dev::Common.new.version_greater_than('22.9999.0', self.class.version) && ENV['ALL_VOLUMES'].to_s.strip != 'false'
-      prune('volumes', opts:)
+      _prune('volumes', opts:)
+    end
+
+    def prune_project_volumes(project_name:)
+      project_name = project_name.to_s.strip
+      raise 'No project name defined' if project_name.empty?
+
+      ::Docker::Volume.all.each do |volume|
+        next unless volume.info['Name'].start_with?(project_name)
+        begin
+          volume.remove
+          LOG.info "Removed volume #{volume.id[0, 12]}"
+        rescue => e
+          LOG.error "Error removing volume #{volume.id[0, 12]}: #{e}"
+        end
+      end
     end
 
     # Prunes/removes all unused images
     def prune_images
-      prune('images')
+      _prune('images')
     end
 
     # Private method which actually calls the prune endpoint on the docker api connection
-    def prune(type, opts: {})
+    private def _prune(type, opts: {})
       response = ::Docker.connection.post("/#{type.downcase}/prune", opts)
       format_prune(type, response)
     rescue ::Docker::Error::ServerError => e
