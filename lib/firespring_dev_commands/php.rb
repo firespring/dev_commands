@@ -8,11 +8,12 @@ module Dev
     DEFAULT_PACKAGE_FILE = 'composer.json'.freeze
 
     # Config object for setting top level git config options
-    Config = Struct.new(:container_path, :local_path, :package_file) do
+    Config = Struct.new(:container_path, :local_path, :package_file, :coverage) do
       def initialize
         self.container_path = DEFAULT_PATH
         self.local_path = DEV_COMMANDS_ROOT_DIR
         self.package_file = DEFAULT_PACKAGE_FILE
+        self.coverage = nil
       end
     end
 
@@ -30,12 +31,14 @@ module Dev
       alias_method :configure, :config
     end
 
-    attr_accessor :container_path, :local_path, :package_file
+    attr_accessor :container_path, :local_path, :package_file, :coverage
 
-    def initialize(container_path: nil, local_path: nil, package_file: nil)
+    def initialize(container_path: nil, local_path: nil, package_file: nil, coverage: nil)
       @container_path = container_path || self.class.config.container_path
       @local_path = local_path || self.class.config.local_path
       @package_file = package_file || self.class.config.package_file
+      @coverage = coverage || Dev::Coverage::None.new
+      raise 'coverage must be an instance of the base class' unless @coverage.is_a?(Dev::Coverage::Base)
     end
 
     # The base npm command that is the starting point for all subsequent commands
@@ -90,13 +93,33 @@ module Dev
     def test_command
       test = base_command
       test << 'run' << 'test'
+      test.concat(coverage.php_options) if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end
 
-    # Build the php test (with coverage) command
-    def test_coverage_command
-      raise 'not implemented'
+    # TODO: Can we pass args into the compose command here?
+#    # Build the php test (with coverage) command
+#    def test_coverage_command
+#      test = base_command
+#      test << 'run' << 'test:coverage'
+#      test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
+#      test
+#    end
+
+    # Run the check to ensure code coverage meets the desired threshold
+    def check_test_coverage(application:)
+      coverage.check(application:)
+    end
+
+    # TODO: We should remove this and force it to be one-off
+    # Build the php fast test command
+    def test_fast_command(processes = 4)
+      test = []
+      test << './vendor/bin/paratest'
+      test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
+      test << "-p#{processes}" << '--runner=WrapperRunner'
+      test
     end
   end
 end

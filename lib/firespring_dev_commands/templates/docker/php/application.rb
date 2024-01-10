@@ -8,28 +8,27 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php, :test_isolate, :test_deps
+          attr_reader :php, :isolate_tests
 
           # Create the templated rake tasks for the php application
           #
           # @param application [String] The name of the application
           # @param container_path [String] The path to the application inside of the container
           # @param local_path [String] The path to the application on your local system
-
-          # TODO: 
-          # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
-          # TODO: Auto copy artifacts back?
+          # @param isolate_tests [Boolean] Whether or not to start tests in an isolated project and clean up after tests are run
+          # @param coverage [Dev::Coverage::Base] The coverage class which is an instance of Base to be used to evaluate coverage
+          # TODO: Auto copy all artifacts back?
           def initialize(
             application,
             container_path: nil,
             local_path: nil,
-            test_isolate: false,
-            test_deps: true,
+            isolate_tests: false,
+            coverage: nil,
             exclude: []
           )
-            @php = Dev::Php.new(container_path:, local_path:)
-            @test_isolate = test_isolate
-            @test_deps = test_deps
+            @php = Dev::Php.new(container_path:, local_path:, coverage:)
+            @isolate_tests = isolate_tests
+
             super(application, exclude:)
           end
 
@@ -124,8 +123,7 @@ module Dev
           def create_test_task!
             application = @name
             php = @php
-            test_isolate = @test_isolate
-            test_deps = @test_deps
+            isolate_tests = @isolate_tests
             exclude = @exclude
             return if exclude.include?(:test)
 
@@ -139,22 +137,23 @@ module Dev
                 namespace :php do
                   desc "Run all php tests against the #{application}'s codebase" \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
-                  task test: %W(init_docker) do
+                  task test: %W(init_docker up_no_deps) do
                     LOG.debug("Running all php tests in the #{application} codebase")
 
-                    project_name = test_isolate ? SecureRandom.hex : nil
+                    project_name = isolate_tests ? SecureRandom.hex : nil
 
                     # TODO: What about tests that need things running?
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    options << '--no-deps' unless test_deps
-                    Dev::Docker::Compose.new(project_name:, services: application, options:).run(*php.test_command)
+                    #options << '--no-deps' unless test_deps
+                    #Dev::Docker::Compose.new(project_name:, services: application, options:).run(*php.test_command)
+                    Dev::Docker::Compose.new(project_name:, services: application, options:).exec(*php.test_command)
+                    php.check_test_coverage(application:)
 
                     # Clean up resources if we are on an isolated project name
-                    if test_isolate
+                    if isolate_tests
                       Dev::Docker::Compose.new(project_name:).down
-                      # TODO: Should we prune here or not? Don't want to clean up volumes that SBF needs?
-                      Dev::Docker.new.prune
+                      Dev::Docker.new.prune('volumes')
                     end
                   end
                 end

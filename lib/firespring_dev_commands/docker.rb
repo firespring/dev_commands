@@ -61,12 +61,12 @@ module Dev
 
     # Prunes/removes all unused containers
     def prune_containers
-      _prune('containers')
+      prune('containers')
     end
 
     # Prunes/removes all unused networks
     def prune_networks
-      _prune('networks')
+      prune('networks')
     end
 
     # Prunes/removes all unused volumes
@@ -74,16 +74,16 @@ module Dev
     def prune_volumes
       opts = {}
       opts[:filters] = {all: ['true']}.to_json if Dev::Common.new.version_greater_than('22.9999.0', self.class.version) && ENV['ALL_VOLUMES'].to_s.strip != 'false'
-      _prune('volumes', opts:)
+      prune('volumes', opts:)
     end
 
     # Prunes/removes all unused images
     def prune_images
-      _prune('images')
+      prune('images')
     end
 
     # Private method which actually calls the prune endpoint on the docker api connection
-    private def _prune(type, opts: {})
+    def prune(type, opts: {})
       response = ::Docker.connection.post("/#{type.downcase}/prune", opts)
       format_prune(type, response)
     rescue ::Docker::Error::ServerError => e
@@ -140,8 +140,14 @@ module Dev
       Docker::Compose.new.mapped_public_port(name, private_port)
     end
 
+    # Gets the default working dir of the container
+    def working_dir(container)
+      container.json['Config']['WorkingDir']
+    end
+
     # Copies the source path on your local machine to the destination path on the container
     def copy_to_container(container, source_path, dest_path)
+      dest_path = File.join(working_dir(container), dest_path) unless dest_path.start_with?(File::SEPARATOR)
       LOG.info "Copying #{source_path} to #{dest_path}... "
 
       container.archive_in(source_path, dest_path, overwrite: true)
@@ -156,6 +162,7 @@ module Dev
     # Copies the source path on the container to the destination path on your local machine
     # If required is set to true, the command will fail if the source path does not exist on the container
     def copy_from_container(container, source_path, dest_path, required: true)
+      source_path = File.join(working_dir(container), source_path) unless source_path.start_with?(File::SEPARATOR)
       LOG.info "Copying #{source_path} to #{dest_path}... "
 
       tar = StringIO.new

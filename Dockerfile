@@ -12,7 +12,7 @@ RUN bundle config --global jobs 12 && bundle config --global retry 3
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get dist-upgrade -y \
-    && apt-get install -y locales apt-transport-https build-essential curl libxml2-dev git \
+    && apt-get install -y locales apt-transport-https build-essential curl git \
     && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && locale-gen \
     && apt-get autoremove -y \
     && apt-get clean \
@@ -24,7 +24,8 @@ ADD Gemfile .
 ADD Gemfile.lock .
 ADD firespring_dev_commands.gemspec .
 ADD lib/firespring_dev_commands/version.rb ./lib/firespring_dev_commands/version.rb
-RUN bundle install --with test
+RUN bundle config --local with 'test'
+RUN bundle install
 
 # Copy the rest of the source in
 ADD . .
