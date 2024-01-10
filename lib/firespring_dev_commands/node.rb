@@ -75,7 +75,7 @@ module Dev
     # Build the node lint command
     def lint_command
       lint = base_command
-      lint << 'run' << 'lint'
+      lint << 'run' << 'lint' << '--'
       lint.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint
     end
@@ -83,7 +83,7 @@ module Dev
     # Build the node lint fix command
     def lint_fix_command
       lint_fix = base_command
-      lint_fix << 'run' << 'lint-fix'
+      lint_fix << 'run' << 'lint-fix' << '--'
       lint_fix.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint_fix
     end
@@ -91,15 +91,7 @@ module Dev
     # Build the node test command
     def test_command
       test = base_command
-      test << 'run' << 'test'
-      test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
-      test
-    end
-
-    # Build the node test (with coverage) command
-    def test_coverage_command
-      test = base_command
-      test << 'run' << 'test:coverage'
+      test << 'run' << 'test' << '--'
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end
