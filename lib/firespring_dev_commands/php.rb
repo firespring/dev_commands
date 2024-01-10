@@ -92,34 +92,24 @@ module Dev
     # Build the php test command
     def test_command
       test = base_command
-      test << 'run' << 'test'
+      test << 'run' << 'test' << '--'
       test.concat(coverage.php_options) if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end
 
-    # TODO: Can we pass args into the compose command here?
-#    # Build the php test (with coverage) command
-#    def test_coverage_command
-#      test = base_command
-#      test << 'run' << 'test:coverage'
-#      test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
-#      test
-#    end
+    # TODO: Should we remove this once the coverage class is built out?
+    # Build the php test (with coverage) command
+    def test_coverage_command
+      test = base_command
+      test << 'run' << 'test:coverage' << '--'
+      test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
+      test
+    end
 
     # Run the check to ensure code coverage meets the desired threshold
     def check_test_coverage(application:)
       coverage.check(application:)
-    end
-
-    # TODO: We should remove this and force it to be one-off
-    # Build the php fast test command
-    def test_fast_command(processes = 4)
-      test = []
-      test << './vendor/bin/paratest'
-      test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
-      test << "-p#{processes}" << '--runner=WrapperRunner'
-      test
     end
   end
 end
