@@ -1,5 +1,4 @@
 require_relative '../../base_interface'
-require 'securerandom'
 
 module Dev
   module Template
@@ -8,29 +7,28 @@ module Dev
       module Php
         # Class for default rake tasks associated with a php project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :php, :test_isolation, :test_deps
+          attr_reader :php, :start_container_dependencies_on_test, :test_isolation
 
           # Create the templated rake tasks for the php application
           #
           # @param application [String] The name of the application
           # @param container_path [String] The path to the application inside of the container
           # @param local_path [String] The path to the application on your local system
+          # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
           # @param test_isolation [Boolean] Whether or not to start tests in an isolated project and clean up after tests are run
-          # @param test_deps [Boolean] Whether or not to start container dependencies when running tests
           # @param coverage [Dev::Coverage::Base] The coverage class which is an instance of Base to be used to evaluate coverage
-          # TODO: Auto copy all artifacts back?
           def initialize(
             application,
             container_path: nil,
             local_path: nil,
+            start_container_dependencies_on_test: false,
             test_isolation: false,
-            test_deps: false,
             coverage: nil,
             exclude: []
           )
             @php = Dev::Php.new(container_path:, local_path:, coverage:)
+            @start_container_dependencies_on_test = start_container_dependencies_on_test
             @test_isolation = test_isolation
-            @test_deps = test_deps
 
             super(application, exclude:)
           end
@@ -83,7 +81,6 @@ module Dev
           def create_lint_task!
             application = @name
             php = @php
-            run_new_container = @run_new_container
             exclude = @exclude
             return if exclude.include?(:lint)
 
@@ -124,9 +121,9 @@ module Dev
           def create_test_task!
             application = @name
             php = @php
-            test_isolation = @test_isolation
-            up_cmd = @test_deps ? :up : :up_no_deps
             exclude = @exclude
+            test_isolation = @test_isolation
+            up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
             return if exclude.include?(:test)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -156,7 +153,6 @@ module Dev
                     # Clean up resources if we are on an isolated project name
                     if test_isolation
                       Dev::Docker::Compose.new.down
-                      #Can we remove volumes in down?
                       Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
                     end
                   end
@@ -190,7 +186,6 @@ module Dev
             # Have to set a local variable to be accessible inside of the instance_eval block
             application = @name
             php = @php
-            run_new_container = @run_new_container
             exclude = @exclude
             return if exclude.include?(:audit)
 
@@ -207,8 +202,6 @@ module Dev
                        "\n\tuse IGNORELIST=(comma delimited list of cwe numbers) removes the entry from the list." \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
-                    # TODO: Conditionally run up unless running new container???
-                    # TODO: Change exec to run command, auto-remove?
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?
 
