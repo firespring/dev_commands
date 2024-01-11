@@ -52,7 +52,7 @@ module Dev
                   desc "Run the node linting software against the #{application}'s codebase" \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task lint: %w(init_docker up_no_deps) do
-                    LOG.debug('Check for node linting errors')
+                    LOG.debug("Check for node linting errors in the #{application} codebase")
 
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
@@ -62,7 +62,7 @@ module Dev
                   namespace :lint do
                     desc "Run the linting software against the #{application}'s codebase and apply all available fixes"
                     task fix: %w(init_docker up_no_deps) do
-                      LOG.debug('Check and fix linting errors')
+                      LOG.debug("Check and fix all node linting errors in the #{application} codebase")
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
@@ -91,7 +91,7 @@ module Dev
                 end
 
                 task test_init_docker: %w(init_docker) do
-                  Dev::Docker::Compose::configure do |c|
+                  Dev::Docker::Compose.configure do |c|
                     c.project_name = SecureRandom.hex if test_isolation
                   end
                 end

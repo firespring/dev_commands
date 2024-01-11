@@ -83,6 +83,7 @@ module Dev
 
       ::Docker::Volume.all.each do |volume|
         next unless volume.info['Name'].start_with?(project_name)
+
         begin
           volume.remove
           LOG.info "Removed volume #{volume.id[0, 12]}"

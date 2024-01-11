@@ -94,7 +94,7 @@ module Dev
 
     # Build the bundle lint command
     def lint_command
-      install = base_command
+      lint = base_command
       lint << 'exec' << 'rake' << 'lint'
       lint.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint
@@ -102,16 +102,16 @@ module Dev
 
     # Build the bundle lint fix command
     def lint_fix_command
-      install = base_command
-      lint << 'exec' << 'rake' << 'lint:fix'
+      lint_fix = base_command
+      lint_fix << 'exec' << 'rake' << 'lint:fix'
       lint_fix.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint_fix
     end
 
     # Build the bundle test command
     def test_command
-      install = base_command
-      lint << 'exec' << 'rake' << 'test'
+      test = base_command
+      test << 'exec' << 'rake' << 'test'
       test.concat(coverage.ruby_options) if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test

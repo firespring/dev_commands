@@ -18,7 +18,7 @@ module Dev
       end
 
       def check(*)
-        puts 'Coverage not configured'
+        # Nothing to do here
       end
     end
   end

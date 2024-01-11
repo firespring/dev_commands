@@ -90,7 +90,7 @@ module Dev
                 end
 
                 task test_init_docker: %w(init_docker) do
-                  Dev::Docker::Compose::configure do |c|
+                  Dev::Docker::Compose.configure do |c|
                     c.project_name = SecureRandom.hex if test_isolation
                   end
                 end

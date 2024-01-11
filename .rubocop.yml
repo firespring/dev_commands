@@ -1,12 +1,15 @@
 # This is the configuration used to check the rubocop source code.
 inherit_from: #{RUBOCOP_HOME}/config/default.yml
-require: rubocop-performance
+require:
+  - rubocop-performance
+  - rubocop-rake
 
 AllCops:
   NewCops: enable
   TargetRubyVersion: '3.1'
   Exclude:
     - 'vendor/**/*'
+  SuggestExtensions: false
 
 Layout/LineLength:
   Max: 175
@@ -56,7 +59,7 @@ Metrics/CyclomaticComplexity:
   Max: 15
 
 Metrics/MethodLength:
-  Max: 30
+  Max: 35
 
 Metrics/ModuleLength:
   Enabled: false

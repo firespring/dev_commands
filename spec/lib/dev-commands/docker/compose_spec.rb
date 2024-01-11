@@ -24,7 +24,7 @@ describe Dev::Docker::Compose do
     )
   end
 
-  before :each do
+  before do
     allow(described_class).to receive(:version).and_return('2.15.0')
   end
 
@@ -63,8 +63,9 @@ describe Dev::Docker::Compose do
   end
 
   describe '.build_command' do
-    let(:command) { [random] }
     subject { instance.send(:build_command, command) }
+
+    let(:command) { [random] }
 
     it 'sets default values' do
       expect(subject.join(' ')).to include(instance.compose_files.first)
@@ -105,8 +106,9 @@ describe Dev::Docker::Compose do
   end
 
   describe '.execute_command' do
-    let(:command) { [random] }
     subject { instance.send(:execute_command, command) }
+
+    let(:command) { [random] }
 
     it 'runs the command' do
       allow(LOG).to receive(:debug)

@@ -49,7 +49,6 @@ module Dev
         end
       end
 
-      # rubocop:disable Metrics/MethodLength
       # Create the rake task for the aws credentials setup and login method
       def create_login_task!
         # Have to set a local variable to be accessible inside of the instance_eval block
@@ -92,7 +91,6 @@ module Dev
           end
         end
       end
-      # rubocop:enable Metrics/MethodLength
 
       # Create the rake task for the eol method
       def create_eol_task!
