@@ -121,38 +121,11 @@ module Dev
       LOG.info "Total reclaimed space: #{Dev::Common.new.filesize(info['SpaceReclaimed'])}"
     end
 
-    # Print the given filesize using the most appropriate units
-    # @deprecated Please use {Common#filesize} instead
-    private def filesize(size)
-      warn '[DEPRECATION] `Docker#filesize` is deprecated.  Please use `Common#filesize` instead.'
-      return '0.0 B' if size.to_i.zero?
-
-      units = %w(B KB MB GB TB Pb EB)
-      exp = (Math.log(size) / Math.log(1024)).to_i
-      exp = 6 if exp > 6
-
-      format('%.1f %s', size.to_f / (1024**exp), units[exp])
-    end
-
     # Remove docker images with the "force" option set to true
     # This will remove the images even if they are currently in use and cause unintended side effects.
     def force_remove_images(name_and_tag)
       images = ::Docker::Image.all(filter: name_and_tag)
       ::Docker::Image.remove(images[0].id, force: true) unless images.empty?
-    end
-
-    # Calls the docker compose method with the given inputs
-    # @deprecated Please use {Docker::Compose#container_by_name} instead
-    def container_by_name(service_name, prefix = nil, status: [Docker::Status::RUNNING])
-      warn '[DEPRECATION] `Docker#container_by_name` is deprecated.  Please use `Docker::Compose#container_by_name` instead.'
-      Docker::Compose.new.container_by_name(service_name, prefix, status)
-    end
-
-    # Calls the docker compose method with the given inputs
-    # @deprecated Please use {Docker::Compose#mapped_public_port} instead
-    def mapped_public_port(name, private_port)
-      warn '[DEPRECATION] `Docker#mapped_public_port` is deprecated.  Please use `Docker::Compose#mapped_public_port` instead.'
-      Docker::Compose.new.mapped_public_port(name, private_port)
     end
 
     # Gets the default working dir of the container

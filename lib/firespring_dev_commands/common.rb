@@ -37,28 +37,6 @@ module Dev
       output
     end
 
-    # Wraps a block of code in a y/n question.
-    # If the user answers 'y' then the block is executed.
-    # If the user answers 'n' then the block is skipped.
-    # @deprecated Please use {Common#when_confirmed} instead
-    def with_confirmation(message, default = 'y', color_message: true)
-      message = "\n  #{message}" << '? '.light_green
-      message = message.light_green if color_message
-      print message
-      print '('.light_green << 'y'.light_yellow << '/'.light_green << 'n'.light_yellow << ') '.light_green
-
-      answer = default
-      answer = $stdin.gets unless ENV['NON_INTERACTIVE'] == 'true'
-
-      unless answer.strip.casecmp('y').zero?
-        puts "\n  Cancelled.\n".light_yellow
-        exit 1
-      end
-      puts
-
-      yield
-    end
-
     # Exits unless the user confirms they want to continue
     # If the user answers 'y' then the code will continue
     # All other inputs cause the code to exit
