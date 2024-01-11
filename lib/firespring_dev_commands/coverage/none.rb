@@ -9,6 +9,14 @@ module Dev
         []
       end
 
+      def node_options
+        []
+      end
+
+      def ruby_options
+        []
+      end
+
       def check(*)
         puts 'Coverage not configured'
       end

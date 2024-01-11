@@ -8,11 +8,12 @@ module Dev
     DEFAULT_PACKAGE_FILE = 'Gemfile'.freeze
 
     # Config object for setting top level git config options
-    Config = Struct.new(:container_path, :local_path, :package_file, :min_version, :max_version) do
+    Config = Struct.new(:container_path, :local_path, :package_file, :min_version, :max_version, :coverage) do
       def initialize
         self.container_path = DEFAULT_PATH
         self.local_path = DEV_COMMANDS_ROOT_DIR
         self.package_file = DEFAULT_PACKAGE_FILE
+        self.coverage = nil
         self.min_version = nil
         self.max_version = nil
       end
@@ -37,12 +38,15 @@ module Dev
       end
     end
 
-    attr_accessor :container_path, :local_path, :package_file
+    attr_accessor :container_path, :local_path, :package_file, :coverage
 
-    def initialize(container_path: nil, local_path: nil, package_file: nil)
+    def initialize(container_path: nil, local_path: nil, package_file: nil, coverage: nil)
       @container_path = container_path || self.class.config.container_path
       @local_path = local_path || self.class.config.local_path
       @package_file = package_file || self.class.config.package_file
+      @coverage = coverage || Dev::Coverage::None.new
+      raise 'coverage must be an instance of the base class' unless @coverage.is_a?(Dev::Coverage::Base)
+
       check_version
     end
 
@@ -91,7 +95,7 @@ module Dev
     # Build the bundle lint command
     def lint_command
       install = base_command
-      lint << 'exec' << 'rubocop'
+      lint << 'exec' << 'rake' << 'lint'
       lint.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint
     end
@@ -99,8 +103,7 @@ module Dev
     # Build the bundle lint fix command
     def lint_fix_command
       install = base_command
-      lint << 'exec' << 'rubocop'
-      lint_fix << '-A'
+      lint << 'exec' << 'rake' << 'lint:fix'
       lint_fix.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint_fix
     end
@@ -108,9 +111,15 @@ module Dev
     # Build the bundle test command
     def test_command
       install = base_command
-      lint << 'exec' << 'rspec'
+      lint << 'exec' << 'rake' << 'test'
+      test.concat(coverage.ruby_options) if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
+    end
+
+    # Run the check to ensure code coverage meets the desired threshold
+    def check_test_coverage(application:)
+      coverage.check(application:)
     end
   end
 end

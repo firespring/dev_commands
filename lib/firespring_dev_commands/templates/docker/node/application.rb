@@ -7,7 +7,7 @@ module Dev
       module Node
         # Class for default rake tasks associated with a node project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :node, :start_container_dependencies_on_test
+          attr_reader :node, :start_container_dependencies_on_test, :test_isolation
 
           # Create the templated rake tasks for the node application
           #
@@ -15,16 +15,22 @@ module Dev
           # @param container_path [String] The path to the application inside of the container
           # @param local_path [String] The path to the application on your local system
           # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
+          # @param test_isolation [Boolean] Whether or not to start tests in an isolated project and clean up after tests are run
+          # @param coverage [Dev::Coverage::Base] The coverage class which is an instance of Base to be used to evaluate coverage
           # @param exclude [Array<Symbol>] An array of default template tasks to exclude
           def initialize(
             application,
             container_path: nil,
             local_path: nil,
-            start_container_dependencies_on_test: true,
+            start_container_dependencies_on_test: false,
+            test_isolation: false,
+            coverage: nil,
             exclude: []
           )
-            @node = Dev::Node.new(container_path:, local_path:)
+            @node = Dev::Node.new(container_path:, local_path:, coverage:)
             @start_container_dependencies_on_test = start_container_dependencies_on_test
+            @test_isolation = test_isolation
+
             super(application, exclude:)
           end
 
@@ -43,7 +49,8 @@ module Dev
                 end
 
                 namespace :node do
-                  desc "Run the node linting software against the #{application}'s codebase"
+                  desc "Run the node linting software against the #{application}'s codebase" \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task lint: %w(init_docker up_no_deps) do
                     LOG.debug('Check for node linting errors')
 
@@ -72,6 +79,7 @@ module Dev
             application = @name
             node = @node
             exclude = @exclude
+            test_isolation = @test_isolation
             up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
             return if exclude.include?(:test)
 
@@ -82,14 +90,28 @@ module Dev
                   # This is just a placeholder to execute the dependencies
                 end
 
+                task test_init_docker: %w(init_docker) do
+                  Dev::Docker::Compose::configure do |c|
+                    c.project_name = SecureRandom.hex if test_isolation
+                  end
+                end
+
                 namespace :node do
-                  desc "Run all node tests against the #{application}'s codebase"
-                  task test: %W(init_docker #{up_cmd}) do
+                  desc "Run all node tests against the #{application}'s codebase" \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
+                  task test: %W(test_init_docker #{up_cmd}) do
                     LOG.debug("Running all node tests in the #{application} codebase")
 
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
                     Dev::Docker::Compose.new(services: application, options:).exec(*node.test_command)
+                    node.check_test_coverage(application:)
+
+                    # Clean up resources if we are on an isolated project name
+                    if test_isolation
+                      Dev::Docker::Compose.new.down
+                      Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
+                    end
                   end
                 end
               end
@@ -134,7 +156,8 @@ module Dev
                 namespace :node do
                   desc 'Run NPM Audit on the target application' \
                        "\n\tuse MIN_SEVERITY=(info low moderate high critical) to fetch only severity type selected and above (default=high)." \
-                       "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list."
+                       "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list." \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?
