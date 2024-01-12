@@ -162,7 +162,7 @@ module Dev
       rescue => e
         raise e if required
 
-        puts 'Not Found'
+        puts "#{source_path} Not Found"
       end
 
       Dev::Tar.new(tar).unpack(source_path, dest_path)
