@@ -19,6 +19,7 @@ module Dev
           # @param coverage [Dev::Coverage::Base] The coverage class which is an instance of Base to be used to evaluate coverage
           # @param lint_artifacts [Dev::Docker::Artifact] An array of lint artifacts to copy back from the container
           # @param test_artifacts [Dev::Docker::Artifact] An array of test artifacts to copy back from the container
+          # @param exclude [Array<Symbol>] An array of default template tasks to exclude
           def initialize(
             application,
             container_path: nil,
@@ -124,6 +125,7 @@ module Dev
                     task fix: %w(init_docker up_no_deps) do
                       LOG.debug("Check and fix all php linting errors in the #{application} codebase")
 
+                      # Run the lint fix command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
                       Dev::Docker::Compose.new(services: application, options:).exec(*php.lint_fix_command)

@@ -17,6 +17,9 @@ module Dev
           # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
           # @param test_isolation [Boolean] Whether or not to start tests in an isolated project and clean up after tests are run
           # @param coverage [Dev::Coverage::Base] The coverage class which is an instance of Base to be used to evaluate coverage
+          # @param lint_artifacts [Dev::Docker::Artifact] An array of lint artifacts to copy back from the container
+          # @param test_artifacts [Dev::Docker::Artifact] An array of test artifacts to copy back from the container
+          # @param exclude [Array<Symbol>] An array of default template tasks to exclude
           def initialize(
             application,
             container_path: nil,
@@ -24,20 +27,28 @@ module Dev
             start_container_dependencies_on_test: false,
             test_isolation: false,
             coverage: nil,
+            lint_artifacts: nil,
+            test_artifacts: nil,
             exclude: []
           )
             @ruby = Dev::Ruby.new(container_path:, local_path:, coverage:)
             @start_container_dependencies_on_test = start_container_dependencies_on_test
             @test_isolation = test_isolation
+            @lint_artifacts = lint_artifacts
+            @test_artifacts = test_artifacts
+            raise 'lint artifact must be instance of Dev::Docker::Artifact' if lint_artifacts&.any? { |it| !it.is_a?(Dev::Docker::Artifact) }
+            raise 'test artifact must be instance of Dev::Docker::Artifact' if test_artifacts&.any? { |it| !it.is_a?(Dev::Docker::Artifact) }
 
             super(application, exclude:)
           end
 
+          # rubocop:disable Metrics/MethodLength
           # Create the rake task which runs linting for the application name
           def create_lint_task!
             application = @name
             ruby = @ruby
             exclude = @exclude
+            lint_artifacts = @lint_artifacts
             return if exclude.include?(:lint)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -53,9 +64,16 @@ module Dev
                   task lint: %w(init_docker up_no_deps) do
                     LOG.debug("Check for ruby linting errors in the #{application} codebase")
 
+                    # Run the lint command
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
                     Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_command)
+                  ensure
+                    # Copy any defined artifacts back
+                    container = Dev::Docker::Compose.new.container_by_name(application)
+                    lint_artifacts&.each do |artifact|
+                      Dev::Docker.new.copy_from_container(container, artifact.container_path, artifact.local_path)
+                    end
                   end
 
                   namespace :lint do
@@ -63,6 +81,7 @@ module Dev
                     task fix: %w(init_docker up_no_deps) do
                       LOG.debug("Check and fix all ruby linting errors in the #{application} codebase")
 
+                      # Run the lint fix command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
                       Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_fix_command)
@@ -72,7 +91,9 @@ module Dev
               end
             end
           end
+          # rubocop:enable Metrics/MethodLength
 
+          # rubocop:disable Metrics/MethodLength
           # Create the rake task which runs all tests for the application name
           def create_test_task!
             application = @name
@@ -80,6 +101,7 @@ module Dev
             exclude = @exclude
             test_isolation = @test_isolation
             up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
+            test_artifacts = @test_artifacts
             return if exclude.include?(:test)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -99,13 +121,21 @@ module Dev
                   desc "Run all ruby tests against the #{application}'s codebase" \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task test: %W(test_init_docker #{up_cmd}) do
-                    LOG.debug("Running all ruby tests in the #{application} codebase")
+                    begin
+                      LOG.debug("Running all ruby tests in the #{application} codebase")
 
-                    options = []
-                    options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options:).exec(*ruby.test_command)
-                    ruby.check_test_coverage(application:)
-
+                      options = []
+                      options << '-T' if Dev::Common.new.running_codebuild?
+                      Dev::Docker::Compose.new(services: application, options:).exec(*ruby.test_command)
+                      ruby.check_test_coverage(application:)
+                    ensure
+                      # Copy any defined artifacts back
+                      container = Dev::Docker::Compose.new.container_by_name(application)
+                      test_artifacts&.each do |artifact|
+                        Dev::Docker.new.copy_from_container(container, artifact.container_path, artifact.local_path)
+                      end
+                    end
+                  ensure
                     # Clean up resources if we are on an isolated project name
                     if test_isolation
                       Dev::Docker::Compose.new.down
@@ -116,6 +146,7 @@ module Dev
               end
             end
           end
+          # rubocop:enable Metrics/MethodLength
 
           # Create the rake task which runs the install command for the application packages
           def create_install_task!
