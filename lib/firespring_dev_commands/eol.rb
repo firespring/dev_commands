@@ -56,7 +56,7 @@ module Dev
       if check_aws_resources
         account_id = Dev::Aws::Profile.new.current
         account_name = Dev::Aws::Account.new.name_by_account(account_id)
-        LOG.info "  Current AWS Account is #{account_name} (#{account_id})".light_yellow
+        LOG.info "  Current AWS Account is #{account_name} (#{account_id})\n".light_yellow
         checks_to_perform.concat(Dev::EndOfLife::Aws.new.default_products)
       end
       checks_to_perform.sort_by(&:name).each(&:print_status)
