@@ -85,3 +85,5 @@ module Bundler
   end
 end
 Bundler::GemHelper.install_tasks
+
+Dev::Docker::Desktop.new

@@ -17,7 +17,7 @@ services:
     restart: always"
 
       def initialize
-        if Os::windows?
+        if Dev::Os.new.windows?
           # Start up a small proxy container if running Docker Desktop on windows
           # This is needed because the docker api library cannot connect to the windows socket
           unless Port::open?('127.0.0.1', 23750)
@@ -31,14 +31,15 @@ services:
           # Configure the docker url to use 23750 on windows
           Docker.url = 'tcp://127.0.0.1:23750'
 
-        elsif Os::mac?
+        elsif Dev::Os.new.mac?
           # Set the docker url to point to the user's docker desktop socket
           Docker.url = "unix://#{Dir.home}/.docker/run/docker.sock" unless File.exist?('/var/run/docker.sock')
 
-        elsif Os::nix?
+        elsif Dev::Os.new.nix?
           # Set the docker url to point to the user's docker desktop socket
           Docker.url = "unix://#{Dir.home}/.docker/desktop/docker.sock" unless File.exist?('/var/run/docker.sock')
         end
       end
     end
   end
+end
