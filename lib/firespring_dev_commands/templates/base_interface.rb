@@ -150,7 +150,6 @@ DEV_COMMANDS_TOP_LEVEL.instance_eval do
     # Define this process in the appropriate namespace to add them only to a specific restart
     #   In that case it is recommended that you call the base _pre_restart_hooks as a dependency of that task
   end
-  raise 'reload command has been renamed to restart' if Rake::Task.task_defined?('_pre_reload_hooks')
 
   # Define an empty _post_restart_hooks handler which can be overridden by the user
   task :_post_restart_hooks do
@@ -158,7 +157,6 @@ DEV_COMMANDS_TOP_LEVEL.instance_eval do
     # Define this process in the appropriate namespace to add them only to a specific restart
     #   In that case it is recommended that you call the base _post_restart_hooks as a dependency of that task
   end
-  raise 'reload command has been renamed to restart' if Rake::Task.task_defined?('_post_reload_hooks')
 
   # Define an empty _pre_clean_hooks handler which can be overridden by the user
   task :_pre_clean_hooks do
