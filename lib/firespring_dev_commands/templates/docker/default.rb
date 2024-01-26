@@ -109,9 +109,11 @@ module Dev
             return if exclude.include?(:restart)
 
             desc 'Runs a "down" followed by an "up"'
-            task restart: %w(_pre_restart_hooks) do
+            task restart: %w(init_docker _pre_restart_hooks _pre_down_hooks _pre_up_hooks) do
               LOG.debug('In base restart')
               Dev::Docker::Compose.new.restart
+              Rake::Task[:_post_up_hooks].execute
+              Rake::Task[:_post_down_hooks].execute
               Rake::Task[:_post_restart_hooks].execute
             end
           end
