@@ -1,6 +1,9 @@
 module Dev
   class Docker
+    # Class for configuring docker desktop
+    # This is mostly around configuring the docker URL correctly
     class Desktop
+      # A snippet of a docker compose file which forwards a socket to a local port so that we can read it in the docker library
       WIN_TCP_COMPOSE_CONTENT = "
 ---
 version: '3.8'
@@ -16,11 +19,12 @@ services:
     command: tcp-listen:2375,reuseaddr,fork unix-connect:/var/run/docker.sock
     restart: always".freeze
 
-      def initialize
+      # Set up the local ports/sockets correctly based off of the os type
+      def configure
         if Dev::Os.new.windows?
           # Start up a small proxy container if running Docker Desktop on windows
           # This is needed because the docker api library cannot connect to the windows socket
-          unless Port.new('127.0.0.1', 23_750).open?
+          unless Dev::Port.new('127.0.0.1', 23_750).open?
             LOG.info('Starting local proxy port for docker')
 
             # Make sure any stopped version of the container are cleaned up
@@ -37,6 +41,8 @@ services:
               options: ['--detach'],
               project_name: SecureRandom.hex
             ).up
+
+            # Wait 1 second before we continue
             sleep 1
           end
 

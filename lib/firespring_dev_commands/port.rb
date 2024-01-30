@@ -1,19 +1,24 @@
-class Port
-  attr_accessor :ip, :port
+module Dev
+  # Class containing methods for actions to be taken on ports
+  class Port
+    attr_accessor :ip_address, :port
 
-  def initialize(ip, port)
-    @ip = ip
-    @port = port
-  end
-
-  def open?
-    Timeout.timeout(1) do
-      TCPSocket.new(ip, port).close
-      return true
+    def initialize(ip_address, port)
+      @ip_address = ip_address
+      @port = port
     end
 
-    false
-  rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-    false
+    # Returns true if the port is open
+    # Returns false otherwise
+    def open?(timeout = 1)
+      Timeout.timeout(timeout) do
+        TCPSocket.new(ip_address, port).close
+        return true
+      end
+
+      false
+    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+      false
+    end
   end
 end
