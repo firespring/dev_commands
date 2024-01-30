@@ -35,7 +35,7 @@ services:
             Dev::Docker::Compose.new(
               compose_files: tmp_compose_file.path,
               options: ['--detach'],
-              project_name: SecureRandom.hex
+              project_name: 'proxy'
             ).up
 
             # Wait 1 second before we continue
