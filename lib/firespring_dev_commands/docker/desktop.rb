@@ -8,9 +8,8 @@ module Dev
 ---
 version: '3.8'
 services:
-  socat:
+  windows_tcp:
     image: alpine/socat
-    container_name: windows_tcp
     network_mode: bridge
     ports:
       - 127.0.0.1:23750:2375
@@ -26,9 +25,6 @@ services:
           # This is needed because the docker api library cannot connect to the windows socket
           unless Dev::Port.new('127.0.0.1', 23_750).open?
             LOG.info('Starting local proxy port for docker')
-
-            # Make sure any stopped version of the container are cleaned up
-            Dev::Docker.new.prune_containers
 
             # Write the compose data to a tmp file
             tmp_compose_file = Tempfile.new('windows_tcp')
