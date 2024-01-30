@@ -1,5 +1,3 @@
-#require 'rbconfig'
-
 module Dev
   class Os
     attr_accessor :os
