@@ -9,6 +9,8 @@ Dev::Docker.configure do |c|
   c.min_version = '23.0.0'
 end
 
+Dev::Docker::Desktop.new.configure
+
 Dev::Docker::Compose.configure do |c|
   c.max_version = '3.0.0'
 end
