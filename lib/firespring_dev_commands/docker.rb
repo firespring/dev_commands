@@ -117,6 +117,41 @@ module Dev
       format('%.1f %s', size.to_f / (1024**exp), units[exp])
     end
 
+    def push_image(image, name, tag = nil)
+      unless tag
+        if name.include?(':')
+          name, tag = name.split(':')
+        else
+          tag = 'latest'
+        end
+      end
+
+      puts "Pushing to #{name}:#{tag}"
+      image.push(::Docker.creds, repo_tag: "#{name}:#{tag}", &Dev::Docker::Status.method(:response_callback))
+    end
+
+    def pull_image(name, tag = nil)
+      unless tag
+        if name.include?(':')
+          name, tag = name.split(':')
+        else
+          tag = 'latest'
+        end
+      end
+
+      puts "\nPulling #{name}:#{tag}"
+      opts = {
+        fromImage: "#{name}:#{tag}",
+        platform: Dev::Common::Platform.new.architecture
+      }
+      ::Docker::Image.create(**opts, &Dev::Docker::Status.new.method(:response_callback))
+    end
+
+    def untag_image(image, name, tag)
+      puts "Untagging #{name}:#{tag}"
+      image.remove(name: "#{name}:#{tag}")
+    end
+
     # Remove docker images with the "force" option set to true
     # This will remove the images even if they are currently in use and cause unintended side effects.
     def force_remove_images(name_and_tag)
