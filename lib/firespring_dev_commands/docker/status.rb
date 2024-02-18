@@ -34,5 +34,25 @@ module Dev
         DEAD
       ].freeze
     end
+
+    # TODO: Can we use 'curses' here and overwrite the correct line?
+    def response_callback(response)
+      response.split(/\n/).each do |line|
+        data = JSON.parse(line)
+        if data.include?('status')
+          if data['id']
+            LOG.info "#{data['id']}: #{data['status']}"
+          else
+            LOG.info "#{data['status']}"
+          end
+        elsif data.include?('errorDetail')
+          raise data['errorDetail']['message']
+        elsif data.include?('aux')
+          return
+        else
+          raise "Unrecognized message from docker: #{data.to_s}"
+        end
+      end
+    end
   end
 end
