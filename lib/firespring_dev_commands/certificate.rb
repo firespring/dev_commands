@@ -43,16 +43,17 @@ module Dev
     def save(dest_dir)
       raise "directory #{dest_dir} must be an existing directory" unless File.directory?(dest_dir)
 
-      domain = domains.first
+      domain = domains.first.sub(/^\*\./, '')
       directories = Dir.glob("/etc/letsencrypt/live/#{domain}*/")
       no_suffix = directories.delete("/etc/letsencrypt/live/#{domain}/")
       biggest_suffix = directories.sort.last
       source_dir = biggest_suffix || no_suffix
+      raise "unable to determine certificate directory for #{domain}" unless source_dir
 
-      FileUtils.cp("#{source_dir}/privkey.pem", dest_dir, verbose: true)
-      FileUtils.cp("#{source_dir}/cert.pem", dest_dir, verbose: true)
-      FileUtils.cp("#{source_dir}/chain.pem", dest_dir, verbose: true)
-      FileUtils.cp("#{source_dir}/fullchain.pem", dest_dir, verbose: true)
+      FileUtils.cp("#{source_dir}privkey.pem", dest_dir, verbose: true)
+      FileUtils.cp("#{source_dir}cert.pem", dest_dir, verbose: true)
+      FileUtils.cp("#{source_dir}chain.pem", dest_dir, verbose: true)
+      FileUtils.cp("#{source_dir}fullchain.pem", dest_dir, verbose: true)
     end
   end
 end

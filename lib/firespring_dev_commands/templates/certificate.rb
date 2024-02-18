@@ -4,35 +4,35 @@ module Dev
   module Template
     # Class contains rake templates for managing configured certificates
     class Certificate < Dev::Template::BaseInterface
-      attr_reader :name, :email, :path
+      attr_reader :names, :email, :paths
 
-      # Allow for custom config path_prefix for the application
-      # Allow for custom key parameter path (otherwise base it off the path prefix)
-      def initialize(name, email:, path:, exclude: [])
-        @name = name
+      def initialize(names, email:, paths:, exclude: [])
+        @names = names
         @email = email
-        @path = path
+        @paths = Array(paths)
 
-        super(name, exclude:)
+        super(exclude:)
       end
 
       # Create the rake task for the generate method
       def create_generate_task!
         # Have to set a local variable to be accessible inside of the instance_eval block
-        name = @name
+        names = @names
         email = @email
-        path = @path
+        paths = @paths
         exclude = @exclude
 
         DEV_COMMANDS_TOP_LEVEL.instance_eval do
           return if exclude.include?(:generate)
 
-          desc 'Requests a new certificate for the configured domain using the route53 validation and deposits it in the configured path'
-          task certificate: %w(init_docker ensure_aws_credentials) do
-            Dev::Docker.new.pull_image('certbot/dns-route53', 'latest')
-            c = Dev::Certificate.new(name, email)
-            c.request
-            c.save(path)
+          namespace :certificate do
+            desc 'Requests a new certificate for the configured domain using the route53 validation and deposits it in the configured paths'
+            task generate: %w(init_docker ensure_aws_credentials) do
+              Dev::Docker.new.pull_image('certbot/dns-route53', 'latest')
+              c = Dev::Certificate.new(names, email)
+              c.request
+              paths.each { |path| c.save(path) }
+            end
           end
         end
       end
