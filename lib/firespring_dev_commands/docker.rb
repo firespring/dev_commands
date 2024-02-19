@@ -144,7 +144,7 @@ module Dev
       puts "\nPulling #{name}:#{tag}"
       opts = {
         fromImage: "#{name}:#{tag}",
-        platform: Dev::Common::Platform.new.architecture
+        platform: Dev::Platform.new.architecture
       }
       ::Docker::Image.create(**opts) { |response| Dev::Docker::Status.new.response_callback(response) }
     end
