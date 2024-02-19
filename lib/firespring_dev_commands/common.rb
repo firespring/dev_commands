@@ -187,5 +187,13 @@ module Dev
         return false
       end
     end
+
+    # Center the string and pad on either side with the given padding character
+    def center_pad(string = '', pad: '-', len: 80)
+      center_dash = len / 2
+      string = string.to_s
+      center_str = string.length / 2
+      string.rjust(center_dash + center_str - 1, pad).ljust(len - 1, pad)
+    end
   end
 end

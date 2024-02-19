@@ -98,7 +98,18 @@ module Dev
       def create_eol_task!
         return if exclude.include?(:eol)
 
-        Dev::EndOfLife.config { |c| c.check_aws_resources = true }
+        Dev::EndOfLife.config do |c|
+          env_check = ENV.fetch('CHECK_AWS', nil).to_s.strip
+          if env_check == 'false'
+            c.check_aws_resources = false
+          else
+            c.check_aws_resources = true
+
+            task eol: %w(ensure_aws_credentials) do
+              # Require the user is logged in to aws since those resources will be checked
+            end
+          end
+        end
       end
     end
   end

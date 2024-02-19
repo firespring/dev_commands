@@ -114,9 +114,9 @@ module Dev
 
         repo_basename = File.basename(File.realpath(project_dir))
         header = " #{repo_basename} (#{original_branches[project_dir]}) "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(header).light_green
         @success &= status(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -166,9 +166,9 @@ module Dev
 
         repo_basename = File.basename(File.realpath(project_dir))
         header = " #{repo_basename} (#{original_branches[project_dir]}) "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(header).light_green
         reset(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
     end
@@ -192,9 +192,9 @@ module Dev
 
         repo_basename = File.basename(File.realpath(project_dir))
         header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(header).light_green
         @success &= checkout(branch, dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -286,9 +286,9 @@ module Dev
 
         repo_basename = File.basename(File.realpath(project_dir))
         header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(header).light_green
         @success &= merge(branch, dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -335,9 +335,9 @@ module Dev
 
         repo_basename = File.basename(File.realpath(project_dir))
         header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(header).light_green
         @success &= pull(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -374,9 +374,9 @@ module Dev
 
         repo_basename = File.basename(File.realpath(project_dir))
         header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(header).light_green
         @success &= push(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -436,14 +436,6 @@ module Dev
     # Split on newlines and add additional padding
     def indent(string, padding: '  ')
       string.to_s.split("\n").each { |line| puts "#{padding}#{line}" }
-    end
-
-    # Center the string and pad on either side with the given padding character
-    def center_pad(string = '', pad: '-', len: 80)
-      center_dash = len / 2
-      string = string.to_s
-      center_str = string.length / 2
-      string.rjust(center_dash + center_str - 1, pad).ljust(len - 1, pad)
     end
 
     # Exclude the command from the message and print all error lines
