@@ -14,10 +14,10 @@ module Dev
     # Certificate is stored in /etc/letsencrypt
     def request
       puts
-      puts "Getting SSL Certs For:"
+      puts 'Getting SSL Certs For:'
       puts domains.join("\n")
       puts
-      puts "This process can take up to 10 minutes"
+      puts 'This process can take up to 10 minutes'
       puts
       puts Time.now
 
@@ -35,7 +35,7 @@ module Dev
       cmd << '-d' << domains.join(',')
       cmd << '--email' << email
       cmd << '--server' << 'https://acme-v02.api.letsencrypt.org/directory'
-      puts cmd.join(" ")
+      puts cmd.join(' ')
       Dev::Common.new.run_command(cmd)
     end
 
@@ -46,7 +46,7 @@ module Dev
       domain = domains.first.sub(/^\*\./, '')
       directories = Dir.glob("/etc/letsencrypt/live/#{domain}*/")
       no_suffix = directories.delete("/etc/letsencrypt/live/#{domain}/")
-      biggest_suffix = directories.sort.last
+      biggest_suffix = directories.max
       source_dir = biggest_suffix || no_suffix
       raise "unable to determine certificate directory for #{domain}" unless source_dir
 

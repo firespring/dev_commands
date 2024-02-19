@@ -128,7 +128,7 @@ module Dev
       end
 
       puts "Pushing to #{name}:#{tag}"
-      image.push(::Docker.creds, repo_tag: "#{name}:#{tag}", &Dev::Docker::Status.method(:response_callback))
+      image.push(::Docker.creds, repo_tag: "#{name}:#{tag}") { |response| Dev::Docker::Status.new.response_callback(response) }
     end
 
     # Push the remote version of the docker image from the defined remote repository
@@ -146,7 +146,7 @@ module Dev
         fromImage: "#{name}:#{tag}",
         platform: Dev::Common::Platform.new.architecture
       }
-      ::Docker::Image.create(**opts, &Dev::Docker::Status.new.method(:response_callback))
+      ::Docker::Image.create(**opts) { |response| Dev::Docker::Status.new.response_callback(response) }
     end
 
     # Remove the local version of the given docker image

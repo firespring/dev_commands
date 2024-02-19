@@ -36,20 +36,20 @@ module Dev
 
       # TODO: Can we use 'curses' here and overwrite the correct line?
       def response_callback(response)
-        response.split(/\n/).each do |line|
+        response.split("\n").each do |line|
           data = JSON.parse(line)
           if data.include?('status')
             if data['id']
               LOG.info "#{data['id']}: #{data['status']}"
             else
-              LOG.info "#{data['status']}"
+              LOG.info (data['status']).to_s
             end
           elsif data.include?('errorDetail')
             raise data['errorDetail']['message']
           elsif data.include?('aux')
-            return
+            next
           else
-            raise "Unrecognized message from docker: #{data.to_s}"
+            raise "Unrecognized message from docker: #{data}"
           end
         end
       end
