@@ -41,6 +41,13 @@ module Dev
                   # This is just a placeholder to execute the dependencies
                 end
 
+                namespace :lint do
+                  desc 'Run all linting software and apply all available fixes'
+                  task fix: %w(ruby:lint:fix) do
+                    # This is just a placeholder to execute the dependencies
+                  end
+                end
+
                 namespace :ruby do
                   desc "Run the ruby linting software against the #{application}'s codebase"
                   task lint: %w(init_docker up_no_deps) do

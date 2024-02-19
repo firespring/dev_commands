@@ -87,6 +87,13 @@ module Dev
                   # This is just a placeholder to execute the dependencies
                 end
 
+                namespace :lint do
+                  desc 'Run all linting software and apply all available fixes'
+                  task fix: %w(php:lint:fix) do
+                    # This is just a placeholder to execute the dependencies
+                  end
+                end
+
                 namespace :php do
                   desc "Run the php linting software against the #{application}'s codebase"
                   task lint: %w(init_docker up_no_deps) do

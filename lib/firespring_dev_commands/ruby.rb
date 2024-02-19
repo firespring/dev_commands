@@ -90,14 +90,16 @@ module Dev
 
     # Build the bundle lint command
     def lint_command
-      lint = ['rubocop']
+      lint = base_command
+      lint << 'exec' << 'rubocop'
       lint.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint
     end
 
     # Build the bundle lint fix command
     def lint_fix_command
-      lint_fix = ['rubocop']
+      lint_fix = base_command
+      lint_fix << 'exec' << 'rubocop'
       lint_fix << '-A'
       lint_fix.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint_fix
@@ -105,7 +107,8 @@ module Dev
 
     # Build the bundle test command
     def test_command
-      test = ['rspec']
+      test = base_command
+      test << 'exec' << 'rspec'
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
     end
