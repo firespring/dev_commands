@@ -43,7 +43,7 @@ module Dev
     def save(dest_dir)
       raise "directory #{dest_dir} must be an existing directory" unless File.directory?(dest_dir)
 
-      domain = domains.first.sub(/^\*\./, '')
+      domain = domains.first.sub(/^\*\./, '') # Need to strip off the '*.' if this is a wildcard cert
       directories = Dir.glob("/etc/letsencrypt/live/#{domain}*/")
       no_suffix = directories.delete("/etc/letsencrypt/live/#{domain}/")
       biggest_suffix = directories.max
