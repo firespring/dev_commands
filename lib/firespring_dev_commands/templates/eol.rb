@@ -13,7 +13,7 @@ module Dev
           return if exclude.include?(:eol)
 
           desc 'Compares the current date to the EOL date for all configured projects' \
-            "\n\toptionally specify CHECK_AWS=<true/false> to toggle whether AWS resources are checked for EOL (defaults to true)"
+               "\n\toptionally specify CHECK_AWS=<true/false> to toggle whether AWS resources are checked for EOL (defaults to true)"
           task eol: %w(init) do
             Dev::EndOfLife.new.check
           end

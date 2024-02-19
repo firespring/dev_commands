@@ -29,6 +29,7 @@ module Dev
           end
 
           # Create the rake task which runs linting for the application name
+          # rubocop:disable Metrics/MethodLength
           def create_lint_task!
             application = @name
             node = @node
@@ -73,6 +74,7 @@ module Dev
               end
             end
           end
+          # rubocop:enable Metrics/MethodLength
 
           # Create the rake task which runs all tests for the application name
           def create_test_task!
