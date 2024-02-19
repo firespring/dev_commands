@@ -3,27 +3,37 @@ module Dev
     # Class which returns information about the current platform
     class Platform
       # Constant containing all supported architectures
-      ALLOWED_ARCHITECTURES = %w(linux/arm64 linux/amd64).freeze
+      ALLOWED_ARCHITECTURES = %w(arm64 amd64).freeze
 
-      # If an architecture was specified in the ENV, use that. Otherwise auto-deted based of the OS reported architecture
+      # Normalize the ruby platform to return a docker platform architecture format
+      def determine_compute_architecture
+        case RUBY_PLATFORM
+        when /x86_64|amd64|x64-mingw/
+          'linux/amd64' # 64-bit Intel/AMD architecture
+        when /arm|aarch64/
+          'linux/arm64' # ARM architecture
+        else
+          raise 'Unknown or unsupported architecture'
+        end
+      end
+
+      # Determine the platform architecture
+      # If one was specified in the DOCKER_ARCHITECTURE variable, use it
+      # Otherwise, use the RUBY_PLATFORM built-in to auto-detect and architecture
       def architecture
-        env_architecture || os_architecture
-      end
+        docker_architecture = ENV['DOCKER_ARCHITECTURE'].to_s.strip.downcase
+        if docker_architecture.empty?
+          determine_compute_architecture
+        else
+          raise "Missing 'linux/' prefix in DOCKER_ARCHITECTURE: #{docker_architecture}" unless docker_architecture.start_with?('linux/')
 
-      # Check to see if a docker architecture has been specified in the ENV
-      # If it has, verify the format and the value
-      def env_architecture
-        arch = ENV['DOCKER_ARCHITECTURE'].to_s.strip.downcase
-        return nil if arch.empty?
+          architecture_name = docker_architecture.split('/')[1]
+          unless ALLOWED_ARCHITECTURES.include?(architecture_name)
+            raise "Invalid DOCKER_ARCHITECTURE: #{architecture_name}. Allowed architectures are #{ALLOWED_ARCHITECTURES.join(', ')}"
+          end
 
-        arch = "linux/#{arch}" unless arch.start_with?('linux/')
-        raise "Invalid DOCKER_ARCHITECTURE: #{arch}. Allowed architectures are #{ALLOWED_ARCHITECTURES.join(', ')}"
-      end
-      # Returns a valid docker architecture based off the RUBY_PLATFORM
-      def os_architecture
-        return 'linux/amd64' if RUBY_PLATFORM.match(/x86_64|amd64|x64-mingw/)
-        return 'linux/arm64' if RUBY_PLATFORM.match(/arm|aarch64/)
-        raise 'Unknown or unsupported architecture'
+          docker_architecture
+        end
       end
     end
   end
