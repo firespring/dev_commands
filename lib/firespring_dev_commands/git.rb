@@ -113,7 +113,7 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} (#{original_branches[project_dir]}) "
+        header = "#{repo_basename} (#{original_branches[project_dir]})"
         puts Dev::Common.new.center_pad(header).light_green
         @success &= status(dir: project_dir)
         puts Dev::Common.new.center_pad.light_green
@@ -165,7 +165,7 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} (#{original_branches[project_dir]}) "
+        header = "#{repo_basename} (#{original_branches[project_dir]})"
         puts Dev::Common.new.center_pad(header).light_green
         reset(dir: project_dir)
         puts Dev::Common.new.center_pad.light_green
@@ -191,8 +191,7 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts Dev::Common.new.center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= checkout(branch, dir: project_dir)
         puts Dev::Common.new.center_pad.light_green
       end
@@ -285,8 +284,7 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts Dev::Common.new.center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= merge(branch, dir: project_dir)
         puts Dev::Common.new.center_pad.light_green
       end
@@ -334,8 +332,7 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts Dev::Common.new.center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= pull(dir: project_dir)
         puts Dev::Common.new.center_pad.light_green
       end
@@ -373,8 +370,7 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts Dev::Common.new.center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= push(dir: project_dir)
         puts Dev::Common.new.center_pad.light_green
       end
@@ -436,6 +432,13 @@ module Dev
     # Split on newlines and add additional padding
     def indent(string, padding: '  ')
       string.to_s.split("\n").each { |line| puts "#{padding}#{line}" }
+    end
+
+    # Center the string and pad on either side with the given padding character
+    # @deprecated Please use {Dev::Common#center_pad} instead
+    def center_pad(string = '', pad: '-', len: 80)
+      warn '[DEPRECATION] `Dev::Git#center_pad` is deprecated. Please use `Dev::Common#center_pad` instead.'
+      Dev::Common.new.center_pad(string, pad:, len:)
     end
 
     # Exclude the command from the message and print all error lines

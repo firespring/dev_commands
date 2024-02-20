@@ -5,9 +5,8 @@ module Dev
     END_OF_LIFE_API_URL = 'https://endoflife.date/api'.freeze
 
     # Config object for setting top level git config options
-    Config = Struct.new(:check_aws_resources, :product_versions, :manual_dates) do
+    Config = Struct.new(:product_versions, :manual_dates) do
       def initialize
-        self.check_aws_resources = false
         self.product_versions = []
         self.manual_dates = {}
       end
@@ -27,10 +26,9 @@ module Dev
       alias_method :configure, :config
     end
 
-    attr_accessor :url, :products, :check_aws_resources, :product_versions
+    attr_accessor :url, :products, :product_versions
 
-    def initialize(check_aws_resources: self.class.config.check_aws_resources, product_versions: self.class.config.product_versions)
-      @check_aws_resources = check_aws_resources
+    def initialize(product_versions: self.class.config.product_versions)
       @product_versions = Array(product_versions)
       raise 'product version must be of type Dev::EndOfLife::ProductVersions' unless @product_versions.all?(Dev::EndOfLife::ProductVersion)
     end
@@ -49,19 +47,22 @@ module Dev
     end
 
     # Prints all of the product version statuses
+    def status
+      product_versions.sort_by(&:name).each(&:print_status)
+    end
+
+    # Returns true if any of the products are EOL
+    def eol?
+      product_versions.any?(&:eol)
+    end
+
+    # Prints all of the product version statuses
     # Raises an error if any products are EOL
     def check
       puts
-      checks_to_perform = product_versions.clone
-      if check_aws_resources
-        account_id = Dev::Aws::Profile.new.current
-        account_name = Dev::Aws::Account.new.name_by_account(account_id)
-        LOG.info "  Current AWS Account is #{account_name} (#{account_id})\n".light_yellow
-        checks_to_perform.concat(Dev::EndOfLife::Aws.new.default_products)
-      end
-      checks_to_perform.sort_by(&:name).each(&:print_status)
+      status
       puts
-      raise 'found EOL versions' if product_versions.any?(&:eol)
+      raise 'found EOL versions' if eol?
     end
   end
 end

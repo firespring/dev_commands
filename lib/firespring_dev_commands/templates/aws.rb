@@ -94,19 +94,28 @@ module Dev
       end
       # rubocop:enable Metrics/MethodLength
 
-      # Set the EOL library to also check AWS resources
+      # Create the rake task for the eol method
       def create_eol_task!
-        return if exclude.include?(:eol)
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
 
-        Dev::EndOfLife.config do |c|
-          env_check = ENV.fetch('CHECK_AWS', nil).to_s.strip
-          if env_check == 'false'
-            c.check_aws_resources = false
-          else
-            c.check_aws_resources = true
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          return if exclude.include?(:eol)
+          return if ENV.fetch('CHECK_AWS', nil).to_s.strip == 'false'
 
-            task eol: %w(ensure_aws_credentials) do
-              # Require the user is logged in to aws since those resources will be checked
+          task eol: [:'eol:aws'] do
+            # This is just a placeholder to execute the dependencies
+          end
+
+          namespace :eol do
+            desc 'Compares the current date to the EOL date for supported aws resources'
+            task aws: %w(init ensure_aws_credentials) do
+              account_id = Dev::Aws::Profile.new.current
+              account_name = Dev::Aws::Account.new.name_by_account(account_id)
+              LOG.info "  Current AWS Account is #{account_name} (#{account_id})".light_yellow
+              puts
+              Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Aws.new.default_products).status
+              puts
             end
           end
         end
