@@ -113,10 +113,10 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} (#{original_branches[project_dir]}) "
-        puts center_pad(header).light_green
+        header = "#{repo_basename} (#{original_branches[project_dir]})"
+        puts Dev::Common.new.center_pad(header).light_green
         @success &= status(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -165,10 +165,10 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} (#{original_branches[project_dir]}) "
-        puts center_pad(header).light_green
+        header = "#{repo_basename} (#{original_branches[project_dir]})"
+        puts Dev::Common.new.center_pad(header).light_green
         reset(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
     end
@@ -191,10 +191,9 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= checkout(branch, dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -285,10 +284,9 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= merge(branch, dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -334,10 +332,9 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= pull(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -373,10 +370,9 @@ module Dev
         next unless File.exist?(project_dir)
 
         repo_basename = File.basename(File.realpath(project_dir))
-        header = " #{repo_basename} "
-        puts center_pad(header).light_green
+        puts Dev::Common.new.center_pad(repo_basename).light_green
         @success &= push(dir: project_dir)
-        puts center_pad.light_green
+        puts Dev::Common.new.center_pad.light_green
       end
       puts
 
@@ -439,11 +435,10 @@ module Dev
     end
 
     # Center the string and pad on either side with the given padding character
+    # @deprecated Please use {Dev::Common#center_pad} instead
     def center_pad(string = '', pad: '-', len: 80)
-      center_dash = len / 2
-      string = string.to_s
-      center_str = string.length / 2
-      string.rjust(center_dash + center_str - 1, pad).ljust(len - 1, pad)
+      warn '[DEPRECATION] `Dev::Git#center_pad` is deprecated. Please use `Dev::Common#center_pad` instead.'
+      Dev::Common.new.center_pad(string, pad:, len:)
     end
 
     # Exclude the command from the message and print all error lines

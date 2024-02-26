@@ -47,12 +47,22 @@ module Dev
     end
 
     # Prints all of the product version statuses
+    def status
+      product_versions.sort_by(&:name).each(&:print_status)
+    end
+
+    # Returns true if any of the products are EOL
+    def eol?
+      product_versions.any?(&:eol)
+    end
+
+    # Prints all of the product version statuses
     # Raises an error if any products are EOL
     def check
       puts
-      product_versions.sort_by(&:name).each(&:print_status)
+      status
       puts
-      raise 'found EOL versions' if product_versions.any?(&:eol)
+      raise 'found EOL versions' if eol?
     end
   end
 end
