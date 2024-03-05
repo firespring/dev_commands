@@ -117,6 +117,44 @@ module Dev
       format('%.1f %s', size.to_f / (1024**exp), units[exp])
     end
 
+    # Push the local version of the docker image to the defined remote repository
+    def push_image(image, name, tag = nil)
+      unless tag
+        if name.include?(':')
+          name, tag = name.split(':')
+        else
+          tag = 'latest'
+        end
+      end
+
+      puts "Pushing to #{name}:#{tag}"
+      image.push(::Docker.creds, repo_tag: "#{name}:#{tag}") { |response| Dev::Docker::Status.new.response_callback(response) }
+    end
+
+    # Push the remote version of the docker image from the defined remote repository
+    def pull_image(name, tag = nil)
+      unless tag
+        if name.include?(':')
+          name, tag = name.split(':')
+        else
+          tag = 'latest'
+        end
+      end
+
+      puts "\nPulling #{name}:#{tag}"
+      opts = {
+        fromImage: "#{name}:#{tag}",
+        platform: Dev::Platform.new.architecture
+      }
+      ::Docker::Image.create(**opts) { |response| Dev::Docker::Status.new.response_callback(response) }
+    end
+
+    # Remove the local version of the given docker image
+    def untag_image(image, name, tag)
+      puts "Untagging #{name}:#{tag}"
+      image.remove(name: "#{name}:#{tag}")
+    end
+
     # Remove docker images with the "force" option set to true
     # This will remove the images even if they are currently in use and cause unintended side effects.
     def force_remove_images(name_and_tag)
