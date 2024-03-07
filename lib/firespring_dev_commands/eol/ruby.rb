@@ -15,6 +15,9 @@ module Dev
 
       # Queries and returns product versions for the default product types
       def default_products
+        # TODO: Check the ruby version if one has been specified in the gemfile
+        #parsed_lock_file.ruby_version if parsed_lock_file.ruby_version
+
         (gemfile_lock_products).flatten.compact
       end
 
@@ -23,8 +26,10 @@ module Dev
         [].tap do |ary|
           parsed_lock_file.specs.each do |spec|
             product = spec.name
-            puts spec.version.inspect
+
             # TODO: Strip off pieces of the version until it matches?
+            puts spec.version.inspect
+
             version = spec.version.to_s
             name = spec.source.to_s
             ary << Dev::EndOfLife::ProductVersion.new(product, version, name)

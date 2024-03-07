@@ -1,6 +1,9 @@
 source 'https://rubygems.org'
 gemspec name: 'firespring_dev_commands'
 
+#ruby "3.2.2"
+#ruby file: '.ruby-version'
+
 gem 'builder', '~> 3.2.4'
 gem 'launchy', '~> 2.5.2'
 gem 'pry', '~> 0.14.2'
