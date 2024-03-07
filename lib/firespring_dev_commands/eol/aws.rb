@@ -1,8 +1,3 @@
-require 'aws-sdk-lambda'
-require 'aws-sdk-elasticache'
-require 'aws-sdk-rds'
-require 'aws-sdk-opensearchservice'
-
 module Dev
   class EndOfLife
     # Class which queries several different AWS product types and

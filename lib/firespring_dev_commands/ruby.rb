@@ -8,11 +8,12 @@ module Dev
     DEFAULT_PACKAGE_FILE = 'Gemfile'.freeze
 
     # Config object for setting top level git config options
-    Config = Struct.new(:container_path, :local_path, :package_file, :min_version, :max_version) do
+    Config = Struct.new(:container_path, :local_path, :package_file, :lock_file, :min_version, :max_version) do
       def initialize
         self.container_path = DEFAULT_PATH
         self.local_path = DEV_COMMANDS_ROOT_DIR
         self.package_file = DEFAULT_PACKAGE_FILE
+        self.lock_file = Bundler.default_lockfile
         self.min_version = nil
         self.max_version = nil
       end
@@ -37,12 +38,13 @@ module Dev
       end
     end
 
-    attr_accessor :container_path, :local_path, :package_file
+    attr_accessor :container_path, :local_path, :package_file, :lock_file
 
-    def initialize(container_path: nil, local_path: nil, package_file: nil)
+    def initialize(container_path: nil, local_path: nil, package_file: nil, lock_file: nil)
       @container_path = container_path || self.class.config.container_path
       @local_path = local_path || self.class.config.local_path
       @package_file = package_file || self.class.config.package_file
+      @lock_file = lock_file || self.class.config.lock_file
       check_version
     end
 

@@ -163,6 +163,32 @@ module Dev
               end
             end
           end
+
+          # Create the rake task for the eol method
+          def create_eol_task!
+            # Have to set a local variable to be accessible inside of the instance_eval block
+            exclude = @exclude
+            ruby = @ruby
+
+            DEV_COMMANDS_TOP_LEVEL.instance_eval do
+              return if exclude.include?(:eol)
+              return if ENV.fetch('CHECK_RUBY', nil).to_s.strip == 'false'
+
+              task eol: [:'eol:ruby'] do
+                # This is just a placeholder to execute the dependencies
+              end
+
+              namespace :eol do
+                desc 'Compares the current date to the EOL date for supported ruby products'
+                task ruby: %w(init) do
+                  LOG.info "  Inspecting ruby package file #{ruby.lock_file}".light_yellow
+                  puts
+                  Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Ruby.new(lock_file: ruby.lock_file).default_products).status
+                  puts
+                end
+              end
+            end
+          end
         end
       end
     end
