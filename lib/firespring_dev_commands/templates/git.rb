@@ -4,6 +4,23 @@ module Dev
   module Template
     # Class contains rake templates for managing your git project
     class Git < Dev::Template::BaseInterface
+      # Create the rake task for cloning all defined repos
+      def create_clone_task!
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
+
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          namespace :git do
+            return if exclude.include?(:clone)
+
+            desc 'Make sure all repos are cloned'
+            task :clone do
+              Dev::Git.new.clone_repos
+            end
+          end
+        end
+      end
+
       # Create the rake task for the git checkout method
       def create_checkout_task!
         # Have to set a local variable to be accessible inside of the instance_eval block

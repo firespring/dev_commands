@@ -44,6 +44,7 @@ module Dev
 
           # rubocop:disable Metrics/MethodLength
           # Create the rake task which runs linting for the application name
+          # rubocop:disable Metrics/MethodLength
           def create_lint_task!
             application = @name
             node = @node
@@ -56,6 +57,13 @@ module Dev
                 desc 'Run all linting software'
                 task lint: %w(node:lint) do
                   # This is just a placeholder to execute the dependencies
+                end
+
+                namespace :lint do
+                  desc 'Run all linting software and apply all available fixes'
+                  task fix: %w(node:lint:fix) do
+                    # This is just a placeholder to execute the dependencies
+                  end
                 end
 
                 namespace :node do

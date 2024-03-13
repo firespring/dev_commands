@@ -131,8 +131,8 @@ module Dev
     # e.g. "foo 'bin baz' bar" => [foo, 'bin baz', bar]
     def tokenize(str)
       str.split(/\s(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/)
-         .reject(&:empty?)
-         .map { |s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/, '') }
+        .reject(&:empty?)
+        .map { |s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/, '') }
     end
 
     # Checks if CODEBUILD_INITIATOR or INITIATOR env variable are set
@@ -175,6 +175,15 @@ module Dev
       exp = 6 if exp > 6
 
       format('%.1f %s', size.to_f / (1024**exp), units[exp])
+    end
+
+    # Center the string and pad on either side with the given padding character
+    def center_pad(string = '', pad: '-', len: 80)
+      string = " #{string} " unless string.strip.empty?
+      center_dash = len / 2
+      string = string.to_s
+      center_str = string.length / 2
+      string.rjust(center_dash + center_str - 1, pad).ljust(len - 1, pad)
     end
   end
 end
