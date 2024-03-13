@@ -44,7 +44,6 @@ module Dev
 
           # rubocop:disable Metrics/MethodLength
           # Create the rake task which runs linting for the application name
-          # rubocop:disable Metrics/MethodLength
           def create_lint_task!
             application = @name
             ruby = @ruby

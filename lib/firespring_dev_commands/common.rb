@@ -131,8 +131,8 @@ module Dev
     # e.g. "foo 'bin baz' bar" => [foo, 'bin baz', bar]
     def tokenize(str)
       str.split(/\s(?=(?:[^'"]|'[^']*'|"[^"]*")*$)/)
-        .reject(&:empty?)
-        .map { |s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/, '') }
+         .reject(&:empty?)
+         .map { |s| s.gsub(/(^ +)|( +$)|(^["']+)|(["']+$)/, '') }
     end
 
     # Checks if CODEBUILD_INITIATOR or INITIATOR env variable are set
