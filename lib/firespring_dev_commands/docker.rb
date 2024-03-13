@@ -77,6 +77,7 @@ module Dev
       _prune('volumes', opts:)
     end
 
+    # Prunes all volumes which start wth the given project name
     def prune_project_volumes(project_name:)
       project_name = project_name.to_s.strip
       raise 'No project name defined' if project_name.empty?
