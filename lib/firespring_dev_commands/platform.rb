@@ -31,17 +31,3 @@ module Dev
     end
   end
 end
-
-module Dev
-  class Common
-    # Class which returns information about the current platform
-    class Platform < Platform
-      # Initializer for the deprecated class
-      # @deprecated Please use {Dev::Platform#new} instead
-      def initialize
-        warn '[DEPRECATION] `Dev::Common::Platform#new` is deprecated.  Please use `Dev::Platform#new` instead.'
-        super
-      end
-    end
-  end
-end

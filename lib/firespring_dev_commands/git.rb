@@ -434,13 +434,6 @@ module Dev
       string.to_s.split("\n").each { |line| puts "#{padding}#{line}" }
     end
 
-    # Center the string and pad on either side with the given padding character
-    # @deprecated Please use {Dev::Common#center_pad} instead
-    def center_pad(string = '', pad: '-', len: 80)
-      warn '[DEPRECATION] `Dev::Git#center_pad` is deprecated. Please use `Dev::Common#center_pad` instead.'
-      Dev::Common.new.center_pad(string, pad:, len:)
-    end
-
     # Exclude the command from the message and print all error lines
     private def print_errors(message)
       indent message.split('error:')[1..].join
