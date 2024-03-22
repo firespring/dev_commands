@@ -6,6 +6,6 @@ module Dev
     # Use 'v.v.v.pre.alpha.v' for pre-release vesions
     # Use 'v.v.v.beta.v for beta versions
     # Use semantic versioning for any releases (https://semver.org/)
-    VERSION = '2.1.27'.freeze
+    VERSION = '2.1.28.pre.alpha.1'.freeze
   end
 end
