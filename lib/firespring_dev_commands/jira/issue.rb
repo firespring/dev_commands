@@ -5,11 +5,13 @@ module Dev
       # Issue subtypes which do not map to a story type
       NON_STORY_TYPES = ['epic', 'review', 'sub-task', 'code review sub-task', 'pre-deploy sub-task', 'deploy sub-task', 'devops sub-task'].freeze
 
-      attr_accessor :data, :project, :id, :title, :points, :assignee, :resolved_date, :histories, :last_in_progress_history, :first_in_review_history, :last_closed_history
+      attr_accessor :data, :project, :parent, :id, :title, :points, :assignee, :resolved_date, :histories,
+                    :last_in_progress_history, :first_in_review_history, :last_closed_history
 
       def initialize(data)
         @data = data
         @project = Jira::Project.new(data)
+        @parent = Jira::Parent.new(data) if data.respond_to?(:parent)
         @id = data.key
         @title = data.summary
         @points = calculate_points(data)
