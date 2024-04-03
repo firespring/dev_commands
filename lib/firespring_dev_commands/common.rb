@@ -196,5 +196,16 @@ module Dev
       center_str = string.length / 2
       string.rjust(center_dash + center_str - 1, pad).ljust(len - 1, pad)
     end
+
+    # Print the given filesize using the most appropriate units
+    def filesize(size)
+      return '0.0 B' if size.to_i.zero?
+
+      units = %w(B KB MB GB TB Pb EB)
+      exp = (Math.log(size) / Math.log(1024)).to_i
+      exp = 6 if exp > 6
+
+      format('%.1f %s', size.to_f / (1024**exp), units[exp])
+    end
   end
 end
