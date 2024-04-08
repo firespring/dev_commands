@@ -100,8 +100,8 @@ module Dev
     # Receive a string from the user on stdin unless non_interactive is set to true
     # If a default value was specified and no answer was given, return the default
     def gather_input(default: nil)
-      answer = $stdin.gets.to_s.strip unless ENV['NON_INTERACTIVE'] == 'true'
-      answer.to_s.strip
+      answer = $stdin.gets unless ENV['NON_INTERACTIVE'] == 'true'
+      answer = answer.to_s.strip
       return default if default && answer.empty?
 
       answer
