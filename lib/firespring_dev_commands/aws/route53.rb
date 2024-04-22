@@ -24,18 +24,19 @@ module Dev
           domains.each do |domain_name|
             zone = client.list_hosted_zones_by_name({dns_name: domain_name, max_items: 1})
             target_name = zone.hosted_zones.first.name.chomp!('.')
-            @zones << zone.hosted_zones.first.id unless target_name != domain_name
+            raise "The #{domain_name} hosted zone not found." if target_name != domain_name
+
+            @zones << zone.hosted_zones.first.id
           end
         end
         raise 'Hosted zone(s) not found.' if @zones.empty?
       end
 
       def get_target_config_id(zone_id)
-        config = client.list_query_logging_configs(
+        client.list_query_logging_configs(
           hosted_zone_id: zone_id,
           max_results: '1'
-        )
-        config.query_logging_configs.first.id unless config.query_logging_configs.empty? || config.query_logging_configs.first.hosted_zone_id == zone_id
+        ).query_logging_configs.first.id
       end
 
       def activate_query_logging(log_group)
