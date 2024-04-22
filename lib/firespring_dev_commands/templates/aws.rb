@@ -121,56 +121,60 @@ module Dev
         end
       end
 
-      # rubocop:disable Metrics/MethodLength
       # Create the rake task for the hosted zone method
-      def create_hosted_zone_task!
+      def create_dns_logging_activate_task!
         # Have to set a local variable to be accessible inside of the instance_eval block
         exclude = @exclude
 
         DEV_COMMANDS_TOP_LEVEL.instance_eval do
           namespace :aws do
-            return if exclude.include?(:hosted_zone)
+            return if exclude.include?(:dns_logging)
 
             namespace :hosted_zone do
               namespace :dns_logging do
-                task :init do
-                  @route53 = Dev::Aws::Route53.new
-
-                  domains = ENV['DOMAINS'].to_s.strip.split(',')
-                  domain = ENV['DOMAIN'].to_s.strip
-                  domains << domain unless domain.empty?
-
-                  # Set global zone id array
-                  @route53.get_hosted_zones(domains)
-                end
-
                 desc 'Activates query logging for all hosted zones by default.' \
                      'This command should be run from the account the hosted zone(s) reside.' \
                      "\n\toptionally specify HOSTED_ZONE_GROUP='arn:aws:logs:REGION:ACCOUNT_ID:' to specify the ARN of the target log group." \
-                     "\n\toptionally specify DOMAIN='foo.com' to specify the hosted zone to activate." \
                      "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
                      "\n\t\tComma delimited list."
-                task activate: %w(init) do
+                task :activate do
+                  route53 = Dev::Aws::Route53.new
+                  route53.hosted_zones(ENV['DOMAINS'].to_s.strip.split(','))
                   # Use user defined log group. Otherwise, go get the default.
                   log_group = (ENV['HOSTED_ZONE_GROUP'] || Dev::Aws::Parameter.new.get_value('/Firespring/Internal/Route53/hosted-zone/log-group-arn'))
-
-                  @route53.activate_query_logging(log_group)
-                end
-
-                desc 'Deactivates query logging for all hosted zones by default. ' \
-                     'This command should be run from the account the hosted zone(s) reside.' \
-                     "\n\toptionally specify DOMAIN='foo.com' to specify the hosted zone to activate." \
-                     "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
-                     "\n\t\tComma delimited list."
-                task deactivate: %w(init) do
-                  @route53.deactivate_query_logging
+                  route53.activate_query_logging(log_group)
                 end
               end
             end
           end
         end
       end
-      # rubocop:enable Metrics/MethodLength
+
+      # Create the rake task for the hosted zone method
+      def create_dns_logging_deactivate_task!
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
+
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          namespace :aws do
+            return if exclude.include?(:dns_logging_de)
+
+            namespace :hosted_zone do
+              namespace :dns_logging do
+                desc 'Deactivates query logging for all hosted zones by default. ' \
+                     'This command should be run from the account the hosted zone(s) reside.' \
+                     "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
+                     "\n\t\tComma delimited list."
+                task :deactivate do
+                  route53 = Dev::Aws::Route53.new
+                  route53.hosted_zones(ENV['DOMAINS'].to_s.strip.split(','))
+                  route53.deactivate_query_logging
+                end
+              end
+            end
+          end
+        end
+      end
     end
   end
 end

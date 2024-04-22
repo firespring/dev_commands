@@ -8,20 +8,23 @@ module Dev
 
       def initialize
         @client = ::Aws::Route53::Client.new
-        @zones = []
       end
 
-      def get_hosted_zones(domains)
+      def hosted_zones(domains)
+        @zones = []
         if domains.empty?
-          response = client.list_hosted_zones
-          response.hosted_zones.each do |hosted_zone|
-            @zones << hosted_zone.id
+          @zones = [].tap do |ary|
+            Dev::Aws.each_page(client, :list_hosted_zones, {max_items: 2}) do |response|
+              response.hosted_zones.each do |hosted_zone|
+                ary << hosted_zone.id unless hosted_zone.config.private_zone
+              end
+            end
           end
         else
           domains.each do |domain_name|
             zone = client.list_hosted_zones_by_name({dns_name: domain_name, max_items: 1})
-            target_name = zone.hosted_zones[0].name.chomp!('.') if zone.hosted_zones[0].name.end_with?('.')
-            @zones << zone.hosted_zones[0].id unless target_name != domain_name
+            target_name = zone.hosted_zones.first.name.chomp!('.')
+            @zones << zone.hosted_zones.first.id unless target_name != domain_name
           end
         end
         raise 'Hosted zone(s) not found.' if @zones.empty?
@@ -32,7 +35,7 @@ module Dev
           hosted_zone_id: zone_id,
           max_results: '1'
         )
-        config.query_logging_configs[0].id unless config.query_logging_configs.empty? || config.query_logging_configs[0].hosted_zone_id == zone_id
+        config.query_logging_configs.first.id unless config.query_logging_configs.empty? || config.query_logging_configs.first.hosted_zone_id == zone_id
       end
 
       def activate_query_logging(log_group)
