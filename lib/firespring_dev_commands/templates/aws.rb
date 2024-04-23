@@ -139,7 +139,7 @@ module Dev
                      "\n\t\tComma delimited list."
                 task :activate do
                   route53 = Dev::Aws::Route53.new
-                  route53.hosted_zones(ENV['DOMAINS'].to_s.strip.split(','))
+                  route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
                   # Use user defined log group. Otherwise, go get the default.
                   log_group = (ENV['HOSTED_ZONE_GROUP'] || Dev::Aws::Parameter.new.get_value('/Firespring/Internal/Route53/hosted-zone/log-group-arn'))
                   route53.activate_query_logging(log_group)
@@ -167,7 +167,7 @@ module Dev
                      "\n\t\tComma delimited list."
                 task :deactivate do
                   route53 = Dev::Aws::Route53.new
-                  route53.hosted_zones(ENV['DOMAINS'].to_s.strip.split(','))
+                  route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
                   route53.deactivate_query_logging
                 end
               end
