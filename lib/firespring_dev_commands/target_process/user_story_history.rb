@@ -38,7 +38,7 @@ module Dev
       def parse_time(string)
         return nil unless string && !string.empty?
 
-        Time.at(string.slice(6, 10).to_i)
+        ::Time.at(string.slice(6, 10).to_i)
       end
     end
   end

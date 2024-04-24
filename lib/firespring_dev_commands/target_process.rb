@@ -72,8 +72,8 @@ module Dev
       [].tap do |ary|
         get(Release::PATH, query) do |result|
           ary << Release.new(result)
+          yield ary.last if block_given?
         end
-        ary.each(&)
       end
     end
 
@@ -84,8 +84,8 @@ module Dev
       [].tap do |ary|
         get(UserStory::PATH, query) do |result|
           ary << UserStory.new(result)
+          yield ary.last if block_given?
         end
-        ary.each(&)
       end
     end
 
@@ -96,8 +96,8 @@ module Dev
       [].tap do |ary|
         get(UserStoryHistory::PATH, query) do |result|
           ary << UserStoryHistory.new(result)
+          yield ary.last if block_given?
         end
-        ary.each(&)
       end
     end
 
@@ -108,8 +108,20 @@ module Dev
       [].tap do |ary|
         get(TeamAssignment::PATH, query) do |result|
           ary << TeamAssignment.new(result)
+          yield ary.last if block_given?
         end
-        ary.each(&)
+      end
+    end
+
+    # Perform a query to the time api path
+    # Call the given block (if present) with each time
+    # Return all times
+    def times(query, &)
+      [].tap do |ary|
+        get(Time::PATH, query) do |result|
+          ary << Time.new(result)
+          yield ary.last if block_given?
+        end
       end
     end
 
@@ -132,8 +144,11 @@ module Dev
       parsed_response['Items'].each(&)
 
       while parsed_response['Next']
-        response = client.request_get(parsed_response['Next'], headers)
-        raise "Error querying #{parsed_response['Next']} [#{query_string}]: #{response.inspect}" unless response.response.is_a?(Net::HTTPSuccess)
+        next_query_string = URI(parsed_response['Next']).query
+        next_url = "/api/v1/#{path}"
+        next_url << "?#{next_query_string}" unless query_string.empty?
+        response = client.request_get(next_url, headers)
+        raise "Error querying #{next_url} [#{next_query_string}]: #{response.inspect}" unless response.response.is_a?(Net::HTTPSuccess)
 
         parsed_response = JSON.parse(response.body)
         return parsed_response unless parsed_response.key?('Items')
