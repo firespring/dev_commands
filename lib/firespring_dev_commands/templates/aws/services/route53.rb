@@ -33,14 +33,16 @@ module Dev
                   namespace :dns_logging do
                     desc 'Activates query logging for all hosted zones by default.' \
                          'This command should be run from the account the hosted zone(s) reside.' \
-                         "\n\toptionally specify HOSTED_ZONE_GROUP='arn:aws:logs:REGION:ACCOUNT_ID:' to specify the ARN of the target log group." \
+                         "\n\t(Required) Specify HOSTED_ZONE_GROUP='arn:aws:logs:REGION:ACCOUNT_ID:' to specify the ARN of the target log group." \
                          "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
                          "\n\t\tComma delimited list."
                     task activate: %w(ensure_aws_credentials) do
                       route53 = Dev::Aws::Route53.new
                       route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
-                      # Use user defined log group. Otherwise, go get the default.
-                      log_group = (ENV['HOSTED_ZONE_GROUP'] || Dev::Aws::Parameter.new.get_value('/Firespring/Internal/Route53/hosted-zone/log-group-arn'))
+                      # Use user defined log group.
+                      log_group = ENV.fetch('HOSTED_ZONE_GROUP', nil)
+                      raise 'The Hosted Zone Log Group ARN, HOSTED_ZONE_GROUP, is required' unless log_group
+
                       route53.activate_query_logging(log_group)
                     end
                   end
