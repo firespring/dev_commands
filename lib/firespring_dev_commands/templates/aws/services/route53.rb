@@ -56,7 +56,7 @@ module Dev
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
               namespace :aws do
-                return if exclude.include?(:dns_logging_de)
+                return if exclude.include?(:dns_logging)
 
                 namespace :hosted_zone do
                   namespace :dns_logging do
@@ -82,17 +82,19 @@ module Dev
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
               namespace :aws do
-                return if exclude.include?(:dns_logging_ls)
+                return if exclude.include?(:dns_logging)
 
                 namespace :hosted_zone do
-                  desc 'Deactivates query logging for all hosted zones by default. ' \
-                       'This command should be run from the account the hosted zone(s) reside.' \
-                       "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
-                       "\n\t\tComma delimited list."
-                  task list_query_configs: %w(ensure_aws_credentials) do
-                    route53 = Dev::Aws::Route53.new
-                    route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
-                    route53.list_query_configs
+                  namespace :dns_logging do
+                    desc 'Lists the current config for domain(s). ' \
+                         'This command should be run from the account the hosted zone(s) reside.' \
+                         "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
+                         "\n\t\tComma delimited list."
+                    task list_query_configs: %w(ensure_aws_credentials) do
+                      route53 = Dev::Aws::Route53.new
+                      route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
+                      route53.list_query_configs
+                    end
                   end
                 end
               end
