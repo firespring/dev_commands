@@ -2,7 +2,7 @@ module Dev
   class Aws
     # Class for performing Route53 functions
     class Route53
-      attr_reader :client, :zones, :domains
+      attr_reader :client
 
       def initialize(domains)
         @client = ::Aws::Route53::Client.new
