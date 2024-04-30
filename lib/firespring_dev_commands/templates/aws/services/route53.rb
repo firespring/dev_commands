@@ -33,15 +33,14 @@ module Dev
                   namespace :dns_logging do
                     desc 'Activates query logging for all hosted zones by default.' \
                          'This command should be run from the account the hosted zone(s) reside.' \
-                         "\n\t(Required) Specify HOSTED_ZONE_GROUP='arn:aws:logs:REGION:ACCOUNT_ID:' to specify the ARN of the target log group." \
+                         "\n\t(Required) Specify LOG_GROUP_ARN='arn:aws:logs:REGION:ACCOUNT_ID:' to specify the ARN of the target log group." \
                          "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
                          "\n\t\tComma delimited list."
                     task activate: %w(ensure_aws_credentials) do
-                      route53 = Dev::Aws::Route53.new
-                      route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
+                      route53 = Dev::Aws::Route53.new(ENV['DOMAINS'].to_s.strip.split(','))
                       # Use user defined log group.
-                      log_group = ENV.fetch('HOSTED_ZONE_GROUP', nil)
-                      raise 'The Hosted Zone Log Group ARN, HOSTED_ZONE_GROUP, is required' unless log_group
+                      log_group = ENV.fetch('LOG_GROUP_ARN', nil)
+                      raise 'The Hosted Zone Log Group ARN, LOG_GROUP_ARN, is required' unless log_group
 
                       route53.activate_query_logging(log_group)
                     end
@@ -67,8 +66,7 @@ module Dev
                          "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
                          "\n\t\tComma delimited list."
                     task deactivate: %w(ensure_aws_credentials) do
-                      route53 = Dev::Aws::Route53.new
-                      route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
+                      route53 = Dev::Aws::Route53.new(ENV['DOMAINS'].to_s.strip.split(','))
                       route53.deactivate_query_logging
                     end
                   end
@@ -93,8 +91,7 @@ module Dev
                          "\n\toptionally specify DOMAINS='foo.com,foobar.com' to specify the hosted zones to activate." \
                          "\n\t\tComma delimited list."
                     task list_query_configs: %w(ensure_aws_credentials) do
-                      route53 = Dev::Aws::Route53.new
-                      route53.zones(ENV['DOMAINS'].to_s.strip.split(','))
+                      route53 = Dev::Aws::Route53.new(ENV['DOMAINS'].to_s.strip.split(','))
                       route53.list_query_configs
                     end
                   end
