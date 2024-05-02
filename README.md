@@ -28,7 +28,7 @@ Dev::Template::Docker::Node::Application.new('foo')
 ```
 * If you run `rake -T` now, you should have base rake commands and application rake commands for an app called `foo`
 
-* (optinoal) Add AWS login template commands
+* (optional) Add AWS login template commands
 ```
 # Configure AWS accounts and create tasks
 Dev::Aws::Account::configure do |c|
