@@ -72,19 +72,23 @@ module Dev
       # Queries and returns product versions for rds instance products
       def rds_instance_products
         aws_engines = %w(mysql postgresql)
+        aws_sqlserver_engines = %w(sqlserver-ee sqlserver-ex sqlserver-se sqlserver-web)
         client = ::Aws::RDS::Client.new
 
         [].tap do |ary|
           Dev::Aws.each_page(client, :describe_db_instances) do |response|
             response.db_instances.each do |instance|
               name = instance.db_instance_identifier
-              engine = instance.engine.tr('aurora-', '')
+              engine = instance.engine.gsub('aurora-', '')
               product = if aws_engines.include?(engine)
                           "amazon-rds-#{engine}"
+                        elsif aws_sqlserver_engines.include?(engine)
+                          'mssqlserver'
                         else
                           engine
                         end
               version = instance.engine_version.reverse.split('.')[-2..].join('.').reverse
+              version.chop! if version.end_with?('.00')
               ary << Dev::EndOfLife::ProductVersion.new(product, version, name)
             end
           end
@@ -94,19 +98,23 @@ module Dev
       # Queries and returns product versions for rds cluster products
       def rds_cluster_products
         aws_engines = %w(mysql postgresql)
+        aws_sqlserver_engines = %w(sqlserver-ee sqlserver-ex sqlserver-se sqlserver-web)
         client = ::Aws::RDS::Client.new
 
         [].tap do |ary|
           Dev::Aws.each_page(client, :describe_db_clusters) do |response|
             response.db_clusters.each do |cluster|
               name = cluster.db_cluster_identifier
-              engine = cluster.engine.tr('aurora-', '')
+              engine = cluster.engine.gsub('aurora-', '')
               product = if aws_engines.include?(engine)
                           "amazon-rds-#{engine}"
+                        elsif aws_sqlserver_engines.include?(engine)
+                          'mssqlserver'
                         else
                           engine
                         end
               version = cluster.engine_version.reverse.split('.')[-2..].join('.').reverse
+              version.chop! if version.end_with?('.00')
               ary << Dev::EndOfLife::ProductVersion.new(product, version, name)
             end
           end
