@@ -7,7 +7,7 @@ describe Dev::Docker do
   describe '.initialize' do
     subject { instance }
 
-    before :each do
+    before do
       expect_any_instance_of(described_class).to receive(:check_version)
     end
 

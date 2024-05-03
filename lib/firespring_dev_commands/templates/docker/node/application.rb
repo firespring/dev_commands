@@ -7,7 +7,7 @@ module Dev
       module Node
         # Class for default rake tasks associated with a node project
         class Application < Dev::Template::ApplicationInterface
-          attr_reader :node, :start_container_dependencies_on_test
+          attr_reader :node, :start_container_dependencies_on_test, :test_isolation
 
           # Create the templated rake tasks for the node application
           #
@@ -15,25 +15,40 @@ module Dev
           # @param container_path [String] The path to the application inside of the container
           # @param local_path [String] The path to the application on your local system
           # @param start_container_dependencies_on_test [Boolean] Whether or not to start up container dependencies when running tests
+          # @param test_isolation [Boolean] Whether or not to start tests in an isolated project and clean up after tests are run
+          # @param coverage [Dev::Coverage::Base] The coverage class which is an instance of Base to be used to evaluate coverage
+          # @param lint_artifacts [Dev::Docker::Artifact] An array of lint artifacts to copy back from the container
+          # @param test_artifacts [Dev::Docker::Artifact] An array of test artifacts to copy back from the container
           # @param exclude [Array<Symbol>] An array of default template tasks to exclude
           def initialize(
             application,
             container_path: nil,
             local_path: nil,
-            start_container_dependencies_on_test: true,
+            start_container_dependencies_on_test: false,
+            test_isolation: false,
+            coverage: nil,
+            lint_artifacts: nil,
+            test_artifacts: nil,
             exclude: []
           )
-            @node = Dev::Node.new(container_path:, local_path:)
+            @node = Dev::Node.new(container_path:, local_path:, coverage:)
             @start_container_dependencies_on_test = start_container_dependencies_on_test
+            @test_isolation = test_isolation
+            @lint_artifacts = lint_artifacts
+            @test_artifacts = test_artifacts
+            raise 'lint artifact must be instance of Dev::Docker::Artifact' if lint_artifacts&.any? { |it| !it.is_a?(Dev::Docker::Artifact) }
+            raise 'test artifact must be instance of Dev::Docker::Artifact' if test_artifacts&.any? { |it| !it.is_a?(Dev::Docker::Artifact) }
+
             super(application, exclude:)
           end
 
-          # Create the rake task which runs linting for the application name
           # rubocop:disable Metrics/MethodLength
+          # Create the rake task which runs linting for the application name
           def create_lint_task!
             application = @name
             node = @node
             exclude = @exclude
+            lint_artifacts = @lint_artifacts
             return if exclude.include?(:lint)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -51,19 +66,27 @@ module Dev
                 end
 
                 namespace :node do
-                  desc "Run the node linting software against the #{application}'s codebase"
+                  desc "Run the node linting software against the #{application}'s codebase" \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task lint: %w(init_docker up_no_deps) do
-                    LOG.debug('Check for node linting errors')
+                    LOG.debug("Check for node linting errors in the #{application} codebase")
 
+                    # Run the lint command
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
                     Dev::Docker::Compose.new(services: application, options:).exec(*node.lint_command)
+                  ensure
+                    # Copy any defined artifacts back
+                    container = Dev::Docker::Compose.new.container_by_name(application)
+                    lint_artifacts&.each do |artifact|
+                      Dev::Docker.new.copy_from_container(container, artifact.container_path, artifact.local_path)
+                    end
                   end
 
                   namespace :lint do
                     desc "Run the linting software against the #{application}'s codebase and apply all available fixes"
                     task fix: %w(init_docker up_no_deps) do
-                      LOG.debug('Check and fix linting errors')
+                      LOG.debug("Check and fix all node linting errors in the #{application} codebase")
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
@@ -76,12 +99,15 @@ module Dev
           end
           # rubocop:enable Metrics/MethodLength
 
+          # rubocop:disable Metrics/MethodLength
           # Create the rake task which runs all tests for the application name
           def create_test_task!
             application = @name
             node = @node
             exclude = @exclude
+            test_isolation = @test_isolation
             up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
+            test_artifacts = @test_artifacts
             return if exclude.include?(:test)
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
@@ -91,19 +117,43 @@ module Dev
                   # This is just a placeholder to execute the dependencies
                 end
 
-                namespace :node do
-                  desc "Run all node tests against the #{application}'s codebase"
-                  task test: %W(init_docker #{up_cmd}) do
-                    LOG.debug("Running all node tests in the #{application} codebase")
+                task test_init_docker: %w(init_docker) do
+                  Dev::Docker::Compose.configure do |c|
+                    c.project_name = SecureRandom.hex if test_isolation
+                  end
+                end
 
-                    options = []
-                    options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options:).exec(*node.test_command)
+                namespace :node do
+                  desc "Run all node tests against the #{application}'s codebase" \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
+                  task test: %W(test_init_docker #{up_cmd}) do
+                    begin
+                      LOG.debug("Running all node tests in the #{application} codebase")
+
+                      # Run the test command
+                      options = []
+                      options << '-T' if Dev::Common.new.running_codebuild?
+                      Dev::Docker::Compose.new(services: application, options:).exec(*node.test_command)
+                      node.check_test_coverage(application:)
+                    ensure
+                      # Copy any defined artifacts back
+                      container = Dev::Docker::Compose.new.container_by_name(application)
+                      test_artifacts&.each do |artifact|
+                        Dev::Docker.new.copy_from_container(container, artifact.container_path, artifact.local_path)
+                      end
+                    end
+                  ensure
+                    # Clean up resources if we are on an isolated project name
+                    if test_isolation
+                      Dev::Docker::Compose.new.down
+                      Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
+                    end
                   end
                 end
               end
             end
           end
+          # rubocop:enable Metrics/MethodLength
 
           # Create the rake task which runs the install command for the application packages
           def create_install_task!
@@ -143,12 +193,13 @@ module Dev
                 namespace :node do
                   desc 'Run NPM Audit on the target application' \
                        "\n\tuse MIN_SEVERITY=(info low moderate high critical) to fetch only severity type selected and above (default=high)." \
-                       "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list."
+                       "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list." \
+                       "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?
 
-                    # Retrieve results of the scan.
+                    # Run the audit command and retrieve the results
                     data = Dev::Docker::Compose.new(services: application, options: opts, capture: true).exec(*node.audit_command)
                     Dev::Node::Audit.new(data).to_report.check
                   end

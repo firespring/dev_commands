@@ -47,14 +47,14 @@ end
 # Create the base init command
 DEV_COMMANDS_TOP_LEVEL.instance_eval do
   task :init do
-    LOG.debug 'In base init'
+    # Placeholder for general initialization tasks
   end
 end
 
 # Create the base init_docker command
 DEV_COMMANDS_TOP_LEVEL.instance_eval do
   task init_docker: %w(init) do
-    LOG.debug 'In base init docker'
+    # Placeholder for general docker initialization tasks
   end
 end
 
@@ -144,18 +144,18 @@ DEV_COMMANDS_TOP_LEVEL.instance_eval do
     #   In that case it is recommended that you call the base _post_stop_hooks as a dependency of that task
   end
 
-  # Define an empty _pre_reload_hooks handler which can be overridden by the user
-  task :_pre_reload_hooks do
-    # The user may define custom _pre_reload_hooks tasks to add any pre-reload actions the reload process
-    # Define this process in the appropriate namespace to add them only to a specific reload
-    #   In that case it is recommended that you call the base _pre_reload_hooks as a dependency of that task
+  # Define an empty _pre_restart_hooks handler which can be overridden by the user
+  task :_pre_restart_hooks do
+    # The user may define custom _pre_restart_hooks tasks to add any pre-restart actions the restart process
+    # Define this process in the appropriate namespace to add them only to a specific restart
+    #   In that case it is recommended that you call the base _pre_restart_hooks as a dependency of that task
   end
 
-  # Define an empty _post_reload_hooks handler which can be overridden by the user
-  task :_post_reload_hooks do
-    # The user may define custom _post_reload_hooks tasks to add any post-reload actions the reload process
-    # Define this process in the appropriate namespace to add them only to a specific reload
-    #   In that case it is recommended that you call the base _post_reload_hooks as a dependency of that task
+  # Define an empty _post_restart_hooks handler which can be overridden by the user
+  task :_post_restart_hooks do
+    # The user may define custom _post_restart_hooks tasks to add any post-restart actions the restart process
+    # Define this process in the appropriate namespace to add them only to a specific restart
+    #   In that case it is recommended that you call the base _post_restart_hooks as a dependency of that task
   end
 
   # Define an empty _pre_clean_hooks handler which can be overridden by the user

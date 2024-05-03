@@ -101,16 +101,20 @@ module Dev
           end
         end
 
-        # Create the rake task which runs a docker compose down followed by an up
-        def create_reload_task!
+        # Create the rake task which runs a docker compose restart
+        def create_restart_task!
           exclude = @exclude
 
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
-            return if exclude.include?(:reload)
+            return if exclude.include?(:restart)
 
             desc 'Runs a "down" followed by an "up"'
-            task reload: %w(_pre_reload_hooks down up) do
-              Rake::Task[:_post_reload_hooks].execute
+            task restart: %w(init_docker _pre_restart_hooks _pre_down_hooks _pre_up_hooks) do
+              LOG.debug('In base restart')
+              Dev::Docker::Compose.new.restart
+              Rake::Task[:_post_up_hooks].execute
+              Rake::Task[:_post_down_hooks].execute
+              Rake::Task[:_post_restart_hooks].execute
             end
           end
         end

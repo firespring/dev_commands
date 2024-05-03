@@ -3,21 +3,21 @@ require 'lib/firespring_dev_commands/common'
 
 describe Dev::Common do
   describe '.run_command' do
-    let(:command) { 'ls' }
-    let(:stdin) { Object.new }
-    let(:stdout) { Object.new }
-    let(:stderr) { Object.new }
-    let(:env) { Object.new }
-    let(:capture) { false }
     subject { described_class.new.run_command(command, stdin:, stdout:, stderr:, env:, capture:) }
 
+    let(:command) { 'ls' }
     let(:pid) { Object.new }
     let(:result) { [nil, Struct.new(:foo).new(:bar)] }
     let(:result) { Object.new }
     let(:exitstatus) { Object.new }
     let(:success) { true }
+    let(:stdin) { Object.new }
+    let(:stdout) { Object.new }
+    let(:stderr) { Object.new }
+    let(:env) { Object.new }
+    let(:capture) { false }
 
-    before :each do
+    before do
       expect(Process).to receive(:spawn).with(env, command, in: stdin, out: stdout, err: stderr).and_return(pid)
       expect(Process).to receive(:wait2).with(pid).and_return([nil, result])
       expect(result).to receive(:exitstatus).and_return(exitstatus).at_least(:once)
@@ -51,7 +51,7 @@ describe Dev::Common do
       let(:lines) { [random, random] }
       let(:stdout) { Object.new }
 
-      before :each do
+      before do
         expect(IO).to receive(:pipe).and_return([stdoutread, stdout])
         expect(stdoutread).to receive(:close)
         expect(stdout).to receive(:close)

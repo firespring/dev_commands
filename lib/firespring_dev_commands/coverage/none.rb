@@ -12,9 +12,19 @@ module Dev
         []
       end
 
+      # Returns the node options for generating code coverage file
+      def node_options
+        []
+      end
+
+      # Returns the ruby options for generating code coverage file
+      def ruby_options
+        []
+      end
+
       # Checks the code coverage against the defined threshold
       def check(*)
-        puts 'Coverage not configured'
+        # Nothing to do here
       end
     end
   end

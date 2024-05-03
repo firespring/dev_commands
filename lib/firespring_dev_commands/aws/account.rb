@@ -3,8 +3,7 @@ module Dev
     # Class containing useful methods for interacting with the Aws account
     class Account
       # Config object for setting top level Aws account config options
-      # TODO: registry is deprecated and should be removed on the next major release
-      Config = Struct.new(:root, :children, :default, :registry, :ecr_registry_ids, :login_to_account_ecr_registry, :default_login_role_name)
+      Config = Struct.new(:root, :children, :default, :ecr_registry_ids, :login_to_account_ecr_registry, :default_login_role_name)
 
       # Instantiates a new top level config object if one hasn't already been created
       # Yields that config object to any given block
@@ -28,8 +27,7 @@ module Dev
         IniFile.new(filename: CONFIG_FILE, default: 'default')
       end
 
-      # TODO: registry is deprecated and should be removed on the next major release
-      attr_accessor :root, :children, :default, :registry, :ecr_registry_ids
+      attr_accessor :root, :children, :default, :ecr_registry_ids
 
       # Instantiate an account object
       # Requires that root account and at least one child account have been configured
@@ -44,11 +42,9 @@ module Dev
         @default = self.class.config.default
 
         # Create the ecr registry list based off several possible configuration values
-        @ecr_registry_ids = [self.class.config.registry]
+        @ecr_registry_ids = Array(self.class.config.ecr_registry_ids)
         @ecr_registry_ids << Dev::Aws::Profile.new.current if self.class.config.login_to_account_ecr_registry
-        @ecr_registry_ids.concat(Array(self.class.config.ecr_registry_ids))
         @ecr_registry_ids = @ecr_registry_ids.flatten.compact.reject(&:empty?).uniq
-        @registry = @ecr_registry_ids.first
       end
 
       # Returns all configured account information objects

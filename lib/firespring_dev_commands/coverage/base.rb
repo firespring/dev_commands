@@ -8,6 +8,16 @@ module Dev
       end
 
       # Raises not implemented
+      def node_options
+        raise 'not implemented'
+      end
+
+      # Raises not implemented
+      def ruby_options
+        raise 'not implemented'
+      end
+
+      # Raises not implemented
       def check(*)
         raise 'not implemented'
       end

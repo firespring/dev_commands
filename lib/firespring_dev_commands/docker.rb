@@ -77,6 +77,23 @@ module Dev
       _prune('volumes', opts:)
     end
 
+    # Prunes all volumes which start wth the given project name
+    def prune_project_volumes(project_name:)
+      project_name = project_name.to_s.strip
+      raise 'No project name defined' if project_name.empty?
+
+      ::Docker::Volume.all.each do |volume|
+        next unless volume.info['Name'].start_with?(project_name)
+
+        begin
+          volume.remove
+          LOG.info "Removed volume #{volume.id[0, 12]}"
+        rescue => e
+          LOG.error "Error removing volume #{volume.id[0, 12]}: #{e}"
+        end
+      end
+    end
+
     # Prunes/removes all unused images
     def prune_images
       _prune('images')
@@ -104,17 +121,6 @@ module Dev
       deleted_items = info["#{type}Deleted"] || []
       deleted_items.each { |it| LOG.info "  #{it}" }
       LOG.info "Total reclaimed space: #{Dev::Common.new.filesize(info['SpaceReclaimed'])}"
-    end
-
-    # Print the given filesize using the most appropriate units
-    private def filesize(size)
-      return '0.0 B' if size.to_i.zero?
-
-      units = %w(B KB MB GB TB Pb EB)
-      exp = (Math.log(size) / Math.log(1024)).to_i
-      exp = 6 if exp > 6
-
-      format('%.1f %s', size.to_f / (1024**exp), units[exp])
     end
 
     # Push the local version of the docker image to the defined remote repository
@@ -160,20 +166,6 @@ module Dev
     def force_remove_images(name_and_tag)
       images = ::Docker::Image.all(filter: name_and_tag)
       ::Docker::Image.remove(images[0].id, force: true) unless images.empty?
-    end
-
-    # Calls the docker compose method with the given inputs
-    # @deprecated Please use {Docker::Compose#container_by_name} instead
-    def container_by_name(service_name, prefix = nil, status: [Docker::Status::RUNNING])
-      warn '[DEPRECATION] `Docker#container_by_name` is deprecated.  Please use `Docker::Compose#container_by_name` instead.'
-      Docker::Compose.new.container_by_name(service_name, prefix, status)
-    end
-
-    # Calls the docker compose method with the given inputs
-    # @deprecated Please use {Docker::Compose#mapped_public_port} instead
-    def mapped_public_port(name, private_port)
-      warn '[DEPRECATION] `Docker#mapped_public_port` is deprecated.  Please use `Docker::Compose#mapped_public_port` instead.'
-      Docker::Compose.new.mapped_public_port(name, private_port)
     end
 
     # Gets the default working dir of the container
@@ -234,7 +226,7 @@ module Dev
       rescue => e
         raise e if required
 
-        puts 'Not Found'
+        puts "#{source_path} Not Found"
       end
 
       Dev::Tar.new(tar).unpack(source, destination)

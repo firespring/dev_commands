@@ -145,17 +145,17 @@ module Dev
         end
 
         # Create the rake task which stops, cleans, and starts the application
-        def create_reload_task!
+        def create_restart_task!
           application = @name
           exclude = @exclude
 
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
             namespace application do
-              return if exclude.include?(:reload)
+              return if exclude.include?(:restart)
 
               desc "Reloads the #{application} container"
-              task reload: %w(init_docker _pre_reload_hooks down up_no_deps) do
-                Rake::Task[:_post_reload_hooks].execute
+              task restart: %w(init_docker _pre_restart_hooks down up_no_deps) do
+                Rake::Task[:_post_restart_hooks].execute
               end
             end
           end

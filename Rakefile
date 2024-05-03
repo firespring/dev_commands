@@ -19,6 +19,23 @@ Dev::Template::Docker::Default.new
 Dev::Template::Docker::Application.new('app')
 Dev::Template::Docker::Ruby::Application.new('app')
 
+desc 'run project linting'
+task :lint do
+  Dev::Common.new.run_command('bundle exec rubocop')
+end
+
+namespace :lint do
+  desc 'run project lint fixes'
+  task :fix do
+    Dev::Common.new.run_command('bundle exec rubocop -A')
+  end
+end
+
+desc 'run project tests'
+task :test do
+  Dev::Common.new.run_command('bundle exec rspec')
+end
+
 Dev::Git.configure do |c|
   c.min_version = '2.27.0'
 end
@@ -77,6 +94,7 @@ module Bundler
           puts 'Gem released successfully!'
         end
 
+        desc 'Run the rubygems push command'
         task 'release:rubygem_push' do
           rubygem_push(built_gem_path) if gem_push?
         end

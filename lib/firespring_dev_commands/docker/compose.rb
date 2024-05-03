@@ -126,6 +126,11 @@ module Dev
         execute_command(build_command('stop'))
       end
 
+      # Pull in supported env settings and call restart
+      def restart
+        execute_command(build_command('restart'))
+      end
+
       # Call the compose exec method passing the given args after it
       def exec(*args)
         execute_command(build_command('exec', *args))
