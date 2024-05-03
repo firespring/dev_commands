@@ -37,7 +37,7 @@ module Dev
       def parse_time(string)
         return nil unless string && !string.empty?
 
-        Time.at(string.slice(6, 10).to_i)
+        ::Time.at(string.slice(6, 10).to_i)
       end
 
       # Calculate the cycle time as the amount of time the story was open

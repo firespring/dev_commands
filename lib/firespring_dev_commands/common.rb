@@ -78,8 +78,8 @@ module Dev
     # Receive a string from the user on stdin unless non_interactive is set to true
     # If a default value was specified and no answer was given, return the default
     def gather_input(default: nil)
-      answer = $stdin.gets.to_s.strip unless ENV['NON_INTERACTIVE'] == 'true'
-      answer.to_s.strip
+      answer = $stdin.gets unless ENV['NON_INTERACTIVE'] == 'true'
+      answer = answer.to_s.strip
       return default if default && answer.empty?
 
       answer
@@ -184,6 +184,17 @@ module Dev
       string = string.to_s
       center_str = string.length / 2
       string.rjust(center_dash + center_str - 1, pad).ljust(len - 1, pad)
+    end
+
+    # Print the given filesize using the most appropriate units
+    def filesize(size)
+      return '0.0 B' if size.to_i.zero?
+
+      units = %w(B KB MB GB TB Pb EB)
+      exp = (Math.log(size) / Math.log(1024)).to_i
+      exp = 6 if exp > 6
+
+      format('%.1f %s', size.to_f / (1024**exp), units[exp])
     end
   end
 end

@@ -174,28 +174,53 @@ module Dev
     end
 
     # Copies the source path on your local machine to the destination path on the container
-    def copy_to_container(container, source_path, dest_path)
-      dest_path = File.join(working_dir(container), dest_path) unless dest_path.start_with?(File::SEPARATOR)
-      LOG.info "Copying #{source_path} to #{dest_path}... "
+    def copy_to_container(container, source, destination)
+      # Add the working dir of the container onto the destination (if it doesn't start a path separator)
+      destination = File.join(working_dir(container), destination) unless destination.start_with?(File::SEPARATOR)
+      LOG.info "Copying #{source} to #{destination}..."
 
-      container.archive_in(source_path, dest_path, overwrite: true)
-      return unless File.directory?(source_path)
+      # Need to determine the type of the destination (file or directory or nonexistant)
+      noexist_code = 22
+      file_code = 33
+      directory_code = 44
+      unknown_code = 55
+      filetype_cmd = [
+        'bash',
+        '-c',
+        "set -e; [ ! -e '#{destination}' ] && exit #{noexist_code}; [ -f '#{destination}' ] " \
+        "&& exit #{file_code}; [ -d '#{destination}' ] && exit #{directory_code}; exit #{unknown_code}"
+      ]
+      destination_filetype_code = container.exec(filetype_cmd).last
 
-      dest_file = File.basename(source_path)
-      # TODO: Can we find a better solution for this? Seems pretty brittle
-      retcode = container.exec(['bash', '-c', "cd #{dest_path}; tar -xf #{dest_file}; rm -f #{dest_file}"])[-1]
-      raise 'Unable to unpack on container' unless retcode.zero?
+      # If destination_filetype_code is a file - that means the user passed in a destination filename
+      # Unfortunately the archive_in command does not support that so we will strip it off and use it later (if needed)
+      source_filename = File.basename(source)
+      destination_filename = File.basename(source)
+      destination, _, destination_filename = destination.rpartition(File::SEPARATOR) if destination_filetype_code == file_code
+
+      container.archive_in(source, destination, overwrite: true)
+
+      if File.directory?(source)
+        # If the source was a directory, then the archive_in command leaves it as a tar on the system - so we need to unpack it
+        # TODO: Can we find a better solution for this? Seems pretty brittle
+        retcode = container.exec(['bash', '-c', "cd #{destination}; tar -xf #{destination_filename}; rm -f #{destination_filename}"]).last
+        raise 'Unable to unpack on container' unless retcode.zero?
+      elsif destination_filetype_code == file_code && source_filename != destination_filename
+        # If the destination was a file _and_ the filename is different than the source filename, then we need to rename it
+        retcode = container.exec(['bash', '-c', "cd #{destination}; mv #{source_filename} #{destination_filename}"]).last
+        raise "Unable to rename '#{source_filename}' to '#{destination_filename}' on container" unless retcode.zero?
+      end
     end
 
     # Copies the source path on the container to the destination path on your local machine
     # If required is set to true, the command will fail if the source path does not exist on the container
-    def copy_from_container(container, source_path, dest_path, required: true)
-      source_path = File.join(working_dir(container), source_path) unless source_path.start_with?(File::SEPARATOR)
-      LOG.info "Copying #{source_path} to #{dest_path}... "
+    def copy_from_container(container, source, destination, required: true)
+      source = File.join(working_dir(container), source) unless source.start_with?(File::SEPARATOR)
+      LOG.info "Copying #{source} to #{destination}..."
 
       tar = StringIO.new
       begin
-        container.archive_out(source_path) do |chunk|
+        container.archive_out(source) do |chunk|
           tar.write(chunk)
         end
       rescue => e
@@ -204,7 +229,7 @@ module Dev
         puts "#{source_path} Not Found"
       end
 
-      Dev::Tar.new(tar).unpack(source_path, dest_path)
+      Dev::Tar.new(tar).unpack(source, destination)
     end
 
     # rubocop:disable Metrics/ParameterLists

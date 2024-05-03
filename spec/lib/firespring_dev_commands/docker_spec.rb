@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'lib/firespring_dev_commands/docker'
 
-describe Dev::Docker::Compose do
+describe Dev::Docker do
   let(:instance) { described_class.new }
 
   describe '.initialize' do

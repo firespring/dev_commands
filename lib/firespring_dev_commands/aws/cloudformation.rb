@@ -21,9 +21,10 @@ module Dev
       # Finished status
       FINISHED = :finished
 
-      attr_accessor :client, :name, :template_filename, :parameters, :capabilities, :failure_behavior, :state
+      attr_accessor :client, :name, :template_filename, :parameters, :capabilities, :failure_behavior, :preserve_parameters_on_update, :state
 
-      def initialize(name, template_filename, parameters: Dev::Aws::Cloudformation::Parameters.new, capabilities: [], failure_behavior: 'ROLLBACK')
+      def initialize(name, template_filename, parameters: Dev::Aws::Cloudformation::Parameters.new, capabilities: [], failure_behavior: 'ROLLBACK',
+                     preserve_parameters_on_update: false)
         raise 'parameters must be an intsance of parameters' unless parameters.is_a?(Dev::Aws::Cloudformation::Parameters)
 
         @client = nil
@@ -32,6 +33,7 @@ module Dev
         @parameters = parameters
         @capabilities = capabilities
         @failure_behavior = failure_behavior
+        @preserve_parameters_on_update = preserve_parameters_on_update
         @state = NOT_STARTED
       end
 
@@ -81,11 +83,16 @@ module Dev
         # Call upload function to get the s3 url
         template_url = upload(template_filename)
 
+        update_parameters = if preserve_parameters_on_update
+                              parameters.preserve
+                            else
+                              parameters.default
+                            end
         # Update the cloudformation stack
         client.update_stack(
           stack_name: name,
           template_url:,
-          parameters: parameters.preserve,
+          parameters: update_parameters,
           capabilities:
         )
         @state = STARTED
