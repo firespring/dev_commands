@@ -90,7 +90,8 @@ Bundler::GemHelper.install_tasks
 
 task :joetest do
   puts
-  Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Php.new.default_products).status
-  Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Node.new.default_products).status
+  #Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Php.new.default_products).status
+  #Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Node.new.default_products).status
+  Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Ruby.new.default_products).status
   puts
 end

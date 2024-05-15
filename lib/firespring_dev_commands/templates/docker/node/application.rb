@@ -142,8 +142,8 @@ module Dev
 
                 namespace :node do
                   desc 'Run NPM Audit on the target application' \
-                       "\n\tuse MIN_SEVERITY=(info low moderate high critical) to fetch only severity type selected and above (default=high)." \
-                       "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list."
+                    "\n\tuse MIN_SEVERITY=(info low moderate high critical) to fetch only severity type selected and above (default=high)." \
+                    "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list."
                   task audit: %w(init_docker up_no_deps) do
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?
@@ -159,6 +159,31 @@ module Dev
                       Dev::Docker::Compose.new(services: application).exec(*node.audit_fix_command)
                     end
                   end
+                end
+              end
+            end
+          end
+
+          # Create the rake task for the node eol method
+          def create_eol_task!
+            # Have to set a local variable to be accessible inside of the instance_eval block
+            exclude = @exclude
+            node = @node
+
+            DEV_COMMANDS_TOP_LEVEL.instance_eval do
+              return if exclude.include?(:eol)
+
+              task eol: [:'eol:node'] do
+                # This is just a placeholder to execute the dependencies
+              end
+
+              namespace :eol do
+                desc 'Compares the current date to the EOL date for supported packages in the node package file'
+                task node: %w(init) do
+                  puts
+                  puts "Node product versions (in #{node.package_file})".light_yellow
+                  Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Node.new(node).default_products).status
+                  puts
                 end
               end
             end

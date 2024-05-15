@@ -1,6 +1,12 @@
 module Dev
   class EndOfLife
     class Node
+      attr_reader :node
+
+      def initialize(node = Dev::Node.new)
+        @node = node
+      end
+
       def default_products
         npm_products
       end
@@ -10,7 +16,7 @@ module Dev
         major_version_only_products = ['ckeditor', 'vue', 'jquery']
 
         [].tap do |ary|
-          lockfile = "#{Dev::Node.new.package_file.reverse.split('.')[-1].reverse}-lock.json"
+          lockfile = "#{node.package_file.reverse.split('.')[-1].reverse}-lock.json"
           packages = JSON.load(File.open(lockfile))&.fetch('packages')
           packages&.each do |key, info|
             name = key.split('node_modules/').last
