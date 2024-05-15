@@ -227,9 +227,12 @@ module Dev
               namespace :eol do
                 desc 'Compares the current date to the EOL date for supported packages in the php package file'
                 task php: %w(init) do
+                  php_products = Dev::EndOfLife::Php.new(php).default_products
+                  next if php_products.empty?
+
                   puts
                   puts "Php product versions (in #{php.package_file})".light_yellow
-                  Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Php.new(php).default_products).status
+                  Dev::EndOfLife.new(product_versions: php_products).status
                   puts
                 end
               end

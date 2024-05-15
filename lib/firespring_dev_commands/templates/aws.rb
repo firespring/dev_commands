@@ -101,7 +101,6 @@ module Dev
 
         DEV_COMMANDS_TOP_LEVEL.instance_eval do
           return if exclude.include?(:eol)
-          return if ENV.fetch('CHECK_AWS', nil).to_s.strip == 'false'
 
           task eol: [:'eol:aws'] do
             # This is just a placeholder to execute the dependencies
@@ -110,11 +109,16 @@ module Dev
           namespace :eol do
             desc 'Compares the current date to the EOL date for supported aws resources'
             task aws: %w(init ensure_aws_credentials) do
+              next if ENV.fetch('CHECK_AWS', nil).to_s.strip == 'false'
+
+              aws_products = Dev::EndOfLife::Aws.new.default_products
+              next if aws_products.empty?
+
               puts
               account_id = Dev::Aws::Profile.new.current
               account_name = Dev::Aws::Account.new.name_by_account(account_id)
               puts "AWS product versions (in account #{account_name} / #{account_id})".light_yellow
-              Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Aws.new.default_products).status
+              Dev::EndOfLife.new(product_versions: aws_products).status
               puts
             end
           end

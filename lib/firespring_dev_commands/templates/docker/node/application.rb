@@ -180,9 +180,12 @@ module Dev
               namespace :eol do
                 desc 'Compares the current date to the EOL date for supported packages in the node package file'
                 task node: %w(init) do
+                  node_products = Dev::EndOfLife::Node.new(node).default_products
+                  next if node_products.empty?
+
                   puts
                   puts "Node product versions (in #{node.package_file})".light_yellow
-                  Dev::EndOfLife.new(product_versions: Dev::EndOfLife::Node.new(node).default_products).status
+                  Dev::EndOfLife.new(product_versions: node_products).status
                   puts
                 end
               end

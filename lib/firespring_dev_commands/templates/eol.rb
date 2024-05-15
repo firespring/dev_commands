@@ -15,7 +15,13 @@ module Dev
           desc 'Compares the current date to the EOL date for all configured projects' \
                "\n\toptionally specify CHECK_AWS=<true/false> to toggle whether AWS resources are checked for EOL (defaults to true)"
           task eol: %w(init) do
-            Dev::EndOfLife.new.status
+            manual_products = Dev::EndOfLife.new.product_versions
+            next if manual_products.empty?
+
+            puts
+            puts "Manual product versions"
+            Dev::EndOfLife.new(product_versions: manual_products).status
+            puts
           end
         end
       end
