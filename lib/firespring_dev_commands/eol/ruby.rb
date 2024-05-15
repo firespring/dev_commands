@@ -1,10 +1,11 @@
 module Dev
   class EndOfLife
     class Ruby
-      attr_reader :ruby
+      attr_reader :ruby, :lockfile
 
       def initialize(ruby = Dev::Ruby.new)
         @ruby = ruby
+        @lockfile = File.join(ruby.local_path, "#{ruby.package_file.reverse.split('.')[-1].reverse}.lock")
       end
 
       def default_products
@@ -16,9 +17,8 @@ module Dev
         major_version_only_products = []
 
         [].tap do |ary|
-          lockfile = "#{ruby.package_file.reverse.split('.')[-1].reverse}.lock"
           packages = Bundler::LockfileParser.new(Bundler.read_file(lockfile)).specs
-          packages&.each do |package|
+          packages.each do |package|
             name = package.name
             product = if name == 'laravel/framework'
                         'laravel'

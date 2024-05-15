@@ -1,10 +1,11 @@
 module Dev
   class EndOfLife
     class Php
-      attr_reader :php
+      attr_reader :php, :lockfile
 
       def initialize(php = Dev::Php.new)
         @php = php
+        @lockfile = File.join(php.local_path, "#{php.package_file.reverse.split('.')[-1].reverse}.lock")
       end
 
       def default_products
@@ -16,8 +17,7 @@ module Dev
         major_version_only_products = ['laravel']
 
         [].tap do |ary|
-          lockfile = "#{php.package_file.reverse.split('.')[-1].reverse}.lock"
-          packages = JSON.load(File.open(lockfile))&.fetch('packages')
+          packages = JSON.load(File.open(lockfile))&.fetch('packages', [])
           packages&.each do |package|
             name = package['name']
             product = if name == 'laravel/framework'

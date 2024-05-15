@@ -180,11 +180,12 @@ module Dev
               namespace :eol do
                 desc 'Compares the current date to the EOL date for supported packages in the ruby package file'
                 task ruby: %w(init) do
-                  ruby_products = Dev::EndOfLife::Ruby.new(ruby).default_products
+                  eol = Dev::EndOfLife::Ruby.new(ruby)
+                  ruby_products = eol.default_products
                   next if ruby_products.empty?
 
                   puts
-                  puts "Ruby product versions (in #{ruby.package_file})".light_yellow
+                  puts "Ruby product versions (in #{eol.lockfile})".light_yellow
                   Dev::EndOfLife.new(product_versions: ruby_products).status
                   puts
                 end

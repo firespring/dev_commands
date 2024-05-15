@@ -1,10 +1,11 @@
 module Dev
   class EndOfLife
     class Node
-      attr_reader :node
+      attr_reader :node, :lockfile
 
       def initialize(node = Dev::Node.new)
         @node = node
+        @lockfile = File.join(node.local_path, "#{node.package_file.reverse.split('.')[-1].reverse}-lock.json")
       end
 
       def default_products
@@ -16,9 +17,8 @@ module Dev
         major_version_only_products = ['ckeditor', 'vue', 'jquery']
 
         [].tap do |ary|
-          lockfile = "#{node.package_file.reverse.split('.')[-1].reverse}-lock.json"
-          packages = JSON.load(File.open(lockfile))&.fetch('packages')
-          packages&.each do |key, info|
+          packages = JSON.load(File.open(lockfile))&.fetch('packages', [])
+          packages.each do |key, info|
             name = key.split('node_modules/').last
             version = info['version']
             product = name
