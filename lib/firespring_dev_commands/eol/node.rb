@@ -17,10 +17,9 @@ module Dev
         major_version_only_products = %w(ckeditor vue jquery)
 
         [].tap do |ary|
-          packages = JSON.parse(File.open(lockfile))&.fetch('packages', [])
+          packages = JSON.parse(File.read(lockfile))&.fetch('packages', [])
           packages.each do |key, info|
             name = key.split('node_modules/').last
-            info['version']
             product = name
 
             # Make sure what we found is supported by the EOL library

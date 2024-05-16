@@ -19,7 +19,7 @@ module Dev
         symfony_products = ['symfony/http-client', 'symfony/mailer', 'symfony/mailchimp-mailer']
 
         [].tap do |ary|
-          packages = JSON.parse(File.open(lockfile))&.fetch('packages', [])
+          packages = JSON.parse(File.read(lockfile))&.fetch('packages', [])
           packages&.each do |package|
             name = package['name']
             product = if laravel_products.include?(name)
