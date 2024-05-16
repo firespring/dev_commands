@@ -19,7 +19,7 @@ module Dev
             next if manual_products.empty?
 
             puts
-            puts "Manual product versions"
+            puts 'Manual product versions'
             Dev::EndOfLife.new(product_versions: manual_products).status
             puts
           end

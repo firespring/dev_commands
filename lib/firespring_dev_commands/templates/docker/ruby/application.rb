@@ -141,8 +141,8 @@ module Dev
 
                 namespace :ruby do
                   desc 'Run Bundle Audit on the target application' \
-                    "\n\tuse MIN_SEVERITY=(info low moderate high critical) to fetch only severity type selected and above (default=high)." \
-                    "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list."
+                       "\n\tuse MIN_SEVERITY=(info low moderate high critical) to fetch only severity type selected and above (default=high)." \
+                       "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list."
                   task audit: %w(init_docker up_no_deps) do
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?

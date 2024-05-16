@@ -1,4 +1,4 @@
-FROM ruby:3.2-slim-bullseye
+FROM 300448126090.dkr.ecr.us-east-1.amazonaws.com/firespring/base:bookworm-ruby32
 MAINTAINER Firespring "opensource@firespring.com"
 
 # Set up the working directory

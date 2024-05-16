@@ -20,16 +20,10 @@ module Dev
           packages = Bundler::LockfileParser.new(Bundler.read_file(lockfile)).specs
           packages.each do |package|
             name = package.name
-            product = if name == 'laravel/framework'
-                        'laravel'
-                      elsif ['symfony/http-client', 'symfony/mailer', 'symfony/mailchimp-mailer'].include?(name)
-                        'symfony'
-                      else
-                        name
-                      end
+            product = name
 
             # Make sure what we found is supported by the EOL library
-            next unless eol.is_product?(product)
+            next unless eol.product?(product)
 
             version = package.version.to_s.reverse.split('.')[-2..].join('.').reverse.tr('v', '')
             version = version.split('.').first if major_version_only_products.include?(product)
