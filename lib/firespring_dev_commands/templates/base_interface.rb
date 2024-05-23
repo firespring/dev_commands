@@ -47,14 +47,14 @@ end
 # Create the base init command
 DEV_COMMANDS_TOP_LEVEL.instance_eval do
   task :init do
-    LOG.debug 'In base init'
+    # Default Base Init method
   end
 end
 
 # Create the base init_docker command
 DEV_COMMANDS_TOP_LEVEL.instance_eval do
   task init_docker: %w(init) do
-    LOG.debug 'In base init docker'
+    # Default Base Init Docker method
   end
 end
 
