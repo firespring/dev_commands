@@ -229,12 +229,10 @@ module Dev
                 task php: %w(init) do
                   eol = Dev::EndOfLife::Php.new(php)
                   php_products = eol.default_products
-                  next if php_products.empty?
 
                   puts
                   puts "Php product versions (in #{eol.lockfile})".light_yellow
                   Dev::EndOfLife.new(product_versions: php_products).status
-                  puts
                 end
               end
             end

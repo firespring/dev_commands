@@ -53,6 +53,11 @@ module Dev
 
     # Prints all of the product version statuses
     def status
+      if product_versions.empty?
+        puts '  no tracked products'
+        return
+      end
+
       product_versions.sort_by(&:name).each(&:print_status)
     end
 

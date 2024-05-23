@@ -182,12 +182,10 @@ module Dev
                 task node: %w(init) do
                   eol = Dev::EndOfLife::Node.new(node)
                   node_products = eol.default_products
-                  next if node_products.empty?
 
                   puts
                   puts "Node product versions (in #{eol.lockfile})".light_yellow
                   Dev::EndOfLife.new(product_versions: node_products).status
-                  puts
                 end
               end
             end

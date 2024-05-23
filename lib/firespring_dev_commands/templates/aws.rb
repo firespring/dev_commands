@@ -119,7 +119,6 @@ module Dev
               account_name = Dev::Aws::Account.new.name_by_account(account_id)
               puts "AWS product versions (in account #{account_name} / #{account_id})".light_yellow
               Dev::EndOfLife.new(product_versions: aws_products).status
-              puts
             end
           end
         end

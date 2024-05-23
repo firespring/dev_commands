@@ -182,12 +182,10 @@ module Dev
                 task ruby: %w(init) do
                   eol = Dev::EndOfLife::Ruby.new(ruby)
                   ruby_products = eol.default_products
-                  next if ruby_products.empty?
 
                   puts
                   puts "Ruby product versions (in #{eol.lockfile})".light_yellow
                   Dev::EndOfLife.new(product_versions: ruby_products).status
-                  puts
                 end
               end
             end
