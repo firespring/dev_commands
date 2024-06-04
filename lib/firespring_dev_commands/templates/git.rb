@@ -159,6 +159,49 @@ module Dev
           end
         end
       end
+
+      # Create the rake task for the git commit status task.
+      def create_commit_status_task!
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
+
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          namespace :git do
+            return if exclude.include?(:commit_status)
+
+            # TODO: Clean, comments and description
+            desc 'Add status to commit' \
+                 "\n\tuse TODO"
+
+            task :create_commit_status do
+              # Key Values
+              repository = ENV['REPOSITORY'].to_s.strip
+              branch = ENV['BRANCH'].to_s.strip
+              status = ENV['STATUS'].to_s.strip
+
+              raise 'Repository name is required' unless repository
+              raise 'Branch name is required' unless branch
+              raise 'Status is required' unless status
+
+              # Validate status
+              valid_statuses = %w(error failure pending success)
+              raise "Invalid status: #{status}. Valid statuses are: #{valid_statuses.join(', ')}" unless valid_statuses.include?(status)
+
+              # Optional Values
+              context = ENV['CONTEXT'].to_s.strip
+              description = ENV['DESCRIPTION'].to_s.strip
+              target_url = ENV['TARGET_URL'].to_s.strip
+
+              options = {}
+              options[:context] = context unless context.empty?
+              options[:description] = description unless description.empty?
+              options[:target_url] = target_url unless target_url.empty?
+
+              Dev::Git.new.commit_status(repository:, branch:, status:, options:)
+            end
+          end
+        end
+      end
     end
   end
 end

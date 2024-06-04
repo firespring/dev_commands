@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'git'
+require 'octokit'
 
 module Dev
   # Class for performing git functions
@@ -422,6 +423,22 @@ module Dev
       opts[:depth] = depth unless depth.to_s.strip.empty?
       g = ::Git.clone(ssh_repo_url(repo_name, repo_org), dir, opts)
       g.fetch('origin', prune: true)
+    end
+
+    def commit_status(repository:, branch:, status:, organization: 'firespring', options: {})
+      token = ENV['GITHUB_TOKEN'].to_s.strip
+      raise 'GITHUB_TOKEN is required' unless token
+
+      # Set up the GitHub client
+      client = Octokit::Client.new(access_token: token)
+
+      # Fetch the latest commit SHA for the given branch
+      repo = "#{organization}/#{repository}"
+      ref = "heads/#{branch}"
+      sha = client.ref(repo, ref).object.sha
+
+      # Create the commit status
+      client.create_status(repo, sha, status, options)
     end
 
     # Builds an ssh repo URL using the org and repo name given
