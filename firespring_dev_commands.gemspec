@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'colorize', '~> 1.1.0'
   s.add_dependency 'docker-api', '~> 2.2.0'
   s.add_dependency 'dotenv', '~> 2.8.1'
+  s.add_dependency 'faraday-retry', '~> 2.0'
   s.add_dependency 'git', '~> 1.18.0'
   s.add_dependency 'inifile', '~> 3.0.0'
   s.add_dependency 'jira-ruby', '~> 2.3.0'
