@@ -214,6 +214,33 @@ module Dev
               end
             end
           end
+
+          # Create the rake task for the node eol method
+          def create_eol_task!
+            # Have to set a local variable to be accessible inside of the instance_eval block
+            exclude = @exclude
+            node = @node
+
+            DEV_COMMANDS_TOP_LEVEL.instance_eval do
+              return if exclude.include?(:eol)
+
+              task eol: [:'eol:node'] do
+                # This is just a placeholder to execute the dependencies
+              end
+
+              namespace :eol do
+                desc 'Compares the current date to the EOL date for supported packages in the node package file'
+                task node: %w(init) do
+                  eol = Dev::EndOfLife::Node.new(node)
+                  node_products = eol.default_products
+
+                  puts
+                  puts "Node product versions (in #{eol.lockfile})".light_yellow
+                  Dev::EndOfLife.new(product_versions: node_products).status
+                end
+              end
+            end
+          end
         end
       end
     end
