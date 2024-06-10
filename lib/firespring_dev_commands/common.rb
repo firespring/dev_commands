@@ -7,7 +7,7 @@ module Dev
     # By default, the subshell is connected to the stdin/stdout/stderr of the current program
     # By default, the current environment is passed to the subshell
     # You can capture the output of the command by setting capture to true
-    def run_command(command, stdin: $stdin, stdout: $stdout, stderr: $stderr, env: ENV, capture: false)
+    def run_command(command, stdin: $stdin, stdout: $stdout, stderr: $stderr, env: ENV, capture: false, fail_on_error: true)
       command = Array(command)
       output = nil
 
@@ -31,7 +31,7 @@ module Dev
       unless result.exitstatus.zero?
         puts output if capture
         LOG.error "#{result.exitstatus} exit status while running [ #{command.join(' ')} ]\n".red
-        exit result.exitstatus
+        exit result.exitstatus if fail_on_error
       end
 
       output
