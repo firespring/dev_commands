@@ -11,6 +11,7 @@ module Dev
         @domains = Array(domains || [])
       end
 
+      # TODO: all zones creates an array - we probably want to use yield instead
       private def zones
         if @domains.empty?
           all_zones
@@ -19,6 +20,7 @@ module Dev
         end
       end
 
+      # TODO: Replacement for all_zones which yields each individual record
       def each_zone
         Dev::Aws.each_page(client, :list_hosted_zones) do |response|
           response.hosted_zones&.each do |hosted_zone|
@@ -29,6 +31,7 @@ module Dev
         end
       end
 
+      # TODO: all zones creates an array - we probably want to use yield instead
       #private def all_zones
       #  [].tap do |ary|
       #    Dev::Aws.each_page(client, :list_hosted_zones) do |response|
@@ -58,6 +61,7 @@ module Dev
         ).query_logging_configs&.first&.id
       end
 
+      # Get the hosted zone details for the zone id
       private def details(zone_id)
         response = client.get_hosted_zone(id: zone_id)
         [response&.hosted_zone, response&.delegation_set]
@@ -72,6 +76,7 @@ module Dev
         end
       end
 
+      # TODO: Print info about the zone
       def list_zone_details
         each_zone do |zone|
           puts
@@ -92,6 +97,7 @@ module Dev
         puts
       end
 
+      # TODO: This has been updated to use the each_zone method. This might be finished? Or maybe we also output this in zone details?
       def list_query_configs
         each_zone do |zone|
           message = if target_config_id
