@@ -1,12 +1,14 @@
+require 'aws-sdk-route53'
+
 module Dev
   class Aws
     # Class for performing Route53 functions
     class Route53
       attr_reader :client
 
-      def initialize(domains)
+      def initialize(domains = nil)
         @client = ::Aws::Route53::Client.new
-        @domains = domains
+        @domains = Array(domains || [])
       end
 
       private def zones
@@ -17,15 +19,25 @@ module Dev
         end
       end
 
-      private def all_zones
-        [].tap do |ary|
-          Dev::Aws.each_page(client, :list_hosted_zones) do |response|
-            response.hosted_zones&.each do |hosted_zone|
-              ary << hosted_zone unless hosted_zone.config.private_zone
-            end
+      def each_zone
+        Dev::Aws.each_page(client, :list_hosted_zones) do |response|
+          response.hosted_zones&.each do |hosted_zone|
+            next if hosted_zone.config.private_zone
+
+            yield hosted_zone
           end
         end
       end
+
+      #private def all_zones
+      #  [].tap do |ary|
+      #    Dev::Aws.each_page(client, :list_hosted_zones) do |response|
+      #      response.hosted_zones&.each do |hosted_zone|
+      #        ary << hosted_zone unless hosted_zone.config.private_zone
+      #      end
+      #    end
+      #  end
+      #end
 
       private def zones_by_domain_names(domains)
         [].tap do |ary|
@@ -57,17 +69,15 @@ module Dev
 
       def list_query_configs
         output = {}
-        zones.each do |zone|
+        each_zone do |zone|
           target_config_id = target_config_id(zone.id)
-
-          output[zone.name] = if target_config_id
-                                "Config\t=>\t#{target_config_id}".colorize(:green)
-                              else
-                                'No query logging config assigned.'.colorize(:red)
-                              end
+          message = if target_config_id
+                     "Config\t=>\t#{target_config_id}".colorize(:green)
+                   else
+                     'No query logging config assigned.'.colorize(:red)
+                   end
+          puts "%-50s => %s" % [zone.name, message]
         end
-
-        pretty_puts(output)
       end
 
       def activate_query_logging(log_group)
