@@ -77,10 +77,10 @@ module Dev
           puts
           zone_details, delegation_set = details(zone.id)
 
-          puts "#{zone_details.name} (#{zone_details.id}):"
+          puts "#{zone_details.name.light_white} (#{zone_details.id}):"
           puts "  Delegation Set: #{delegation_set.id}"
           puts "  Zone Nameservers: #{delegation_set.name_servers.join(", ")}"
-          puts "  Actual Nameservers: #{Dev::Dns::Nameserver.new(zone_details.name).status}"
+          puts "  Actual Nameservers: #{Dev::Dns::Nameserver.new(zone_details.name)&.provider&.type}"
 
           target_config_id = target_config_id(zone.id)
           if target_config_id
