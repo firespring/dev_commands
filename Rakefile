@@ -106,21 +106,15 @@ module Bundler
 end
 Bundler::GemHelper.install_tasks
 
-task :joetest do
-#  r53 = Dev::Aws::Route53.new([])
-#  r53.each_public_zone do |zone|
-#    response = r53.client.get_hosted_zone(id: zone.id)
-#    zone_details = response.hosted_zone
-#    delegation_set = response.delegation_set
-#
-#    puts
-#    puts "#{zone_details.name} (#{zone_details.id}):"
-#    puts "  Comment: #{zone_details.config.comment}"
-#    puts "  Delegation Set: #{delegation_set.id}"
-#    puts "  NS: #{delegation_set.name_servers.join(", ")}"
-#    puts
-#  end
-  Dev::Aws::Route53.new.list_query_configs
+# TODO: JOEREMOVE
+Dev::Aws::Account::configure do |c|
+  c.root = Dev::Aws::Account::Info.new('FDP Root', '020401666882')
+  c.children = [
+    Dev::Aws::Account::Info.new('FDP Development', '417401252731'),
+    Dev::Aws::Account::Info.new('FDP Production', '435196416497'),
+  ]
+  c.login_to_account_ecr_registry = true
 end
-
+Dev::Template::Aws.new
 Dev::Template::Aws::Services::Route53.new
+
