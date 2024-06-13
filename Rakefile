@@ -122,3 +122,5 @@ task :joetest do
 #  end
   Dev::Aws::Route53.new.list_query_configs
 end
+
+Dev::Template::Aws::Services::Route53.new
