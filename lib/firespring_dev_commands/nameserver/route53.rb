@@ -5,7 +5,7 @@ module Dev
     class Nameserver
       class Route53 < Base
         def domains
-          ['ns1.firespringdns.com', 'ns2.firespringdns.com', 'ns3.firespringdns.com', 'ns4.firespringdns.com'].freeze
+          %w(ns1.firespringdns.com ns2.firespringdns.com ns3.firespringdns.com ns4.firespringdns.com).freeze
         end
 
         def type
