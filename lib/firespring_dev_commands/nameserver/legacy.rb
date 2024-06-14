@@ -5,7 +5,7 @@ module Dev
     class Nameserver
       class Legacy < Base
         def domains
-          %w[ns1.digitalims.net ns2.digitalims.net].freeze
+          %w(ns1.digitalims.net ns2.digitalims.net).freeze
         end
 
         def type

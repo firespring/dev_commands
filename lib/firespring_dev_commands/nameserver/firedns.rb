@@ -5,7 +5,7 @@ module Dev
     class Nameserver
       class FireDns < Base
         def domains
-          %w[ns1.firespring.com ns2.firespring.com].freeze
+          %w(ns1.firespring.com ns2.firespring.com).freeze
         end
 
         def type
