@@ -1,14 +1,21 @@
 module Dev
   class Dns
     class Nameserver
-      attr_reader :domain, :nameservers
+      attr_reader :domain, :nameservers, :domain_nameservers
 
       def initialize(domain)
         @domain = domain.to_s.strip
+        @nameservers = Dev::Aws::Dns::Config.config.nameservers
       end
 
-      def nameservers
-        @nameservers ||= lookup(domain)
+      def custom_nameservers
+        nameservers.each do |nameserver|
+          yield Custom.new(nameserver[:name], nameserver[:domains])
+        end
+      end
+
+      def domain_nameservers
+        @domain_nameservers ||= lookup(domain)
       end
 
       def lookup(name = domain)
@@ -28,11 +35,12 @@ module Dev
       end
 
       def provider
-        return Unknown.new if nameservers.empty?
+        return Unknown.new if domain_nameservers.empty?
 
-        [Route53, FireDns, Presencehost, Legacy].each do |clazz|
-          instance = clazz.send(:new)
-          return instance if instance.all?(nameservers)
+        if nameservers
+          custom_nameservers do |instance|
+            return instance if instance.all?(domain_nameservers)
+          end
         end
 
         Other.new
