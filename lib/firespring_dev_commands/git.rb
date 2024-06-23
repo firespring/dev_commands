@@ -425,10 +425,7 @@ module Dev
       g.fetch('origin', prune: true)
     end
 
-    def commit_status(repository:, branch:, status:, organization: 'firespring', options: {})
-      token = ENV['GITHUB_TOKEN'].to_s.strip
-      raise 'GITHUB_TOKEN is required' unless token
-
+    def commit_status(token:, repository:, branch:, status:, organization: 'firespring', options: {})
       # Set up the GitHub client
       client = Octokit::Client.new(access_token: token)
 

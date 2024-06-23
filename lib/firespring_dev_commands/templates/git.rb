@@ -160,48 +160,57 @@ module Dev
         end
       end
 
+      # rubocop:disable Metrics/MethodLength
       # Create the rake task for the git commit status task.
       def create_commit_status_task!
         # Have to set a local variable to be accessible inside of the instance_eval block
         exclude = @exclude
-
         DEV_COMMANDS_TOP_LEVEL.instance_eval do
           namespace :git do
             return if exclude.include?(:commit_status)
 
-            # TODO: Clean, comments and description
-            desc 'Add status to commit' \
-                 "\n\tuse TODO"
+            desc 'Add status to PR' \
+                 "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
+                 "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
+                 "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                 "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
+                 "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
 
-            task :create_commit_status do
-              # Key Values
-              repository = ENV['REPOSITORY'].to_s.strip
-              branch = ENV['BRANCH'].to_s.strip
-              status = ENV['STATUS'].to_s.strip
+            # Key Values
+            token = ENV['GITHUB_TOKEN'].to_s.strip
+            repository = ENV['REPOSITORY'].to_s.strip
+            branch = ENV['BRANCH'].to_s.strip
 
-              raise 'Repository name is required' unless repository
-              raise 'Branch name is required' unless branch
-              raise 'Status is required' unless status
+            raise 'GITHUB_TOKEN is required' unless token
+            raise 'Repository name is required' unless repository
+            raise 'Branch name is required' unless branch
 
-              # Validate status
-              valid_statuses = %w(error failure pending success)
-              raise "Invalid status: #{status}. Valid statuses are: #{valid_statuses.join(', ')}" unless valid_statuses.include?(status)
+            options = {}
+            options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
+            options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
 
-              # Optional Values
-              context = ENV['CONTEXT'].to_s.strip
-              description = ENV['DESCRIPTION'].to_s.strip
-              target_url = ENV['TARGET_URL'].to_s.strip
-
-              options = {}
-              options[:context] = context unless context.empty?
-              options[:description] = description unless description.empty?
-              options[:target_url] = target_url unless target_url.empty?
-
-              Dev::Git.new.commit_status(repository:, branch:, status:, options:)
+            namespace :commit_status do
+              desc 'Add status success'
+              task :success do
+                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'success', options:)
+              end
+              desc 'Add status pending'
+              task :pending do
+                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'pending', options:)
+              end
+              desc 'Add status error'
+              task :error do
+                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'error', options:)
+              end
+              desc 'Add status failure'
+              task :failure do
+                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'failure', options:)
+              end
             end
           end
         end
       end
+      # rubocop:enable Metrics/MethodLength
     end
   end
 end
