@@ -160,57 +160,153 @@ module Dev
         end
       end
 
-      # rubocop:disable Metrics/MethodLength
-      # Create the rake task for the git commit status task.
-      def create_commit_status_task!
+      # Create the rake task for the git commit status pending task.
+      def create_commit_status_pending_task!
         # Have to set a local variable to be accessible inside of the instance_eval block
         exclude = @exclude
+
         DEV_COMMANDS_TOP_LEVEL.instance_eval do
           namespace :git do
             return if exclude.include?(:commit_status)
 
-            desc 'Add status to PR' \
-                 "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
-                 "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
-                 "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
-                 "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
-                 "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
-
-            # Key Values
-            token = ENV['GITHUB_TOKEN'].to_s.strip
-            repository = ENV['REPOSITORY'].to_s.strip
-            branch = ENV['BRANCH'].to_s.strip
-
-            raise 'GITHUB_TOKEN is required' unless token
-            raise 'Repository name is required' unless repository
-            raise 'Branch name is required' unless branch
-
-            options = {}
-            options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
-            options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
-
             namespace :commit_status do
-              desc 'Add status success'
-              task :success do
-                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'success', options:)
-              end
-              desc 'Add status pending'
+              desc 'Add pending status to commit' \
+                   "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
+                   "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
+                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
+                   "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
               task :pending do
-                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'pending', options:)
-              end
-              desc 'Add status error'
-              task :error do
-                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'error', options:)
-              end
-              desc 'Add status failure'
-              task :failure do
-                Dev::Git.new.commit_status(token:, repository:, branch:, status: 'failure', options:)
+                status = 'pending'
+                token = ENV['GITHUB_TOKEN'].to_s.strip
+                repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
+                branch = ENV['BRANCH'].to_s.strip
+
+                raise 'GITHUB_TOKEN is required' unless token
+                raise 'Repository name is required' unless repo_name
+                raise 'Branch name is required' unless branch
+
+                options = {}
+                options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
+                options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
+
+                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
               end
             end
           end
         end
       end
-      # rubocop:enable Metrics/MethodLength
+
+      # Create the rake task for the git commit status success task.
+      def create_commit_status_success_task!
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
+
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          namespace :git do
+            return if exclude.include?(:commit_status)
+
+            namespace :commit_status do
+              desc 'Add success status to commit' \
+                   "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
+                   "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
+                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
+                   "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
+              task :success do
+                status = 'success'
+                token = ENV['GITHUB_TOKEN'].to_s.strip
+                repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
+                branch = ENV['BRANCH'].to_s.strip
+
+                raise 'GITHUB_TOKEN is required' unless token
+                raise 'Repository name is required' unless repo_name
+                raise 'Branch name is required' unless branch
+
+                options = {}
+                options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
+                options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
+
+                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
+              end
+            end
+          end
+        end
+      end
+
+      # Create the rake task for the git commit status error task.
+      def create_commit_status_error_task!
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
+
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          namespace :git do
+            return if exclude.include?(:commit_status)
+
+            namespace :commit_status do
+              desc 'Add error status to commit' \
+                   "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
+                   "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
+                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
+                   "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
+              task :error do
+                status = 'error'
+                token = ENV['GITHUB_TOKEN'].to_s.strip
+                repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
+                branch = ENV['BRANCH'].to_s.strip
+
+                raise 'GITHUB_TOKEN is required' unless token
+                raise 'Repository name is required' unless repo_name
+                raise 'Branch name is required' unless branch
+
+                options = {}
+                options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
+                options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
+
+                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
+              end
+            end
+          end
+        end
+      end
+
+      # Create the rake task for the git commit status failure task.
+      def create_commit_status_failure_task!
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
+
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          namespace :git do
+            return if exclude.include?(:commit_status)
+
+            namespace :commit_status do
+              desc 'Add failure status to commit' \
+                   "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
+                   "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
+                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
+                   "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
+              task :failure do
+                status = 'failure'
+                token = ENV['GITHUB_TOKEN'].to_s.strip
+                repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
+                branch = ENV['BRANCH'].to_s.strip
+
+                raise 'GITHUB_TOKEN is required' unless token
+                raise 'Repository name is required' unless repo_name
+                raise 'Branch name is required' unless branch
+
+                options = {}
+                options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
+                options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
+
+                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
+              end
+            end
+          end
+        end
+      end
     end
   end
 end

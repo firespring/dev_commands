@@ -409,7 +409,10 @@ module Dev
     # Clones the repo_name into the dir
     # Optionally specify a repo_org
     # Optionally specify a branch to check out (defaults to the repository default branch)
-    def clone_repo(dir:, repo_name:, repo_org: 'firespring', branch: nil, depth: nil)
+    def clone_repo(dir:, repo_name:, repo_org: nil, branch: nil, depth: nil)
+      # TODO: Split out the default of 'firespring' into a configuration variable
+      repo_org = 'firespring' if repo_org.to_s.strip.empty?
+
       if Dir.exist?("#{dir}/.git")
         puts "#{dir} already cloned".light_green
         return
@@ -426,12 +429,15 @@ module Dev
       g.fetch('origin', prune: true)
     end
 
-    def commit_status(token:, repository:, branch:, status:, organization: 'firespring', options: {})
+    def commit_status(token:, repo_name:, branch:, status:, repo_org: nil, options: {})
+      # TODO: Split out the default of 'firespring' into a configuration variable
+      repo_org = 'firespring' if repo_org.to_s.strip.empty?
+
       # Set up the GitHub client
       client = Octokit::Client.new(access_token: token)
 
       # Fetch the latest commit SHA for the given branch
-      repo = "#{organization}/#{repository}"
+      repo = "#{repo_org}/#{repo_name}"
       ref = "heads/#{branch}"
       sha = client.ref(repo, ref).object.sha
 
