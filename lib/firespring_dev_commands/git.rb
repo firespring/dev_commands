@@ -429,20 +429,17 @@ module Dev
       g.fetch('origin', prune: true)
     end
 
-    def commit_status(token:, repo_name:, branch:, status:, repo_org: nil, options: {})
+    def commit_status(token:, repo_name:, commit_id:, status:, repo_org: nil, options: {})
       # TODO: Split out the default of 'firespring' into a configuration variable
       repo_org = 'firespring' if repo_org.to_s.strip.empty?
+      repo = "#{repo_org}/#{repo_name}"
 
       # Set up the GitHub client
       client = Octokit::Client.new(access_token: token)
 
-      # Fetch the latest commit SHA for the given branch
-      repo = "#{repo_org}/#{repo_name}"
-      ref = "heads/#{branch}"
-      sha = client.ref(repo, ref).object.sha
-
       # Create the commit status
-      client.create_status(repo, sha, status, options)
+      puts "Tagging commit #{commit_id} in #{repo} as #{status} for #{options[:context]}"
+      client.create_status(repo, commit_id, status, options)
     end
 
     # Builds an ssh repo URL using the org and repo name given

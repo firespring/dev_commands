@@ -173,24 +173,24 @@ module Dev
               desc 'Add pending status to commit' \
                    "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
                    "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
-                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse COMMIT_ID=abc123 to specify the commit id of code (required)" \
                    "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
                    "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
               task :pending do
                 status = 'pending'
                 token = ENV['GITHUB_TOKEN'].to_s.strip
                 repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
-                branch = ENV['BRANCH'].to_s.strip
+                commit_id = ENV['COMMIT_ID'].to_s.strip
 
                 raise 'GITHUB_TOKEN is required' unless token
-                raise 'Repository name is required' unless repo_name
-                raise 'Branch name is required' unless branch
+                raise 'REPOSITORY is required' unless repo_name
+                raise 'COMMIT_ID is required' unless commit_id
 
                 options = {}
                 options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
                 options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
 
-                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
+                Dev::Git.new.commit_status(token:, repo_name:, commit_id:, status:, repo_org:, options:)
               end
             end
           end
@@ -210,24 +210,24 @@ module Dev
               desc 'Add success status to commit' \
                    "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
                    "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
-                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse COMMIT_ID=abc123 to specify the commit id of code (required)" \
                    "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
                    "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
               task :success do
                 status = 'success'
                 token = ENV['GITHUB_TOKEN'].to_s.strip
                 repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
-                branch = ENV['BRANCH'].to_s.strip
+                commit_id = ENV['COMMIT_ID'].to_s.strip
 
                 raise 'GITHUB_TOKEN is required' unless token
-                raise 'Repository name is required' unless repo_name
-                raise 'Branch name is required' unless branch
+                raise 'REPOSITORY is required' unless repo_name
+                raise 'COMMIT_ID is required' unless commit_id
 
                 options = {}
                 options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
                 options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
 
-                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
+                Dev::Git.new.commit_status(token:, repo_name:, commit_id:, status:, repo_org:, options:)
               end
             end
           end
@@ -247,24 +247,24 @@ module Dev
               desc 'Add error status to commit' \
                    "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
                    "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
-                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse COMMIT_ID=abc123 to specify the commit id of code (required)" \
                    "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
                    "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
               task :error do
                 status = 'error'
                 token = ENV['GITHUB_TOKEN'].to_s.strip
                 repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
-                branch = ENV['BRANCH'].to_s.strip
+                commit_id = ENV['COMMIT_ID'].to_s.strip
 
                 raise 'GITHUB_TOKEN is required' unless token
-                raise 'Repository name is required' unless repo_name
-                raise 'Branch name is required' unless branch
+                raise 'REPOSITORY is required' unless repo_name
+                raise 'COMMIT_ID is required' unless commit_id
 
                 options = {}
                 options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
                 options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
 
-                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
+                Dev::Git.new.commit_status(token:, repo_name:, commit_id:, status:, repo_org:, options:)
               end
             end
           end
@@ -284,24 +284,24 @@ module Dev
               desc 'Add failure status to commit' \
                    "\n\tuse GITHUB_TOKEN=abc123 enables write options for the check (required)" \
                    "\n\tuse REPOSITORY=abc123 to specify the repository (required)" \
-                   "\n\tuse BRANCH=abc123 to specify the branch of code (required)" \
+                   "\n\tuse COMMIT_ID=abc123 to specify the commit id of code (required)" \
                    "\n\tuse CONTEXT=abc123 names the check on the PR (optional)" \
                    "\n\tuse TARGET_URL={url} adds 'detail' hyperlink to check on the PR (optional)"
               task :failure do
                 status = 'failure'
                 token = ENV['GITHUB_TOKEN'].to_s.strip
                 repo_org, repo_name = ENV['REPOSITORY'].to_s.strip.split('/')
-                branch = ENV['BRANCH'].to_s.strip
+                commit_id = ENV['COMMIT_ID'].to_s.strip
 
                 raise 'GITHUB_TOKEN is required' unless token
-                raise 'Repository name is required' unless repo_name
-                raise 'Branch name is required' unless branch
+                raise 'REPOSITORY is required' unless repo_name
+                raise 'COMMIT_ID is required' unless commit_id
 
                 options = {}
                 options[:context] = ENV['CONTEXT'].to_s.strip unless ENV['CONTEXT'].to_s.strip.empty?
                 options[:target_url] = ENV['TARGET_URL'].to_s.strip unless ENV['TARGET_URL'].to_s.strip.empty?
 
-                Dev::Git.new.commit_status(token:, repo_name:, branch:, status:, repo_org:, options:)
+                Dev::Git.new.commit_status(token:, repo_name:, commit_id:, status:, repo_org:, options:)
               end
             end
           end
