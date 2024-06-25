@@ -97,7 +97,8 @@ module Dev
     def branch_name(dir: default_project_dir)
       return unless File.exist?(dir)
 
-      ::Git.open(dir).current_branch
+      g = ::Git.open(dir)
+      g.current_branch || "HEAD detached at #{g.object('HEAD').sha[0..7]}"
     end
 
     # Returns true if the remote branch exists, false otherwise

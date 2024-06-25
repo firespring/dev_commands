@@ -46,8 +46,18 @@ module Dev
       @products
     end
 
+    # Returns true if the given product is supported either in the endoflife api products or a manual product
+    def product?(product)
+      products.include?(product) || self.class.config.manual_dates.any? { |key, _| key.to_s.start_with?("#{product}_") }
+    end
+
     # Prints all of the product version statuses
     def status
+      if product_versions.empty?
+        puts '  no tracked products'
+        return
+      end
+
       product_versions.sort_by(&:name).each(&:print_status)
     end
 

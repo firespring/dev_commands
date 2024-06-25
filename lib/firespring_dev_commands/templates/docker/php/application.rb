@@ -210,6 +210,33 @@ module Dev
               end
             end
           end
+
+          # Create the rake task for the php eol method
+          def create_eol_task!
+            # Have to set a local variable to be accessible inside of the instance_eval block
+            exclude = @exclude
+            php = @php
+
+            DEV_COMMANDS_TOP_LEVEL.instance_eval do
+              return if exclude.include?(:eol)
+
+              task eol: [:'eol:php'] do
+                # Thie is just a placeholder to execute the dependencies
+              end
+
+              namespace :eol do
+                desc 'Compares the current date to the EOL date for supported packages in the php package file'
+                task php: %w(init) do
+                  eol = Dev::EndOfLife::Php.new(php)
+                  php_products = eol.default_products
+
+                  puts
+                  puts "Php product versions (in #{eol.lockfile})".light_yellow
+                  Dev::EndOfLife.new(product_versions: php_products).status
+                end
+              end
+            end
+          end
         end
       end
     end
