@@ -123,7 +123,7 @@ Dev::Aws::Dns::Config::configure do |c|
     {name: 'Firedns', domains: %w(ns1.firespring.com ns2.firespring.com).freeze},
     {name: 'Legacy', domains:  %w(ns1.digitalims.net ns2.digitalims.net).freeze},
     {name: 'Presencehost', domains: %w(ns-1387.awsdns-45.org ns-2009.awsdns-59.co.uk ns-819.awsdns-38.net ns-388.awsdns-48.com).freeze},
-    {name: 'Route53', domains: %w(ns1.firespringdns.com ns2.firespringdns.com ns3.firespringdns.com ns4.firespringdns.com).freeze}
+    {name: 'Route53', domains: %w(ns1.firespringdns.com ns2.firespringdns.com ns3.firespringdns.com ns4.firespringdns.com ns-236.awsdns-29.com ns-1700.awsdns-20.co.uk ns-618.awsdns-13.net ns-1401.awsdns-47.org).freeze}
   ]
 end
 Dev::Template::Aws::Services::Route53.new

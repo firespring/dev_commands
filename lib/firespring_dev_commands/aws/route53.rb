@@ -15,7 +15,7 @@ module Dev
         if @domains.empty?
           each_zone(&)
         else
-          zones_by_domain_names(@domains, &)
+          each_zones_by_domain_names(&)
         end
       end
 
@@ -30,20 +30,19 @@ module Dev
         end
       end
 
-      private def each_zones_by_domain_names(domains)
-        domains.each do |domain_name|
-          client.list_hosted_zones_by_name({ dns_name: domain_name }) do |response|
-            target = response.hosted_zones.find { |it| it.name.chomp('.') == domain_name }
-            raise "The #{domain_name} hosted zone not found." unless target
+      private def each_zones_by_domain_names
+        @domains.each do |domain_name|
+          response = client.list_hosted_zones_by_name({ dns_name: domain_name })
+          target = response.hosted_zones.find { |it| it.name.chomp('.') == domain_name }
+          raise "The #{domain_name} hosted zone not found." unless target
 
-            yield target
-          end
+          yield target
         end
       end
 
-      private def zones_by_domain_names(domains)
+      private def zones_by_domain_names
         [].tap do |ary|
-          domains.each do |domain_name|
+          @domains.each do |domain_name|
             response = client.list_hosted_zones_by_name({dns_name: domain_name})
             target = response.hosted_zones.find { |it| it.name.chomp('.') == domain_name }
             raise "The #{domain_name} hosted zone not found." unless target
@@ -81,19 +80,22 @@ module Dev
         zones do |zone|
           puts
           zone_details, delegation_set = details(zone.id)
+          target_config_id = target_config_id(zone.id)
+
           puts "#{zone_details.name.light_white} (#{zone_details.id}):"
           puts "  Delegation Set: #{delegation_set.id}"
           puts "  Zone Nameservers: #{delegation_set.name_servers.join(', ')}"
           puts "  Actual Nameservers: #{Dev::Dns::Nameserver.new(zone_details.name)&.provider&.type}"
           puts "  Actual IP Resolution: #{ip_address(zone_details.name)}"
           puts "  Service Provider: #{Dev::Dns::ServiceProvider.new(ip_address(zone_details.name))&.provider&.type}"
-
-          target_config_id = target_config_id(zone.id)
           if target_config_id
             puts "  Config\t=>\t#{target_config_id}".colorize(:green)
           else
             puts '  No query logging config assigned.'.colorize(:red)
           end
+        rescue ::Aws::Route53::Errors::Throttling
+          sleep(1)
+          retry
         end
         puts
       end
@@ -107,6 +109,9 @@ module Dev
                       'No query logging config assigned.'.colorize(:red)
                     end
           puts format('%-50s => %s', zone.name, message)
+        rescue ::Aws::Route53::Errors::Throttling
+          sleep(1)
+          retry
         end
       end
 
@@ -118,6 +123,9 @@ module Dev
             cloud_watch_logs_log_group_arn: log_group
           )
           puts format('%-50s => %s', zone.id, response.location)
+        rescue ::Aws::Route53::Errors::Throttling
+          sleep(1)
+          retry
         rescue ::Aws::Route53::Errors::ServiceError => e
           raise "Error: #{e.message}" unless e.instance_of?(::Aws::Route53::Errors::QueryLoggingConfigAlreadyExists)
 
@@ -129,7 +137,6 @@ module Dev
         zones do |zone|
           target_config_id = target_config_id(zone.id)
           if target_config_id
-            sleep(1)
             client.delete_query_logging_config(
               id: target_config_id
             )
@@ -137,6 +144,9 @@ module Dev
           else
             puts format('%-50s => %s', zone.id, 'No query logging config assigned.'.colorize(:red))
           end
+        rescue ::Aws::Route53::Errors::Throttling
+          sleep(1)
+          retry
         end
       end
     end
