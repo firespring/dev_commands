@@ -29,7 +29,7 @@ module Dev
                 next if cloudformations.empty?
 
                 names = cloudformations.map(&:name).join(', ')
-                Dev::Common.new.exit_unless_confirmed("  This will create the #{names} pipelins. Continue?")
+                Dev::Common.new.exit_unless_confirmed("  This will create the #{names} pipelines. Continue?")
 
                 # Start create on all stacks without waiting so they are created in parallel
                 cloudformations.each do |cloudformation|
@@ -64,7 +64,7 @@ module Dev
                 next if cloudformations.empty?
 
                 names = cloudformations.map(&:name).join(', ')
-                Dev::Common.new.exit_unless_confirmed("  This will update the #{names} pipelins. Continue?")
+                Dev::Common.new.exit_unless_confirmed("  This will update the #{names} pipelines. Continue?")
 
                 # Start update on all stacks without waiting so they are updated in parallel
                 cloudformations.each do |cloudformation|
@@ -99,7 +99,7 @@ module Dev
                 next if cloudformations.empty?
 
                 names = cloudformations.map(&:name).join(', ')
-                Dev::Common.new.exit_unless_confirmed("  This will delete the #{names} pipelins. Continue?")
+                Dev::Common.new.exit_unless_confirmed("  This will delete the #{names} pipelines. Continue?")
 
                 # Start delete on all stacks without waiting so they are deleted in parallel
                 cloudformations.each do |cloudformation|
