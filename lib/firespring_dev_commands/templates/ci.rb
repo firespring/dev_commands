@@ -28,7 +28,7 @@ module Dev
               task create: %w(init ensure_aws_credentials show_account_info) do
                 next if cloudformations.empty?
 
-                names = cloudformations.map { |it| it.name }.join(', ')
+                names = cloudformations.map(&:name).join(', ')
                 Dev::Common.new.exit_unless_confirmed("  This will create the #{names} pipelins. Continue?")
 
                 # Start create on all stacks without waiting so they are created in parallel
@@ -63,7 +63,7 @@ module Dev
               task update: %w(init ensure_aws_credentials show_account_info) do
                 next if cloudformations.empty?
 
-                names = cloudformations.map { |it| it.name }.join(', ')
+                names = cloudformations.map(&:name).join(', ')
                 Dev::Common.new.exit_unless_confirmed("  This will update the #{names} pipelins. Continue?")
 
                 # Start update on all stacks without waiting so they are updated in parallel
@@ -98,7 +98,7 @@ module Dev
               task delete: %w(init ensure_aws_credentials show_account_info) do
                 next if cloudformations.empty?
 
-                names = cloudformations.map { |it| it.name }.join(', ')
+                names = cloudformations.map(&:name).join(', ')
                 Dev::Common.new.exit_unless_confirmed("  This will delete the #{names} pipelins. Continue?")
 
                 # Start delete on all stacks without waiting so they are deleted in parallel

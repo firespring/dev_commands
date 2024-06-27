@@ -82,7 +82,7 @@ module Dev
 
               namespace :default do
                 desc 'Configure the default AWS login credentials' \
-                  "\n\t(primarily used for rotating access keys)"
+                     "\n\t(primarily used for rotating access keys)"
                 task credentials: %w(init) do
                   Dev::Aws::Credentials.new.base_setup!
                 end
