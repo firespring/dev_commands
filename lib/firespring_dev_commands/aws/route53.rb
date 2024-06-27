@@ -32,15 +32,15 @@ module Dev
         end
       end
 
-      private def each_zone_by_domains
+      private def each_zone_by_domains(&)
         @domains.each do |domain|
-          response = client.list_hosted_zones_by_name({ dns_name: domain})
+          response = client.list_hosted_zones_by_name({dns_name: domain})
 
           # The 'list_hosted_zones_by_name' returns fuzzy matches (so "foo.com" would return both "bar.foo.com" and "foo.com"
-          targets = response.hosted_zones.select { |it| it.name.chomp('.') == domain}
+          targets = response.hosted_zones.select { |it| it.name.chomp('.') == domain }
           raise "The #{domain} hosted zone not found." if targets.empty?
 
-          targets.each { |target| yield target }
+          targets.each(&)
         rescue ::Aws::Route53::Errors::Throttling
           sleep(1)
           retry
