@@ -29,8 +29,7 @@ module Dev
         return lookup(name.split('.', 2).last) if records.empty?
 
         records.map { |record| record.name.to_s }
-
-      rescue => e
+      rescue
         []
       end
 

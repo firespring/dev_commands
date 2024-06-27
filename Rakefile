@@ -90,7 +90,7 @@ Bundler::GemHelper.install_tasks
 
 # TODO: JOEREMOVE??
 # Consider config options for this implementation. This should not really contain firespring centric files.
-Dev::Aws::Account::configure do |c|
+Dev::Aws::Account.configure do |c|
   c.root = Dev::Aws::Account::Info.new('FDP Root', '020401666882')
   c.children = [
     Dev::Aws::Account::Info.new('FDP Development', '417401252731'),
@@ -100,14 +100,15 @@ Dev::Aws::Account::configure do |c|
 end
 Dev::Template::Aws.new
 
-Dev::Aws::Dns::Config::configure do |c|
+Dev::Aws::Dns::Config.configure do |c|
   c.providers = [{name: 'firespring', ips: %w(52.5.5.85 52.4.4.190).freeze}]
   c.nameservers = [
     {name: 'Firedns', domains: %w(ns1.firespring.com ns2.firespring.com).freeze},
     {name: 'Legacy', domains:  %w(ns1.digitalims.net ns2.digitalims.net).freeze},
     {name: 'Presencehost', domains: %w(ns-1387.awsdns-45.org ns-2009.awsdns-59.co.uk ns-819.awsdns-38.net ns-388.awsdns-48.com).freeze},
-    {name: 'Route53', domains: %w(ns1.firespringdns.com ns2.firespringdns.com ns3.firespringdns.com ns4.firespringdns.com).freeze}
+    {name: 'Route53',
+     domains: %w(ns1.firespringdns.com ns2.firespringdns.com ns3.firespringdns.com ns4.firespringdns.com ns-236.awsdns-29.com ns-1700.awsdns-20.co.uk ns-618.awsdns-13.net
+                 ns-1401.awsdns-47.org).freeze}
   ]
 end
 Dev::Template::Aws::Services::Route53.new
-
