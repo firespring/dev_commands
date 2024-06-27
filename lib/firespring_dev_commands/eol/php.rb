@@ -1,5 +1,6 @@
 module Dev
   class EndOfLife
+    # Class which checks for eol packges referenced by the php package manager
     class Php
       attr_reader :php, :lockfile
 
@@ -8,10 +9,14 @@ module Dev
         @lockfile = File.join(php.local_path, "#{php.package_file.reverse.split('.')[-1].reverse}.lock")
       end
 
+      # Default to Composer products
       def default_products
         composer_products
       end
 
+      # 1.) Parse the composer lock file
+      # 2.) Do some package name and version manipulation
+      # 3.) Return the product if it looks like something that the EOL library tracks
       def composer_products
         eol = Dev::EndOfLife.new
         major_version_only_products = ['laravel']
