@@ -40,18 +40,6 @@ module Dev
         end
       end
 
-      private def zones_by_domain_names
-        [].tap do |ary|
-          @domains.each do |domain_name|
-            response = client.list_hosted_zones_by_name({dns_name: domain_name})
-            target = response.hosted_zones.find { |it| it.name.chomp('.') == domain_name }
-            raise "The #{domain_name} hosted zone not found." unless target
-
-            ary << target
-          end
-        end
-      end
-
       private def ip_address(domain)
         # rubocop:disable Style/RedundantBegin
         begin
