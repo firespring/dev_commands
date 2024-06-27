@@ -11,15 +11,14 @@ module Dev
         @domains = Array(domains || [])
       end
 
-      private def zones(&)
+      def zones(&)
         if @domains.empty?
           each_zone(&)
         else
-          each_zones_by_domain_names(&)
+          each_zone_by_domains(&)
         end
       end
 
-      # NOTE: Adding a sleep of one second may be necessary.
       private def each_zone
         Dev::Aws.each_page(client, :list_hosted_zones) do |response|
           response.hosted_zones&.each do |hosted_zone|
@@ -27,35 +26,38 @@ module Dev
 
             yield hosted_zone
           end
+        rescue ::Aws::Route53::Errors::Throttling
+          sleep(1)
+          retry
         end
       end
 
-      private def each_zones_by_domain_names
-        @domains.each do |domain_name|
-          response = client.list_hosted_zones_by_name({ dns_name: domain_name })
-          target = response.hosted_zones.find { |it| it.name.chomp('.') == domain_name }
-          raise "The #{domain_name} hosted zone not found." unless target
+      private def each_zone_by_domains
+        @domains.each do |domain|
+          response = client.list_hosted_zones_by_name({ dns_name: domain})
 
-          yield target
+          # The 'list_hosted_zones_by_name' returns fuzzy matches (so "foo.com" would return both "bar.foo.com" and "foo.com"
+          targets = response.hosted_zones.select { |it| it.name.chomp('.') == domain}
+          raise "The #{domain} hosted zone not found." if targets.empty?
+
+          targets.each { |target| yield target }
+        rescue ::Aws::Route53::Errors::Throttling
+          sleep(1)
+          retry
         end
       end
 
       private def ip_address(domain)
-        # rubocop:disable Style/RedundantBegin
-        begin
-          ip_address = Addrinfo.ip(domain.to_s)
-          ip_address.ip_address
-        rescue SocketError
-          "Unable to resolve domain: #{domain}"
-        end
-        # rubocop:enable Style/RedundantBegin
+        Addrinfo.ip(domain.to_s.strip)&.ip_address
+      rescue SocketError
+        "Unable to resolve domain: #{domain}"
       end
 
       private def target_config_id(zone_id)
         client.list_query_logging_configs(
           hosted_zone_id: zone_id,
           max_results: '1'
-        ).query_logging_configs.first&.id
+        ).query_logging_configs&.first&.id
       end
 
       # Get the hosted zone details for the zone id
@@ -75,7 +77,7 @@ module Dev
           puts "  Zone Nameservers: #{delegation_set.name_servers.join(', ')}"
           puts "  Actual Nameservers: #{Dev::Dns::Nameserver.new(zone_details.name)&.provider&.type}"
           puts "  Actual IP Resolution: #{ip_address(zone_details.name)}"
-          puts "  Service Provider: #{Dev::Dns::ServiceProvider.new(ip_address(zone_details.name))&.provider&.type}"
+          puts "  Website Provider: #{Dev::Dns::ServiceProvider.new(ip_address(zone_details.name))&.provider&.type}"
           if target_config_id
             puts "  Config\t=>\t#{target_config_id}".colorize(:green)
           else
@@ -104,7 +106,6 @@ module Dev
       end
 
       def activate_query_logging(log_group)
-        # NOTE: Rate exceeded can be reached for large datasets.
         zones do |zone|
           response = client.create_query_logging_config(
             hosted_zone_id: zone.id,
