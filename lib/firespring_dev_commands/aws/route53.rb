@@ -71,13 +71,15 @@ module Dev
           puts
           zone_details, delegation_set = details(zone.id)
           target_config_id = target_config_id(zone.id)
+          nameserver = Dev::Dns::Nameserver.new(zone_details.name)
+          service_provider = Dev::Dns::ServiceProvider.new(ip_address(zone_details.name))
 
           puts "#{zone_details.name.light_white} (#{zone_details.id}):"
           puts "  Delegation Set: #{delegation_set.id}"
-          puts "  Zone Nameservers: #{delegation_set.name_servers.join(', ')}"
-          puts "  Actual Nameservers: #{Dev::Dns::Nameserver.new(zone_details.name)&.provider&.type}"
-          puts "  Actual IP Resolution: #{ip_address(zone_details.name)}"
-          puts "  Website Provider: #{Dev::Dns::ServiceProvider.new(ip_address(zone_details.name))&.provider&.type}"
+          puts "  Delegation Defined Nameservers: #{delegation_set.name_servers.sort.join(', ')}"
+          puts "  DNS Reported Nameservers: #{nameserver.provider&.type} (#{nameserver.domain_nameservers.sort.join(', ')})"
+          puts "  Domain Apex IP Resolution: #{ip_address(zone_details.name)}"
+          puts "  Website Provider: #{service_provider.provider&.type}"
           if target_config_id
             puts "  Config\t=>\t#{target_config_id}".colorize(:green)
           else
