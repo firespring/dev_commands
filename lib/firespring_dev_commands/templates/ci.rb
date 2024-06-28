@@ -20,14 +20,16 @@ module Dev
           # Have to set a local variable to be accessible inside of the instance_eval block
           exclude = @exclude
           cloudformations = @cloudformations
-          return if exclude.include?(:status)
+          return if exclude.include?(:create)
 
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
             namespace :ci do
               desc 'Create the ci cloudformation stack in aws'
-              task create: %w(init ensure_aws_credentials) do
-                LOG.info
+              task create: %w(init ensure_aws_credentials show_account_info) do
                 next if cloudformations.empty?
+
+                names = cloudformations.map(&:name).join(', ')
+                Dev::Common.new.exit_unless_confirmed("  This will create the #{names} pipelines. Continue?")
 
                 # Start create on all stacks without waiting so they are created in parallel
                 cloudformations.each do |cloudformation|
@@ -53,14 +55,16 @@ module Dev
           # Have to set a local variable to be accessible inside of the instance_eval block
           exclude = @exclude
           cloudformations = @cloudformations
-          return if exclude.include?(:status)
+          return if exclude.include?(:update)
 
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
             namespace :ci do
               desc 'Update the ci cloudformation stack in aws'
-              task update: %w(init ensure_aws_credentials) do
-                LOG.info
+              task update: %w(init ensure_aws_credentials show_account_info) do
                 next if cloudformations.empty?
+
+                names = cloudformations.map(&:name).join(', ')
+                Dev::Common.new.exit_unless_confirmed("  This will update the #{names} pipelines. Continue?")
 
                 # Start update on all stacks without waiting so they are updated in parallel
                 cloudformations.each do |cloudformation|
@@ -86,14 +90,16 @@ module Dev
           # Have to set a local variable to be accessible inside of the instance_eval block
           exclude = @exclude
           cloudformations = @cloudformations
-          return if exclude.include?(:status)
+          return if exclude.include?(:delete)
 
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
             namespace :ci do
               desc 'Delete the ci cloudformation stack in aws'
-              task delete: %w(init ensure_aws_credentials) do
-                LOG.info
+              task delete: %w(init ensure_aws_credentials show_account_info) do
                 next if cloudformations.empty?
+
+                names = cloudformations.map(&:name).join(', ')
+                Dev::Common.new.exit_unless_confirmed("  This will delete the #{names} pipelines. Continue?")
 
                 # Start delete on all stacks without waiting so they are deleted in parallel
                 cloudformations.each do |cloudformation|
@@ -124,8 +130,7 @@ module Dev
           DEV_COMMANDS_TOP_LEVEL.instance_eval do
             namespace :ci do
               desc 'Show the current status of the pipelines associated with your branch'
-              task status: %w(init ensure_aws_credentials) do
-                LOG.info
+              task status: %w(init ensure_aws_credentials show_account_info) do
                 next if cloudformations.empty?
 
                 pattern = /#{cloudformations.map(&:name).join('|')}/

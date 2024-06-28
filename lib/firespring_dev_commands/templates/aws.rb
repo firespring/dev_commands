@@ -18,6 +18,22 @@ module Dev
         end
       end
 
+      # Create the rake task which shows the current AWS account information
+      def create_show_account_info_task!
+        # Have to set a local variable to be accessible inside of the instance_eval block
+        exclude = @exclude
+
+        DEV_COMMANDS_TOP_LEVEL.instance_eval do
+          return if exclude.include?(:show_account_info)
+
+          task show_account_info: %w(init ensure_aws_credentials) do
+            account_id = Dev::Aws::Credentials.new.logged_in_account
+            account_name = Dev::Aws::Account.new.name_by_account(account_id)
+            LOG.info "\n  Current AWS Account is #{account_name} (#{account_id})\n".light_yellow
+          end
+        end
+      end
+
       # Create the rake task for the aws profile method
       def create_profile_task!
         # Have to set a local variable to be accessible inside of the instance_eval block
