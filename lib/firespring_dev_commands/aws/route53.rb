@@ -37,6 +37,7 @@ module Dev
           response = client.list_hosted_zones_by_name({dns_name: domain})
 
           # The 'list_hosted_zones_by_name' returns fuzzy matches (so "foo.com" would return both "bar.foo.com" and "foo.com"
+          # So we are only selecting domains that match exactly since that's what we really want here
           targets = response.hosted_zones.select { |it| it.name.chomp('.') == domain }
           raise "The #{domain} hosted zone not found." if targets.empty?
 

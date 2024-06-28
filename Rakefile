@@ -112,3 +112,12 @@ Dev::Aws::Dns::Config.configure do |c|
   ]
 end
 Dev::Template::Aws::Services::Route53.new
+
+task :joetest do
+  #r = Dev::Dns::Resource.new('www.printerpresence.digitalims.net')
+  puts "A is #{Dev::Dns::Resource.new('mte1._domainkey.print.firespring.com').lookup(type: Resolv::DNS::Resource::IN::A)}"
+  puts "CNAME is #{Dev::Dns::Resource.new('mte1._domainkey.print.firespring.com').lookup(type: Resolv::DNS::Resource::IN::CNAME)}"
+  puts "NS is #{Dev::Dns::Resource.new('mte1._domainkey.print.firespring.com').lookup(type: Resolv::DNS::Resource::IN::NS)}"
+  puts "NS is #{Dev::Dns::Resource.new('mte1._domainkey.print.firespring.com').recursive_nameserver_lookup()}"
+end
+
