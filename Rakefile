@@ -90,8 +90,7 @@ Bundler::GemHelper.install_tasks
 
 task :joetest do
   bw = Dev::BuiltWith.new
-  bw.get('https://mfhc.org') do |it|
-    puts it.inspect
-  end
+  domain = bw.get('https://mfhc.org')
+  puts domain.inspect
 end
 

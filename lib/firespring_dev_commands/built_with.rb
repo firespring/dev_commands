@@ -54,44 +54,15 @@ module Dev
       @headers = {}
     end
 
-    def releases(query, &)
-      [].tap do |ary|
-        get(Release::PATH, query) do |result|
-          ary << Release.new(result)
-          yield ary.last if block_given?
-        end
-      end
-    end
-
-    def get(domain, &)
-      opts = {
-        KEY: api_key,
-        LOOKUP: domain
-      }
+    def get(domain)
+      opts = {KEY: api_key, LOOKUP: domain}
       thing = "#{path}?#{URI.encode_www_form(opts)}"
 
       response = client.request_get(thing, headers)
       raise "Error querying #{thing}: #{response.inspect}" unless response.response.is_a?(Net::HTTPSuccess)
 
       parsed_response = JSON.parse(response.body)
-      return parsed_response unless parsed_response.key?('Items')
-
-      parsed_response['Items'].each(&)
-
-      while parsed_response['Next']
-        next_query_string = URI(parsed_response['Next']).query
-        next_url = "/api/v1/#{path}"
-        next_url << "?#{next_query_string}" unless query_string.empty?
-        response = client.request_get(next_url, headers)
-        raise "Error querying #{next_url} [#{next_query_string}]: #{response.inspect}" unless response.response.is_a?(Net::HTTPSuccess)
-
-        parsed_response = JSON.parse(response.body)
-        return parsed_response unless parsed_response.key?('Items')
-
-        parsed_response['Items'].each(&)
-      end
-
-      nil
+      return Domain.new(parsed_response)
     end
   end
 end
