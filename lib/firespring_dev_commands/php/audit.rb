@@ -16,6 +16,10 @@ module Dev
       def to_report
         Dev::Audit::Report.new(
           data['advisories'].map do |_, v|
+            # If there are multiple advisories for the same package, v changes from an array into a hash
+            v = v.values if v.is_a?(Hash)
+
+            # Iterate over the advisories and turn them into report items
             v.map do |it|
               Dev::Audit::Report::Item.new(
                 id: it['advisoryId'],
