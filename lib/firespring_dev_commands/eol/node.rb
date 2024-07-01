@@ -1,5 +1,6 @@
 module Dev
   class EndOfLife
+    # Class which checks for eol packges referenced by the node package manager
     class Node
       attr_reader :node, :lockfile
 
@@ -8,10 +9,14 @@ module Dev
         @lockfile = File.join(node.local_path, "#{node.package_file.reverse.split('.')[-1].reverse}-lock.json")
       end
 
+      # Default to NPM products
       def default_products
         npm_products
       end
 
+      # 1.) Parse the npm lock file
+      # 2.) Do some package name and version manipulation
+      # 3.) Return the product if it looks like something that the EOL library tracks
       def npm_products
         eol = Dev::EndOfLife.new
         major_version_only_products = %w(ckeditor vue jquery)
