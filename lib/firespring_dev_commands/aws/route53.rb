@@ -72,20 +72,14 @@ module Dev
           puts
           zone_details, delegation_set = details(zone.id)
           target_config_id = target_config_id(zone.id)
-          nameserver = Dev::Dns::Nameserver.new(zone_details.name)
-          service_provider = Dev::Dns::ServiceProvider.new(ip_address(zone_details.name))
+          dns_resource = Dev::Dns::Resource.new(zone_details.name)
 
-          puts "#{zone_details.name.light_white} (#{zone_details.id}):"
-          puts "  Delegation Set: #{delegation_set.id}"
-          puts "  Delegation Defined Nameservers: #{delegation_set.name_servers.sort.join(', ')}"
-          puts "  DNS Reported Nameservers: #{nameserver.provider&.type} (#{nameserver.domain_nameservers.sort.join(', ')})"
-          puts "  Domain Apex IP Resolution: #{ip_address(zone_details.name)}"
-          puts "  Website Provider: #{service_provider.provider&.type}"
-          if target_config_id
-            puts "  Config\t=>\t#{target_config_id}".colorize(:green)
-          else
-            puts '  No query logging config assigned.'.colorize(:red)
-          end
+          puts "#{zone_details.name.chomp('.').light_white} (#{zone_details.id}):"
+          puts format('  %-50s %s', 'Delegation Set:', delegation_set.id)
+          puts format('  %-50s %s', 'Delegation Defined Nameservers:', delegation_set.name_servers.sort.join(', '))
+          puts format('  %-50s %s', 'DNS Reported Nameservers:', dns_resource.recursive_nameserver_lookup.sort.join(', '))
+          puts format('  %-50s %s', 'DNS Reported Nameserver IPs:', dns_resource.recursive_nameserver_lookup.sort.map { |it| dns_resource.recursive_a_lookup(it) }.join(', '))
+          puts format('  %-50s %s', 'Domain Apex IP Resolution:', dns_resource.recursive_a_lookup.sort.join(', '))
         rescue ::Aws::Route53::Errors::Throttling
           sleep(1)
           retry

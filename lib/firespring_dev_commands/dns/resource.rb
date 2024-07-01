@@ -31,7 +31,7 @@ module Dev
         return recursive_nameserver_lookup(name.split('.', 2).last) if records.empty?
 
         # Look up the IPs for the nameservers
-        records.map { |name| recursive_cname_or_a_lookup(name) }
+        records
       end
 
       # Recursively attempt to find an A record for the given domain.
@@ -42,7 +42,7 @@ module Dev
         return records unless records.empty?
 
         # Try looking up a CNAME record
-        records = lookup(name, type: Resolve::DNS::Resource::IN::CNAME)
+        records = lookup(name, type: Resolv::DNS::Resource::IN::CNAME)
 
         # If we didn't find an A record _or_ a CNAME, just return empty
         return records if records.empty?
@@ -50,13 +50,13 @@ module Dev
         # If we found more than one CNAME that is a DNS error
         raise "Found more than one CNAME entry for #{name}. This is not allowed by DNS" if records.length > 1
 
-        return recursive_cname_or_a_lookup(records.first)
+        return recursive_a_lookup(records.first)
       end
 
       # Lookup the given name using the record type provided.
       def lookup(name = domain, type: Resolv::DNS::Resource::IN::A)
         # Validate the type
-        raise 'lookup type must be a Resolve::DNS::Resource' unless type.ancestors.include?(Resolv::DNS::Resource)
+        raise 'lookup type must be a Resolv::DNS::Resource' unless type.ancestors.include?(Resolv::DNS::Resource)
 
         # If we were given a tld, return empty
         return [] unless name.include?('.')
@@ -65,9 +65,18 @@ module Dev
         records = Resolv::DNS.new.getresources(name, type)
 
         # Return the record names
-        records.map { |record| record.name.to_s }
+        records.map do |record|
+          if record.respond_to?(:address)
+            record.address.to_s
+          elsif record.respond_to?(:name)
+            record.name.to_s
+          else
+            ''
+          end
+        end
       rescue
-        []
+        sleep(1)
+        retry
       end
     end
   end
