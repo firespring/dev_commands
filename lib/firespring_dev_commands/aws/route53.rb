@@ -71,7 +71,6 @@ module Dev
         zones do |zone|
           puts
           zone_details, delegation_set = details(zone.id)
-          target_config_id = target_config_id(zone.id)
           dns_resource = Dev::Dns::Resource.new(zone_details.name)
 
           puts "#{zone_details.name.chomp('.').light_white} (#{zone_details.id}):"
