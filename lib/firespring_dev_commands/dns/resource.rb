@@ -22,7 +22,7 @@ module Dev
         value.match?(Resolv::IPv6::Regex)
       end
 
-      # Recurisively determine the correct nameservers for the given domain.
+      # Recursively determine the correct nameservers for the given domain.
       # If nameservers are not found, strip subdomains off until we've reached the TLD
       def recursive_nameserver_lookup(name = domain)
         records = lookup(name, type: Resolv::DNS::Resource::IN::NS)
@@ -50,7 +50,7 @@ module Dev
         # If we found more than one CNAME that is a DNS error
         raise "Found more than one CNAME entry for #{name}. This is not allowed by DNS" if records.length > 1
 
-        return recursive_a_lookup(records.first)
+        recursive_a_lookup(records.first)
       end
 
       # Lookup the given name using the record type provided.
