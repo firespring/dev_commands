@@ -6,16 +6,21 @@ module Dev
       module Services
         # Class contains rake templates for managing your AWS settings and logging in
         class Route53 < Dev::Template::BaseInterface
-          # Create the rake task which ensures active credentials are present
-          def create_ensure_credentials_task!
+          def create_list_zone_details_task!
             # Have to set a local variable to be accessible inside of the instance_eval block
             exclude = @exclude
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
-              return if exclude.include?(:ensure_aws_credentials)
+              return if exclude.include?(:list_details)
 
-              task ensure_aws_credentials: %w(init) do
-                raise 'AWS Credentials not found / expired' unless Dev::Aws::Credentials.new.active?
+              namespace :aws do
+                namespace :hosted_zone do
+                  desc 'print details for all hosted zones'
+                  task list_details: %w(ensure_aws_credentials) do
+                    route53 = Dev::Aws::Route53.new(ENV['DOMAINS'].to_s.strip.split(','))
+                    route53.list_zone_details
+                  end
+                end
               end
             end
           end
@@ -26,9 +31,9 @@ module Dev
             exclude = @exclude
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
-              namespace :aws do
-                return if exclude.include?(:dns_logging)
+              return if exclude.include?(:dns_logging_activate)
 
+              namespace :aws do
                 namespace :hosted_zone do
                   namespace :dns_logging do
                     desc 'Activates query logging for all hosted zones by default.' \
@@ -56,9 +61,9 @@ module Dev
             exclude = @exclude
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
-              namespace :aws do
-                return if exclude.include?(:dns_logging)
+              return if exclude.include?(:dns_logging_deactivate)
 
+              namespace :aws do
                 namespace :hosted_zone do
                   namespace :dns_logging do
                     desc 'Deactivates query logging for all hosted zones by default. ' \
@@ -81,9 +86,9 @@ module Dev
             exclude = @exclude
 
             DEV_COMMANDS_TOP_LEVEL.instance_eval do
-              namespace :aws do
-                return if exclude.include?(:dns_logging)
+              return if exclude.include?(:dns_logging_config)
 
+              namespace :aws do
                 namespace :hosted_zone do
                   namespace :dns_logging do
                     desc 'Lists the current config for domain(s). ' \
