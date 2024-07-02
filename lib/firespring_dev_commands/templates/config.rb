@@ -44,7 +44,6 @@ module Dev
           end
         end
 
-        # rubocop:disable Metrics/MethodLength
         # Create the set task
         def create_set_task!
           # Have to set a local variable to be accessible inside of the instance_eval block
@@ -77,26 +76,17 @@ module Dev
                     params[:key_id] = Dev::Aws::Parameter.new.get_value(key_parameter_path)
                   end
 
-                  message = 'This will change '.light_green +
-                            param_path.light_yellow +
-                            ' from "'.light_green +
-                            old_value.value.light_yellow +
-                            '" ('.light_green +
-                            old_value.type.light_yellow +
-                            ') to "'.light_green +
-                            new_value.light_yellow +
-                            '" ('.light_green +
-                            params[:type].light_yellow +
+                  message = "\n  This will change ".light_green + param_path.light_yellow + ' from "'.light_green + old_value.value.light_yellow + '" ('.light_green +
+                            old_value.type.light_yellow + ') to "'.light_green + new_value.light_yellow + '" ('.light_green + params[:type].light_yellow +
                             '). Continue'.light_green
-                  Dev::Common.new.with_confirmation(message, color_message: false) do
-                    Dev::Aws::Parameter.new.put(param_path, new_value, **params)
-                  end
+                  Dev::Common.new.exit_unless_confirmed(message, colorize: false)
+                  Dev::Aws::Parameter.new.put(param_path, new_value, **params)
+                  puts
                 end
               end
             end
           end
         end
-        # rubocop:enable Metrics/MethodLength
       end
     end
   end
