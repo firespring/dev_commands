@@ -1,5 +1,6 @@
 module Dev
   class EndOfLife
+    # Class which checks for eol packges referenced by the ruby package manager
     class Ruby
       attr_reader :ruby, :lockfile
 
@@ -8,11 +9,15 @@ module Dev
         @lockfile = File.join(ruby.local_path, "#{ruby.package_file.reverse.split('.')[-1].reverse}.lock")
       end
 
+      # Default to Rubygems products
       def default_products
-        composer_products
+        rubygems_products
       end
 
-      def composer_products
+      # 1.) Parse the rubygems lock file
+      # 2.) Do some package name and version manipulation
+      # 3.) Return the product if it looks like something that the EOL library tracks
+      def rubygems_products
         eol = Dev::EndOfLife.new
         major_version_only_products = []
 
