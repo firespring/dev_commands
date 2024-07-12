@@ -47,11 +47,7 @@ services:
 
         else
           # If a user based socket has been defined, default to that
-          ::Docker.url = if File.exist?("/#{Dir.home}/.docker/run/docker.sock")
-                           "unix://#{Dir.home}/.docker/run/docker.sock"
-                         elsif File.exist?("/#{Dir.home}/.docker/desktop/docker.sock")
-                           "unix://#{Dir.home}/.docker/desktop/docker.sock"
-                         end
+          ::Docker.url = Dev::Common.new.run_command("docker context inspect --format '{{.Endpoints.docker.Host}}'")
         end
       end
     end
