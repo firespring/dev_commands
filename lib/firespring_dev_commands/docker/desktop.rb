@@ -46,8 +46,14 @@ services:
           ::Docker.url = 'tcp://127.0.0.1:23750'
 
         else
+          context = Dev::Common.new.run_command(
+            "docker context inspect --format '{{.Endpoints.docker.Host}}'",
+            capture: true
+          ).to_s.strip
+          raise 'context is empty' unless context
+
           # If a user based socket has been defined, default to that
-          ::Docker.url = Dev::Common.new.run_command("docker context inspect --format '{{.Endpoints.docker.Host}}'")
+          ::Docker.url = context
         end
       end
     end
