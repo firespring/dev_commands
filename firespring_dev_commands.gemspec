@@ -30,9 +30,12 @@ Gem::Specification.new do |s|
   s.add_dependency 'colorize', '~> 1.1.0'
   s.add_dependency 'docker-api', '~> 2.2.0'
   s.add_dependency 'dotenv', '~> 2.8.1'
+  s.add_dependency 'excon', '0.110.0' # Currently pinned because 0.111 was causing a "can't modify frozen Array" error
+  s.add_dependency 'faraday-retry', '~> 2.0'
   s.add_dependency 'git', '~> 1.18.0'
   s.add_dependency 'inifile', '~> 3.0.0'
   s.add_dependency 'jira-ruby', '~> 2.3.0'
+  s.add_dependency 'octokit', '~> 8.1'
   s.add_dependency 'ox', '~> 2.14.17'
   s.add_dependency 'public_suffix', '5.0.4'
   s.add_dependency 'rake', '~> 13.1.0'

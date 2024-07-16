@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'git'
+require 'octokit'
 
 module Dev
   # Class for performing git functions
@@ -408,7 +409,10 @@ module Dev
     # Clones the repo_name into the dir
     # Optionally specify a repo_org
     # Optionally specify a branch to check out (defaults to the repository default branch)
-    def clone_repo(dir:, repo_name:, repo_org: 'firespring', branch: nil, depth: nil)
+    def clone_repo(dir:, repo_name:, repo_org: nil, branch: nil, depth: nil)
+      # TODO: Split out the default of 'firespring' into a configuration variable
+      repo_org = 'firespring' if repo_org.to_s.strip.empty?
+
       if Dir.exist?("#{dir}/.git")
         puts "#{dir} already cloned".light_green
         return
@@ -423,6 +427,19 @@ module Dev
       opts[:depth] = depth unless depth.to_s.strip.empty?
       g = ::Git.clone(ssh_repo_url(repo_name, repo_org), dir, opts)
       g.fetch('origin', prune: true)
+    end
+
+    def commit_status(token:, repo_name:, commit_id:, status:, repo_org: nil, options: {})
+      # TODO: Split out the default of 'firespring' into a configuration variable
+      repo_org = 'firespring' if repo_org.to_s.strip.empty?
+      repo = "#{repo_org}/#{repo_name}"
+
+      # Set up the GitHub client
+      client = Octokit::Client.new(access_token: token)
+
+      # Create the commit status
+      puts "Tagging commit #{commit_id} in #{repo} as #{status} for #{options[:context]}"
+      client.create_status(repo, commit_id, status, options)
     end
 
     # Builds an ssh repo URL using the org and repo name given
