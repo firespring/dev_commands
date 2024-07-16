@@ -1,7 +1,7 @@
 ---
 services:
   app:
-    image: firespring/dev_commands:latest
+    image: firespring/dev_commands:${DOCKER_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile

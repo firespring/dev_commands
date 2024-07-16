@@ -24,6 +24,8 @@ Dev::Git.configure do |c|
 end
 Dev::Template::Git.new
 
+ENV['DOCKER_TAG'] ||= Dev::Git.new.branch_name.split('/')&.last
+
 Dev::EndOfLife.config do |c|
   c.product_versions = [
     Dev::EndOfLife::ProductVersion.new('debian', '12', 'base OS version running in the container we use for test/package'),
