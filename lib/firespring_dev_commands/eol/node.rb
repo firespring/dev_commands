@@ -19,7 +19,7 @@ module Dev
       # 3.) Return the product if it looks like something that the EOL library tracks
       def npm_products
         eol = Dev::EndOfLife.new
-        major_version_only_products = %w(ckeditor vue jquery)
+        major_version_only_products = %w(ckeditor jquery)
 
         [].tap do |ary|
           packages = JSON.parse(File.read(lockfile))&.fetch('packages', [])
