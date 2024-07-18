@@ -94,7 +94,7 @@ module Dev
         #       because some projects may be using older versions of the dev_commands library
         # defaultini.delete('mfa_serial')
 
-        session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', nil)}_cli"
+        session_name_default = defaultini['role_session_name'] || "#{ENV.fetch('USERNAME', 'no_username_found')}_cli"
         defaultini['role_session_name'] = Dev::Common.new.ask('Default session name', session_name_default)
 
         duration_default = defaultini['session_duration'] || 36_000
