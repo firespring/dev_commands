@@ -61,7 +61,7 @@ module Dev
         puts "  Logging in to #{account} in #{region} as #{role}".light_yellow
         puts
 
-        code = ENV['AWS_TOKEN_CODE'] || Dev::Common.new.ask("Enter the MFA code for the #{ENV.fetch('USERNAME', '')} user serial #{serial}")
+        code = ENV['AWS_TOKEN_CODE'] || Dev::Common.new.ask("Enter the MFA code for the #{ENV.fetch('USERNAME', 'no_username_found')} user serial #{serial}")
         raise 'MFA is required' unless code.to_s.strip
 
         sts = ::Aws::STS::Client.new(profile: 'default', region:)
