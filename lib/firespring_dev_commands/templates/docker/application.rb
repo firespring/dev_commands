@@ -118,24 +118,6 @@ module Dev
           end
         end
 
-        # Create the rake task which runs a docker compose exec bash for the application name
-        def create_sh_empty_task!
-          application = @name
-          exclude = @exclude
-
-          DEV_COMMANDS_TOP_LEVEL.instance_eval do
-            namespace application do
-              return if exclude.include?(:sh_empty)
-
-              desc "Open a shell into an empty #{application} container"
-              task sh_empty: %W(init_docker #{application}:up_empty_no_deps _pre_sh_hooks) do
-                Dev::Docker::Compose.new(services: [application]).sh
-                Rake::Task[:_post_sh_hooks].execute
-              end
-            end
-          end
-        end
-
         # Create the rake task which runs a docker compose logs for the application name
         def create_logs_task!
           application = @name
