@@ -108,7 +108,7 @@ module Dev
             exclude = @exclude
             test_isolation = @test_isolation
             up_prefix = @test_isolation ? :up_empty : :up # NOTE: This should maybe be it's own variable at some point?
-            up_cmd = @start_container_dependencies_on_test ? :"#{up_prefix}_empty" : :"#{up_prefix}_empty_no_deps"
+            up_cmd = @start_container_dependencies_on_test ? :"#{up_prefix}" : :"#{up_prefix}_no_deps"
             test_artifacts = @test_artifacts
             return if exclude.include?(:test)
 
@@ -146,6 +146,8 @@ module Dev
                   ensure
                     # Clean up resources if we are on an isolated project name
                     if test_isolation
+                      # Need to call stop before down because other the "run" containers aren't stopped
+                      Dev::Docker.new.stop_project_containers(project_name: Dev::Docker::Compose.config.project_name)
                       Dev::Docker::Compose.new.down
                       Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
                     end
@@ -156,12 +158,13 @@ module Dev
                     namespace :test do
                       desc "Open a shell into a test #{application} container"
                       task sh: %W(test_init_docker #{up_cmd} _pre_sh_hooks) do
-                        @project_id = Dev::Docker::Compose.config.project_name
-
-                        with_clean do
-                          Dev::Docker::Compose.new(services: @default_service).sh
-                          Rake::Task[:_post_sh_hooks].execute
-                        end
+                        Dev::Docker::Compose.new(services: @default_service).sh
+                        Rake::Task[:_post_sh_hooks].execute
+                      ensure
+                        # Need to call stop before down because other the "run" containers aren't stopped
+                        Dev::Docker.new.stop_project_containers(project_name: Dev::Docker::Compose.config.project_name)
+                        Dev::Docker::Compose.new.down
+                        Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
                       end
                     end
                   end
