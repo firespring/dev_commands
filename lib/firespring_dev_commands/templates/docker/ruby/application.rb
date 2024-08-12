@@ -107,7 +107,7 @@ module Dev
             ruby = @ruby
             exclude = @exclude
             test_isolation = @test_isolation
-            up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
+            up_cmd = @start_container_dependencies_on_test ? :up_empty : :up_empty_no_deps
             test_artifacts = @test_artifacts
             return if exclude.include?(:test)
 
