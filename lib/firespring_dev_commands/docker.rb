@@ -99,7 +99,7 @@ module Dev
       raise 'No project name defined' if project_name.empty?
 
       ::Docker::Container.all(filters: {status: %w(restarting running)}.to_json).each do |container|
-        next unless container.info&.dig('Names')&.map { |name| name.split('/').last }.any? { |it| it.start_with?(project_name) }
+        next unless container.info&.dig('Names')&.map { |name| name.split('/').last }&.any? { |it| it.start_with?(project_name) }
 
         begin
           container.stop
