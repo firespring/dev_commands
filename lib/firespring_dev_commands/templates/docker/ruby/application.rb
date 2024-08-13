@@ -74,7 +74,8 @@ module Dev
                     # Run the lint command
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_command)
+                    environment = ['OPTS']
+                    Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.lint_command)
                   ensure
                     # Copy any defined artifacts back
                     container = Dev::Docker::Compose.new.container_by_name(application)
@@ -91,7 +92,8 @@ module Dev
                       # Run the lint fix command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_fix_command)
+                      environment = ['OPTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.lint_fix_command)
                     end
                   end
                 end
@@ -107,7 +109,8 @@ module Dev
             ruby = @ruby
             exclude = @exclude
             test_isolation = @test_isolation
-            up_cmd = @start_container_dependencies_on_test ? :up : :up_no_deps
+            up_prefix = @test_isolation ? :up_empty : :up # NOTE: This should maybe be it's own variable at some point?
+            up_cmd = @start_container_dependencies_on_test ? :"#{up_prefix}" : :"#{up_prefix}_no_deps"
             test_artifacts = @test_artifacts
             return if exclude.include?(:test)
 
@@ -133,7 +136,8 @@ module Dev
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options:).exec(*ruby.test_command)
+                      environment = %w(OPTS TESTS)
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.test_command)
                       ruby.check_test_coverage(application:)
                     ensure
                       # Copy any defined artifacts back
@@ -145,8 +149,26 @@ module Dev
                   ensure
                     # Clean up resources if we are on an isolated project name
                     if test_isolation
+                      # Need to call stop before down because other the "run" containers aren't stopped
+                      Dev::Docker.new.stop_project_containers(project_name: Dev::Docker::Compose.config.project_name)
                       Dev::Docker::Compose.new.down
                       Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
+                    end
+                  end
+
+                  # If using test isolation then give users a way to 'sh' into the isolated container
+                  if test_isolation
+                    namespace :test do
+                      desc "Open a shell into a test #{application} container"
+                      task sh: %W(test_init_docker #{up_cmd} _pre_sh_hooks) do
+                        Dev::Docker::Compose.new(services: @default_service).sh
+                        Rake::Task[:_post_sh_hooks].execute
+                      ensure
+                        # Need to call stop before down because other the "run" containers aren't stopped
+                        Dev::Docker.new.stop_project_containers(project_name: Dev::Docker::Compose.config.project_name)
+                        Dev::Docker::Compose.new.down
+                        Dev::Docker.new.prune_project_volumes(project_name: Dev::Docker::Compose.config.project_name)
+                      end
                     end
                   end
                 end
@@ -168,7 +190,8 @@ module Dev
                 namespace :ruby do
                   desc 'Install all bundled gems'
                   task install: %w(init_docker up_no_deps) do
-                    Dev::Docker::Compose.new(services: application).exec(*ruby.install_command)
+                    environment = ['OPTS']
+                    Dev::Docker::Compose.new(services: application, environment:).exec(*ruby.install_command)
                   end
                 end
               end
@@ -196,11 +219,11 @@ module Dev
                        "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list." \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
-                    opts = []
-                    opts << '-T' if Dev::Common.new.running_codebuild?
-
                     # Retrieve results of the scan.
-                    data = Dev::Docker::Compose.new(services: application, options: opts, capture: true).exec(*ruby.audit_command)
+                    options = []
+                    options << '-T' if Dev::Common.new.running_codebuild?
+                    environment = ['OPTS']
+                    data = Dev::Docker::Compose.new(services: application, options:, environment:, capture: true).exec(*ruby.audit_command)
                     Dev::Ruby::Audit.new(data).to_report.check
                   end
 
@@ -208,7 +231,8 @@ module Dev
                   #   desc 'Run NPM Audit fix command'
                   #   task fix: %w(init_docker up_no_deps) do
                   #     raise 'not implemented'
-                  #     # Dev::Docker::Compose.new(services: application).exec(*ruby.audit_fix_command)
+                  #     # environment = ['OPTS']
+                  #     # Dev::Docker::Compose.new(services: application, environment:).exec(*ruby.audit_fix_command)
                   #   end
                   # end
                 end

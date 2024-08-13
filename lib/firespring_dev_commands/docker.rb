@@ -94,6 +94,22 @@ module Dev
       end
     end
 
+    def stop_project_containers(project_name:)
+      project_name = project_name.to_s.strip
+      raise 'No project name defined' if project_name.empty?
+
+      ::Docker::Container.all(filters: {status: %w(restarting running)}.to_json).each do |container|
+        next unless container.info&.dig('Names')&.map { |name| name.split('/').last }&.any? { |it| it.start_with?(project_name) }
+
+        begin
+          container.stop
+          LOG.info "Stopped container #{container.id[0, 12]}"
+        rescue => e
+          LOG.error "Error stopping container #{contianer.id[0, 12]}: #{e}"
+        end
+      end
+    end
+
     # Prunes/removes all unused images
     def prune_images
       _prune('images')
