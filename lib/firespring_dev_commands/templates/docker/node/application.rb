@@ -134,7 +134,8 @@ module Dev
                       # Run the test command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options:).exec(*node.test_command)
+                      environment = ['TESTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.test_command)
                       node.check_test_coverage(application:)
                     ensure
                       # Copy any defined artifacts back
