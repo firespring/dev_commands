@@ -74,7 +74,8 @@ module Dev
                     # Run the lint command
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options:).exec(*node.lint_command)
+                    environment = ['OPTS']
+                    Dev::Docker::Compose.new(services: application, options:, environment:).exec(*node.lint_command)
                   ensure
                     # Copy any defined artifacts back
                     container = Dev::Docker::Compose.new.container_by_name(application)
@@ -90,7 +91,8 @@ module Dev
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options:).exec(*node.lint_fix_command)
+                      environment = ['OPTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*node.lint_fix_command)
                     end
                   end
                 end
@@ -134,8 +136,8 @@ module Dev
                       # Run the test command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      environment = ['TESTS']
-                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.test_command)
+                      environment = ['OPTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*node.test_command)
                       node.check_test_coverage(application:)
                     ensure
                       # Copy any defined artifacts back
@@ -216,18 +218,21 @@ module Dev
                        "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list." \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
-                    opts = []
-                    opts << '-T' if Dev::Common.new.running_codebuild?
-
                     # Run the audit command and retrieve the results
-                    data = Dev::Docker::Compose.new(services: application, options: opts, capture: true).exec(*node.audit_command)
+                    options = []
+                    options << '-T' if Dev::Common.new.running_codebuild?
+                    environment = ['OPTS']
+                    data = Dev::Docker::Compose.new(services: application, options:, environment:, capture: true).exec(*node.audit_command)
                     Dev::Node::Audit.new(data).to_report.check
                   end
 
                   namespace :audit do
                     desc 'Run NPM Audit fix command'
                     task fix: %w(init_docker up_no_deps) do
-                      Dev::Docker::Compose.new(services: application).exec(*node.audit_fix_command)
+                      options = []
+                      options << '-T' if Dev::Common.new.running_codebuild?
+                      environment = ['OPTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*node.audit_fix_command)
                     end
                   end
                 end

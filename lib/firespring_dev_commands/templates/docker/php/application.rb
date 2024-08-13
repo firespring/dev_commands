@@ -118,7 +118,8 @@ module Dev
                     # Run the lint command
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options:).exec(*php.lint_command)
+                    environment = ['OPTS']
+                    Dev::Docker::Compose.new(services: application, options:, environment:).exec(*php.lint_command)
                   ensure
                     # Copy any defined artifacts back
                     container = Dev::Docker::Compose.new.container_by_name(application)
@@ -135,7 +136,8 @@ module Dev
                       # Run the lint fix command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options:).exec(*php.lint_fix_command)
+                      environment = ['OPTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*php.lint_fix_command)
                     end
                   end
                 end
@@ -179,8 +181,8 @@ module Dev
                       # Run the test command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      environment = ['TESTS']
-                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.test_command)
+                      environment = ['OPTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*php.test_command)
                       php.check_test_coverage(application:)
                     ensure
                       # Copy any defined artifacts back
@@ -233,7 +235,8 @@ module Dev
                 namespace :php do
                   desc 'Install all composer packages'
                   task install: %w(init_docker up_no_deps) do
-                    Dev::Docker::Compose.new(services: application).exec(*php.install_command)
+                    environment = ['OPTS']
+                    Dev::Docker::Compose.new(services: application, environment:).exec(*php.install_command)
                   end
                 end
               end
@@ -261,11 +264,11 @@ module Dev
                        "\n\tuse IGNORELIST=(comma delimited list of cwe numbers) removes the entry from the list." \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
+                    # Run the audit command and retrieve the results
                     opts = []
                     opts << '-T' if Dev::Common.new.running_codebuild?
-
-                    # Run the audit command and retrieve the results
-                    data = Dev::Docker::Compose.new(services: application, options: opts, capture: true).exec(*php.audit_command)
+                    environment = ['OPTS']
+                    data = Dev::Docker::Compose.new(services: application, options:, environment:, capture: true).exec(*php.audit_command)
                     Dev::Php::Audit.new(data).to_report.check
                   end
 
@@ -273,7 +276,8 @@ module Dev
                   #   desc 'Fix the composer vulnerabilities that were found'
                   #   task fix: %w(init_docker up_no_deps) do
                   #     raise 'not implemented'
-                  #     # Dev::Docker::Compose.new(services: application).exec(*php.audit_fix_command)
+                  #     # environment = ['OPTS']
+                  #     # Dev::Docker::Compose.new(services: application, environment:).exec(*php.audit_fix_command)
                   #   end
                   # end
                 end

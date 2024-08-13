@@ -74,7 +74,8 @@ module Dev
                     # Run the lint command
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_command)
+                    environment = ['OPTS']
+                    Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.lint_command)
                   ensure
                     # Copy any defined artifacts back
                     container = Dev::Docker::Compose.new.container_by_name(application)
@@ -91,7 +92,8 @@ module Dev
                       # Run the lint fix command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      Dev::Docker::Compose.new(services: application, options:).exec(*ruby.lint_fix_command)
+                      environment = ['OPTS']
+                      Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.lint_fix_command)
                     end
                   end
                 end
@@ -134,7 +136,7 @@ module Dev
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      environment = ['TESTS']
+                      environment = ['OPTS']
                       Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.test_command)
                       ruby.check_test_coverage(application:)
                     ensure
@@ -188,7 +190,8 @@ module Dev
                 namespace :ruby do
                   desc 'Install all bundled gems'
                   task install: %w(init_docker up_no_deps) do
-                    Dev::Docker::Compose.new(services: application).exec(*ruby.install_command)
+                    environment = ['OPTS']
+                    Dev::Docker::Compose.new(services: application, environment:).exec(*ruby.install_command)
                   end
                 end
               end
@@ -220,7 +223,8 @@ module Dev
                     opts << '-T' if Dev::Common.new.running_codebuild?
 
                     # Retrieve results of the scan.
-                    data = Dev::Docker::Compose.new(services: application, options: opts, capture: true).exec(*ruby.audit_command)
+                    environment = ['OPTS']
+                    data = Dev::Docker::Compose.new(services: application, options:, environment:, capture: true).exec(*ruby.audit_command)
                     Dev::Ruby::Audit.new(data).to_report.check
                   end
 
@@ -228,7 +232,8 @@ module Dev
                   #   desc 'Run NPM Audit fix command'
                   #   task fix: %w(init_docker up_no_deps) do
                   #     raise 'not implemented'
-                  #     # Dev::Docker::Compose.new(services: application).exec(*ruby.audit_fix_command)
+                  #     # environment = ['OPTS']
+                  #     # Dev::Docker::Compose.new(services: application, environment:).exec(*ruby.audit_fix_command)
                   #   end
                   # end
                 end
