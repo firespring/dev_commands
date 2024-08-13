@@ -181,7 +181,7 @@ module Dev
                       # Run the test command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      environment = ['OPTS', 'TESTS']
+                      environment = %w(OPTS TESTS)
                       Dev::Docker::Compose.new(services: application, options:, environment:).exec(*php.test_command)
                       php.check_test_coverage(application:)
                     ensure
@@ -265,8 +265,8 @@ module Dev
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
                     # Run the audit command and retrieve the results
-                    opts = []
-                    opts << '-T' if Dev::Common.new.running_codebuild?
+                    options = []
+                    options << '-T' if Dev::Common.new.running_codebuild?
                     environment = ['OPTS']
                     data = Dev::Docker::Compose.new(services: application, options:, environment:, capture: true).exec(*php.audit_command)
                     Dev::Php::Audit.new(data).to_report.check

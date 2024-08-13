@@ -136,7 +136,7 @@ module Dev
 
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      environment = ['OPTS', 'TESTS']
+                      environment = %w(OPTS TESTS)
                       Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.test_command)
                       ruby.check_test_coverage(application:)
                     ensure
@@ -219,10 +219,9 @@ module Dev
                        "\n\tuse IGNORELIST=(comma delimited list of ids) removes the entry from the list." \
                        "\n\t(optional) use OPTS=... to pass additional options to the command"
                   task audit: %w(init_docker up_no_deps) do
-                    opts = []
-                    opts << '-T' if Dev::Common.new.running_codebuild?
-
                     # Retrieve results of the scan.
+                    options = []
+                    options << '-T' if Dev::Common.new.running_codebuild?
                     environment = ['OPTS']
                     data = Dev::Docker::Compose.new(services: application, options:, environment:, capture: true).exec(*ruby.audit_command)
                     Dev::Ruby::Audit.new(data).to_report.check
