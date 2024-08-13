@@ -181,7 +181,7 @@ module Dev
                       # Run the test command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      environment = ['OPTS']
+                      environment = ['OPTS', 'TESTS']
                       Dev::Docker::Compose.new(services: application, options:, environment:).exec(*php.test_command)
                       php.check_test_coverage(application:)
                     ensure
