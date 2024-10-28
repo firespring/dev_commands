@@ -34,7 +34,7 @@ module Dev
 
       private def each_zone_by_domains(&)
         @domains.each do |domain|
-          response = client.list_hosted_zones_by_name({dns_name: domain})
+          response = client.list_hosted_zones_by_name({ dns_name: domain })
 
           # The 'list_hosted_zones_by_name' returns fuzzy matches (so "foo.com" would return both "bar.foo.com" and "foo.com"
           # So we are only selecting domains that match exactly since that's what we really want here
@@ -68,17 +68,62 @@ module Dev
       end
 
       def list_zone_details
+        if false
+          command_line_details
+        else
+          json_details
+        end
+      end
+
+      def json_details
+        zone_count = 0
         zones do |zone|
-          puts
           zone_details, delegation_set = details(zone.id)
           dns_resource = Dev::Dns::Resource.new(zone_details.name)
+          zone_count += 1
+          apex_record = dns_resource.recursive_a_lookup
+          nameserver_names = dns_resource.recursive_nameserver_lookup
+          nameserver_ips = nameserver_names.sort.map { |it| dns_resource.recursive_a_lookup(it) }
+          # Check if the site is dead, no a record or any AWS ips in the lists.
+          # if apex_record.empty? && (!zone_details.name.chomp('.').include? 'firespring') && (!nameserver_ips.join(', ').include? '205.251')
+          if !dns_resource.recursive_a_lookup.empty? && (dns_resource.recursive_nameserver_lookup.include? 'ns1.firespring.com')
+            out_data = {
+              'count' => zone_count,
+              'dns_name' => zone_details.name.chomp('.'),
+              'hosted_zone_id' => zone_details.id,
+              'delegation_set_id' => delegation_set.id,
+              # 'registrar_servers' => dns_resource.registrar_lookup.join(','), # This function is fickle, add with care.
+              'reported_nameservers' => nameserver_names.sort.join(', '),
+              'reported_ns_ips' => nameserver_ips.join(', '),
+              'a_record_ip' => apex_record.sort.join(', ')
+            }
+            # Display contents
+            puts JSON.pretty_generate(out_data)
+          end
+        rescue ::Aws::Route53::Errors::Throttling
+          sleep(1)
+          retry
+        end
+        puts
+      end
 
-          puts "#{zone_details.name.chomp('.').light_white} (#{zone_details.id}):"
-          puts format('  %-50s %s', 'Delegation Set:', delegation_set.id)
-          puts format('  %-50s %s', 'Delegation Defined Nameservers:', delegation_set.name_servers.sort.join(', '))
-          puts format('  %-50s %s', 'DNS Reported Nameservers:', dns_resource.recursive_nameserver_lookup.sort.join(', '))
-          puts format('  %-50s %s', 'DNS Reported Nameserver IPs:', dns_resource.recursive_nameserver_lookup.sort.map { |it| dns_resource.recursive_a_lookup(it) }.join(', '))
-          puts format('  %-50s %s', 'Domain Apex IP Resolution:', dns_resource.recursive_a_lookup.sort.join(', '))
+      def command_line_details
+        zone_count = 0
+        zones do |zone|
+
+          zone_details, delegation_set = details(zone.id)
+          dns_resource = Dev::Dns::Resource.new(zone_details.name)
+          zone_count += 1
+          if !dns_resource.recursive_a_lookup.empty? && (dns_resource.recursive_nameserver_lookup.include? 'ns1.firespring.com')
+            puts
+            puts "#{zone_count} - #{zone_details.name.chomp('.')} (#{zone_details.id}):"
+            puts format('  %-50s %s', 'Delegation Set:', delegation_set.id)
+            puts format('  %-50s %s', 'Delegation Defined Nameservers:', delegation_set.name_servers.sort.join(', '))
+            puts format('  %-50s %s', 'WHOIS Reported server:', dns_resource.registrar_lookup.join(','))
+            puts format('  %-50s %s', 'DNS Reported Nameservers:', dns_resource.recursive_nameserver_lookup.sort.join(', '))
+            puts format('  %-50s %s', 'DNS Reported Nameserver IPs:', dns_resource.recursive_nameserver_lookup.sort.map { |it| dns_resource.recursive_a_lookup(it) }.join(', '))
+            puts format('  %-50s %s', 'Domain Apex IP Resolution:', dns_resource.recursive_a_lookup.sort.join(', '))
+          end
         rescue ::Aws::Route53::Errors::Throttling
           sleep(1)
           retry

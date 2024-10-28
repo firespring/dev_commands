@@ -40,4 +40,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'public_suffix', '5.0.4'
   s.add_dependency 'rake', '~> 13.1.0'
   s.add_dependency 'slack-ruby-client', '~> 2.2.0'
+  s.add_dependency 'whois', '~> 6.0'
 end

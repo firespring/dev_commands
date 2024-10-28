@@ -1,3 +1,5 @@
+require 'whois'
+
 module Dev
   class Dns
     class Resource
@@ -20,6 +22,14 @@ module Dev
       # Returns whether or not the given value is a valid IPv6 address
       def self.ipv6?(value)
         value.match?(Resolv::IPv6::Regex)
+      end
+
+      # Determines the registrar(s) of the given name. Not perfect and can be rate limited.
+      def registrar_lookup(name = domain)
+        Whois.whois(name.chomp('.')).parts.map(&:host)
+      rescue Whois::Error
+        sleep(0.75)
+        retry
       end
 
       # Recursively determine the correct nameservers for the given domain.
