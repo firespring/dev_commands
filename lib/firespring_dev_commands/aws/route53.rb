@@ -34,7 +34,7 @@ module Dev
 
       private def each_zone_by_domains(&)
         @domains.each do |domain|
-          response = client.list_hosted_zones_by_name({ dns_name: domain })
+          response = client.list_hosted_zones_by_name({dns_name: domain})
 
           # The 'list_hosted_zones_by_name' returns fuzzy matches (so "foo.com" would return both "bar.foo.com" and "foo.com"
           # So we are only selecting domains that match exactly since that's what we really want here
@@ -65,14 +65,6 @@ module Dev
       private def details(zone_id)
         response = client.get_hosted_zone(id: zone_id)
         [response.hosted_zone, response.delegation_set]
-      end
-
-      def list_zone_details
-        if false
-          command_line_details
-        else
-          json_details
-        end
       end
 
       def json_details
@@ -110,7 +102,6 @@ module Dev
       def command_line_details
         zone_count = 0
         zones do |zone|
-
           zone_details, delegation_set = details(zone.id)
           dns_resource = Dev::Dns::Resource.new(zone_details.name)
           zone_count += 1
@@ -121,7 +112,9 @@ module Dev
             puts format('  %-50s %s', 'Delegation Defined Nameservers:', delegation_set.name_servers.sort.join(', '))
             puts format('  %-50s %s', 'WHOIS Reported server:', dns_resource.registrar_lookup.join(','))
             puts format('  %-50s %s', 'DNS Reported Nameservers:', dns_resource.recursive_nameserver_lookup.sort.join(', '))
-            puts format('  %-50s %s', 'DNS Reported Nameserver IPs:', dns_resource.recursive_nameserver_lookup.sort.map { |it| dns_resource.recursive_a_lookup(it) }.join(', '))
+            puts format('  %-50s %s', 'DNS Reported Nameserver IPs:', dns_resource.recursive_nameserver_lookup.sort.map do |it|
+                                                                        dns_resource.recursive_a_lookup(it)
+                                                                      end.join(', '))
             puts format('  %-50s %s', 'Domain Apex IP Resolution:', dns_resource.recursive_a_lookup.sort.join(', '))
           end
         rescue ::Aws::Route53::Errors::Throttling

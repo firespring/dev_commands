@@ -6,7 +6,7 @@ module Dev
       module Services
         # Class contains rake templates for managing your AWS settings and logging in
         class Route53 < Dev::Template::BaseInterface
-          def create_list_zone_details_task!
+          def create_pretty_list_zone_details_task!
             # Have to set a local variable to be accessible inside of the instance_eval block
             exclude = @exclude
 
@@ -18,7 +18,26 @@ module Dev
                   desc 'print details for all hosted zones'
                   task list_details: %w(ensure_aws_credentials) do
                     route53 = Dev::Aws::Route53.new(ENV['DOMAINS'].to_s.strip.split(','))
-                    route53.list_zone_details
+                    route53.command_line_details
+                  end
+                end
+              end
+            end
+          end
+
+          def create_json_list_zone_details_task!
+            # Have to set a local variable to be accessible inside of the instance_eval block
+            exclude = @exclude
+
+            DEV_COMMANDS_TOP_LEVEL.instance_eval do
+              return if exclude.include?(:json_details)
+
+              namespace :aws do
+                namespace :hosted_zone do
+                  desc 'print details for all hosted zones'
+                  task json_details: %w(ensure_aws_credentials) do
+                    route53 = Dev::Aws::Route53.new(ENV['DOMAINS'].to_s.strip.split(','))
+                    route53.json_details
                   end
                 end
               end
