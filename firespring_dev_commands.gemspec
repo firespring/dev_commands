@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'aws-sdk-opensearchservice', '~> 1.33.0'
   s.add_dependency 'aws-sdk-rds', '~> 1.208.0'
   s.add_dependency 'aws-sdk-route53', '~> 1.87.0'
-  s.add_dependency 'aws-sdk-s3', '~> 1.141.0'
+  s.add_dependency 'aws-sdk-s3', '~> 1.157.0'
   s.add_dependency 'aws-sdk-ssm', '~> 1.162.0'
   s.add_dependency 'aws-sdk-sts', '~> 1.11.0'
   s.add_dependency 'colorize', '~> 1.1.0'
