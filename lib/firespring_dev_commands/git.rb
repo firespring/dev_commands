@@ -185,7 +185,7 @@ module Dev
     end
 
     # Checks out the given branch in all repositories with some additional formatting
-    def checkout_all(branch, default_branch: nil)
+    def checkout_all(branch, default)
       @success = true
       puts
       puts "Checking out #{branch} in each repo".light_yellow if project_dirs.length > 1
@@ -194,7 +194,7 @@ module Dev
 
         repo_basename = File.basename(File.realpath(project_dir))
         puts Dev::Common.new.center_pad(repo_basename).light_green
-        @success &= checkout(branch, default: default_branch, dir: project_dir)
+        @success &= checkout(branch, default, dir: project_dir)
         puts Dev::Common.new.center_pad.light_green
       end
       puts
@@ -203,9 +203,10 @@ module Dev
     end
 
     # Checks out the given branch in the given repo
+    # If the given branch isn't found, falls back to default branch, then staging, then main
     # Defaults to the current directory
     # optionally raise errors
-    def checkout(branch, default: nil, dir: default_project_dir, raise_errors: false)
+    def checkout(branch, default, dir: default_project_dir, raise_errors: false)
       raise 'branch is required' if branch.to_s.strip.empty?
       return unless File.exist?(dir)
 
@@ -215,7 +216,8 @@ module Dev
       g = ::Git.open(dir)
       g.fetch('origin', prune: true)
 
-      # If the branch we are checking out doesn't exist, check out either the staging branch or the main branch
+      # If the branch we are checking out doesn't exist,
+      # check out either the default branch, staging branch, or the main branch
       actual_branch = branch
       unless branch_exists?(dir, branch)
         actual_branch = [default, staging_branch, main_branch].uniq.find { |it| branch_exists?(dir, it) }

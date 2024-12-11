@@ -39,7 +39,7 @@ module Dev
               default = ENV['DEFAULT'].to_s.strip
               raise 'branch is required' if branch.empty?
 
-              Dev::Git.new.checkout_all(branch, default_branch: default)
+              Dev::Git.new.checkout_all(branch, default)
             end
 
             task co: %w(init checkout) do
