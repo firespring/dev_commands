@@ -61,20 +61,46 @@ module Dev
         puts "  Logging in to #{account} in #{region} as #{role}".light_yellow
         puts
 
-        code = ENV['AWS_TOKEN_CODE'] || Dev::Common.new.ask("Enter the MFA code for the #{ENV.fetch('USERNAME', 'no_username_found')} user serial #{serial}")
+        code = mfa_code(serial)
         raise 'MFA is required' unless code.to_s.strip
 
         sts = ::Aws::STS::Client.new(profile: 'default', region:)
         creds = sts.assume_role(
-          serial_number: serial,
+          serial_number: mfa_serial || serial,
           role_arn: role,
           role_session_name: session_name,
-          token_code: code,
+          token_code: code.to_s.strip,
           duration_seconds: session_duration
         ).credentials
         puts
 
         Dev::Aws::Credentials.new.write!(account, creds)
+      end
+
+      # The custom local file where target information is stored.
+      CUSTOM_CONFIG_FILE = "#{Dir.home}/.bash_profile.d/config/.main".freeze
+
+      # Targets a custom ini config.
+      def custom_config_ini
+        IniFile.new(filename: CUSTOM_CONFIG_FILE, default: 'default')['default']
+      end
+
+      def mfa_serial
+        return unless !ENV.fetch('OP_LOGIN', nil).nil? && File.exist?(CUSTOM_CONFIG_FILE)
+
+        custom_config_ini['aws_1pass_mfa_serial']
+      end
+
+      # Handles the MFA code logic.
+      def mfa_code(serial)
+        # Note, OP_LOGIN likely not needed. Available as feature flag.
+        # Checks if OnePassword CLI is installed and the custom config file exist.
+        if !ENV.fetch('OP_LOGIN', nil).nil? && system('op --version', out: '/dev/null') && File.exist?(CUSTOM_CONFIG_FILE)
+          cmd = "op item get #{custom_config_ini['aws_uuid']} --otp"
+          `#{cmd}`
+        else
+          ENV['AWS_TOKEN_CODE'] || Dev::Common.new.ask("Enter the MFA code for the #{ENV.fetch('USERNAME', 'no_username_found')} user serial #{serial}")
+        end
       end
 
       # Returns the config ini file
@@ -88,8 +114,8 @@ module Dev
         cfgini
       end
 
-      # Authroizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
-      # Authroizes the docker ruby library to pull/push images from the Aws container registry
+      # Authorizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
+      # Authorizes the docker ruby library to pull/push images from the Aws container registry
       def registry_logins!(registry_ids: nil, region: nil)
         registry_ids ||= Dev::Aws::Account.new.ecr_registry_ids
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
@@ -100,8 +126,8 @@ module Dev
         puts
       end
 
-      # Authroizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
-      # Authroizes the docker ruby library to pull/push images from the Aws container registry
+      # Authorizes the docker cli to pull/push images from the Aws container registry (e.g. if docker compose needs to pull an image)
+      # Authorizes the docker ruby library to pull/push images from the Aws container registry
       def registry_login!(registry_id: nil, region: nil)
         registry_id ||= Dev::Aws::Account.new.ecr_registry_ids.first
         region ||= Dev::Aws::Credentials.new.logged_in_region || Dev::Aws::DEFAULT_REGION
@@ -116,7 +142,7 @@ module Dev
         ENV['ECR_REGISTRY'] ||= registry
       end
 
-      # Authroizes the docker cli to pull/push images from the Aws container registry
+      # Authorizes the docker cli to pull/push images from the Aws container registry
       # (e.g. if docker compose needs to pull an image)
       # @deprecated Please use {Dev::Aws::Login#registry_login!} instead
       def docker_login!(registry_id: nil, region: nil)
@@ -127,7 +153,7 @@ module Dev
         puts
       end
 
-      # Authroizes the docker cli to pull/push images from the Aws container registry
+      # Authorizes the docker cli to pull/push images from the Aws container registry
       # (e.g. if docker compose needs to pull an image)
       private def docker_cli_login!(registry:, region:)
         print("  Logging in to #{registry} in docker... ")
@@ -137,7 +163,7 @@ module Dev
         Dev::Common.new.run_command([login_cmd])
       end
 
-      # Authroizes the docker ruby library to pull/push images from the Aws container registry
+      # Authorizes the docker ruby library to pull/push images from the Aws container registry
       # @deprecated Please use {Dev::Aws::Login#registry_login!} instead
       def ecr_login!(registry_id: nil, region: nil)
         registry_id ||= Dev::Aws::Account.new.ecr_registry_ids.first
@@ -146,7 +172,7 @@ module Dev
         docker_lib_login!(registry_id:, region:)
       end
 
-      # Authroizes the docker ruby library to pull/push images from the Aws container registry
+      # Authorizes the docker ruby library to pull/push images from the Aws container registry
       private def docker_lib_login!(registry_id:, region:)
         # Grab your authentication token from AWS ECR
         ecr_client = ::Aws::ECR::Client.new(region:)
