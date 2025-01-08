@@ -50,7 +50,7 @@ module Dev
             [d.main_branch, d.staging_branch].uniq.each do |it|
               desc "Checks out the #{it} branch for each repo (alias: git:co:#{it})"
               task "checkout:#{it}": %w(init) do
-                Dev::Git.new.checkout_all(it)
+                Dev::Git.new.checkout_all(it, '')
               end
 
               task "co:#{it}": %W(init checkout:#{it}) do
