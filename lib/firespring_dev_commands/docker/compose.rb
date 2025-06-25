@@ -233,7 +233,8 @@ module Dev
 
       # Merges two arrays removing nested structure and duplicate keys
       private def merge_options(*opts)
-        @options = (@options + Array(opts)).flatten.uniq
+        puts 'WARNING: merging options disabled' if @options.any? { |it| it.include?('--build-arg') }
+        @options = (@options + Array(opts)).flatten.uniq unless @options.any? { |it| it.include?('--build-arg') }
       end
 
       # Build the compose command with the given inputs
