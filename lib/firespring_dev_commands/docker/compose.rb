@@ -41,7 +41,7 @@ module Dev
         end
       end
 
-      attr_accessor :capture, :compose_files, :environment, :options, :project_dir, :project_name, :services, :user, :volumes
+      attr_accessor :capture, :compose_files, :environment, :options, :project_dir, :project_name, :services, :user, :volumes, :running_silent
 
       def initialize(
         compose_files: self.class.config.compose_files,
@@ -52,7 +52,8 @@ module Dev
         services: [],
         user: nil,
         volumes: [],
-        capture: false
+        capture: false,
+        running_silent: false
       )
         @compose_files = Array(compose_files)
         @environment = environment
@@ -63,6 +64,7 @@ module Dev
         @user = user
         @volumes = Array(volumes)
         @capture = capture
+        @running_silent = running_silent
         check_version
       end
 
@@ -242,6 +244,7 @@ module Dev
         command = EXECUTABLE_NAME.dup
         command << '--project-directory' << project_dir
         command << '-p' << project_name if project_name
+        command << '--progress=quiet' if running_silent
         Array(compose_files).compact.each { |file| command << '-f' << file }
         command << action
 

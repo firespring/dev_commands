@@ -39,6 +39,13 @@ module Dev
                 Dev::Docker::Compose.new(services: [application]).up
                 Rake::Task[:_post_up_hooks].execute
               end
+
+              desc "Starts up the #{application} container and it's dependencies"
+              task up_silent: %w(init_docker _pre_up_hooks) do
+                LOG.debug "In #{application} up"
+                Dev::Docker::Compose.new(running_silent: true, services: [application]).up
+                Rake::Task[:_post_up_hooks].execute
+              end
             end
           end
         end
