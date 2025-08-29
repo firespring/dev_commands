@@ -74,7 +74,7 @@ module Dev
                     # Run the lint command
                     options = []
                     options << '-T' if Dev::Common.new.running_codebuild?
-                    environment = ['OPTS']
+                    environment = %w(OPTS)
                     Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.lint_command)
                   ensure
                     # Copy any defined artifacts back
@@ -92,7 +92,7 @@ module Dev
                       # Run the lint fix command
                       options = []
                       options << '-T' if Dev::Common.new.running_codebuild?
-                      environment = ['OPTS']
+                      environment = %w(OPTS)
                       Dev::Docker::Compose.new(services: application, options:, environment:).exec(*ruby.lint_fix_command)
                     end
                   end
@@ -190,7 +190,7 @@ module Dev
                 namespace :ruby do
                   desc 'Install all bundled gems'
                   task install: %w(init_docker up_no_deps) do
-                    environment = ['OPTS']
+                    environment = %w(OPTS)
                     Dev::Docker::Compose.new(services: application, environment:).exec(*ruby.install_command)
                   end
                 end
