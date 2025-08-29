@@ -53,7 +53,7 @@ module Dev
         detail = JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
 
         # If EOL info is a boolean or missing from the current details, overwrite with the manual date (if present)
-        manual_date = Dev::EndOfLife.config.manual_dates["#{product}_#{cycle.tr('.', '_')}".to_sym]
+        manual_date = Dev::EndOfLife.config.manual_dates[:"#{product}_#{cycle.tr('.', '_')}"]
         detail['eol'] = manual_date if manual_date && (detail['eol'].boolean? || detail['eol'].nil?)
         detail['eol'] = '1979-01-01' if detail.empty?
         detail

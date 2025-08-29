@@ -6,7 +6,7 @@ module Dev
 
       def initialize(data)
         @name = data.project.name
-        @name = @name << ' DevOps' if /devops/i.match?(data.issuetype.name)
+        @name <<= ' DevOps' if /devops/i.match?(data.issuetype.name)
       end
     end
   end

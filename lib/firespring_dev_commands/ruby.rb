@@ -95,7 +95,9 @@ module Dev
     # Build the bundle lint command
     def lint_command
       lint = base_command
-      lint << 'exec' << 'rake' << 'lint'
+      target_lint = Dev::Env.new.containerized? ? %w(rake lint) : ['rubocop']
+      lint << 'exec'
+      lint.concat(target_lint)
       lint.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint
     end
@@ -103,7 +105,9 @@ module Dev
     # Build the bundle lint fix command
     def lint_fix_command
       lint_fix = base_command
-      lint_fix << 'exec' << 'rake' << 'lint:fix'
+      target_lint = Dev::Env.new.containerized? ? %w(rake lint:fix) : %w(rubocop -A)
+      lint_fix << 'exec'
+      lint_fix.concat(target_lint)
       lint_fix.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       lint_fix
     end
@@ -111,7 +115,9 @@ module Dev
     # Build the bundle test command
     def test_command
       test = base_command
-      test << 'exec' << 'rake' << 'test'
+      target_test = Dev::Env.new.containerized? ? %w(rake test) : ['rspec']
+      test << 'exec'
+      test.concat(target_test)
       test.concat(coverage.ruby_options) if coverage
       test.concat(Dev::Common.new.tokenize(ENV['OPTS'].to_s))
       test
