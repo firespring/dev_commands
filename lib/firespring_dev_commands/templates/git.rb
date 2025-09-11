@@ -31,13 +31,15 @@ module Dev
             return if exclude.include?(:checkout)
 
             desc 'Checks out a branch for each repo (alias: git:co)' \
-                 "\n\tuse BRANCH=abc123 to specify the branch of code you with to switch to (required)" \
-                 "\n\tIf the branch does not exist, the configured staging or main branch will be checked out"
+                 "\n\tuse BRANCH=abc123 to specify the branch of code you wish to switch to (required)" \
+                 "\n\tuse DEFAULT=abc456 to specify the branch of code to fall back to" \
+                 "\n\tIf branch and default do not exist, the configured staging or main branch will be checked out"
             task checkout: %w(init) do
               branch = ENV['BRANCH'].to_s.strip
+              default = ENV['DEFAULT'].to_s.strip
               raise 'branch is required' if branch.empty?
 
-              Dev::Git.new.checkout_all(branch)
+              Dev::Git.new.checkout_all(branch, default)
             end
 
             task co: %w(init checkout) do
@@ -48,7 +50,7 @@ module Dev
             [d.main_branch, d.staging_branch].uniq.each do |it|
               desc "Checks out the #{it} branch for each repo (alias: git:co:#{it})"
               task "checkout:#{it}": %w(init) do
-                Dev::Git.new.checkout_all(it)
+                Dev::Git.new.checkout_all(it, '')
               end
 
               task "co:#{it}": %W(init checkout:#{it}) do
