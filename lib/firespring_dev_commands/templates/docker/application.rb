@@ -40,7 +40,7 @@ module Dev
                 Rake::Task[:_post_up_hooks].execute
               end
 
-              desc "Starts up the #{application} container and it's dependencies"
+              desc "Starts up the #{application} container and it's dependencies silently"
               task up_silent: %w(init_docker _pre_up_hooks) do
                 LOG.debug "In #{application} up"
                 Dev::Docker::Compose.new(running_silent: true, services: [application]).up
@@ -65,6 +65,13 @@ module Dev
                 Dev::Docker::Compose.new(services: [application], options: ['--no-deps']).up
                 Rake::Task[:_post_up_hooks].execute
               end
+
+              desc "Starts up the #{application} container silently but no dependencies"
+              task up_no_deps_silent: %w(init_docker _pre_up_hooks) do
+                LOG.debug "In #{application} up_no_deps_silent"
+                Dev::Docker::Compose.new(running_silent: true, services: [application], options: ['--no-deps']).up
+                Rake::Task[:_post_up_hooks].execute
+              end
             end
           end
         end
@@ -84,6 +91,13 @@ module Dev
                 Dev::Docker::Compose.new(services: [application], options: ['--detach']).run(['sh', '-c', 'while [ true ]; do sleep 300; done;'])
                 Rake::Task[:_post_up_hooks].execute
               end
+
+              desc "Starts up an empty #{application} container and it's dependencies silently"
+              task up_empty_silent: %w(init_docker _pre_up_hooks) do
+                LOG.debug "In #{application} up_empty_silent"
+                Dev::Docker::Compose.new(running_silent: true, services: [application], options: ['--detach']).run(['sh', '-c', 'while [ true ]; do sleep 300; done;'])
+                Rake::Task[:_post_up_hooks].execute
+              end
             end
           end
         end
@@ -101,6 +115,14 @@ module Dev
               task up_empty_no_deps: %w(init_docker _pre_up_hooks) do
                 LOG.debug "In #{application} up_empty_no_deps"
                 Dev::Docker::Compose.new(services: [application], options: ['--no-deps', '--detach']).run(['sh', '-c', 'while [ true ]; do sleep 300; done;'])
+                Rake::Task[:_post_up_hooks].execute
+              end
+
+              desc "Starts up an empty #{application} container silently but no dependencies"
+              task up_empty_no_deps_silent: %w(init_docker _pre_up_hooks) do
+                LOG.debug "In #{application} up_empty_no_deps_silent"
+                Dev::Docker::Compose.new(running_silent: true, services: [application],
+                                         options: ['--no-deps', '--detach']).run(['sh', '-c', 'while [ true ]; do sleep 300; done;'])
                 Rake::Task[:_post_up_hooks].execute
               end
             end
