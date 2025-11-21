@@ -42,9 +42,9 @@ module Dev
         @default = self.class.config.default
 
         # Create the ecr registry list based off several possible configuration values
-        @ecr_registry_ids = Array(self.class.config.ecr_registry_ids)
-        @ecr_registry_ids << Dev::Aws::Profile.new.current if self.class.config.login_to_account_ecr_registry
-        @ecr_registry_ids = @ecr_registry_ids.flatten.compact.reject(&:empty?).uniq
+        base_registry_ids = Array(self.class.config.ecr_registry_ids)
+        current_account_id = Dev::Aws::Profile.new.current if self.class.config.login_to_account_ecr_registry
+        @ecr_registry_ids = (base_registry_ids + Array(current_account_id)).flatten.compact.reject(&:empty?).uniq
       end
 
       # Returns all configured account information objects
