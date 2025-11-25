@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    firespring_dev_commands (3.2.0)
+    firespring_dev_commands (3.2.1)
       activesupport (~> 7.1.2)
       aws-sdk-cloudformation (~> 1.97.0)
       aws-sdk-codepipeline (~> 1.67.0)
@@ -237,7 +237,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
-    uri (1.0.4)
+    uri (1.1.1)
     version_gem (1.1.8)
     yard (0.9.37)
 
