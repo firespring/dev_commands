@@ -12,7 +12,7 @@ end
 Dev::Docker::Desktop.new.configure
 
 Dev::Docker::Compose.configure do |c|
-  c.max_version = '3.0.0'
+  c.max_version = '6.0.0'
 end
 
 Dev::Template::Docker::Default.new
