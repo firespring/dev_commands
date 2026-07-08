@@ -120,7 +120,7 @@ module Dev
         defaultini = cfgini['default']
         profileini = cfgini["profile #{account}"]
 
-        profileini['source_profile'] = account
+        profileini['source_profile'] = 'default'
 
         region_default = profileini['region'] || defaultini['region'] || ENV['AWS_DEFAULT_REGION'] || Dev::Aws::DEFAULT_REGION
         profileini['region'] = Dev::Common.new.ask('Default region name', region_default)
