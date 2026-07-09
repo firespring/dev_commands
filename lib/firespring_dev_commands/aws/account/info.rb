@@ -6,6 +6,8 @@ module Dev
         attr_accessor :name, :id
 
         def initialize(name, id)
+          raise 'AWS account id must be a string' unless id.is_a?(String)
+
           @name = name
           @id = id
         end
